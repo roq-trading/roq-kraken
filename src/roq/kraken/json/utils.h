@@ -10,12 +10,6 @@
 
 #include "roq/core/charconv/datetime.h"
 
-#include "roq/kraken/json/report_type.h"
-#include "roq/kraken/json/side.h"
-#include "roq/kraken/json/status.h"
-#include "roq/kraken/json/time_in_force.h"
-#include "roq/kraken/json/type.h"
-
 namespace roq {
 namespace kraken {
 namespace json {
@@ -34,6 +28,7 @@ inline void update(
   result = std::chrono::milliseconds{core::json::get<uint64_t>(value)};
 }
 
+/*
 template <>
 inline void update(
     ReportType& result,
@@ -41,49 +36,7 @@ inline void update(
   using result_type = std::remove_reference<decltype(result)>::type;
   result = result_type(core::json::get<std::string_view>(value));
 }
-
-template <>
-inline void update(
-    Side& result,
-    const core::json::value_t& value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    Status& result,
-    const core::json::value_t& value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    TimeInForce& result,
-    const core::json::value_t& value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(
-    Type& result,
-    const core::json::value_t& value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-// ...
-
-inline roq::Side map(json::Side side) {
-  switch (side) {
-    case json::Side::UNDEFINED: return roq::Side::UNDEFINED;
-    case json::Side::BUY: return roq::Side::BUY;
-    case json::Side::SELL: return roq::Side::SELL;
-    default: return roq::Side::UNDEFINED;  // XXX UNKNOWN ??
-  }
-}
+*/
 
 }  // namespace json
 }  // namespace kraken

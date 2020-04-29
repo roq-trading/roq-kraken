@@ -8,20 +8,24 @@ else
 	PREFIX=
 fi
 
-NAME="kraken"
+NAME="kraken-beta"
 
 CONFIG_FILE="$CWD/config/$NAME.toml"
 
+ENV="beta-"
+
 URI="kraken.com"
 
-REST_URI="https://api.$URI/api/2"
-WS_URI="wss://api.$URI/api/2/ws"
+# REST_URI="https://${ENV}api.$URI/0"
+REST_URI="https://api.$URI/0"
+WS_URI_PUBLIC="wss://${ENV}ws.$URI"
+WS_URI_PRIVATE="wss://${ENV}ws-auth.$URI"
 
 $PREFIX ./roq-kraken \
 	--name "$NAME" \
 	--config-file "$CONFIG_FILE" \
 	--rest-uri "$REST_URI" \
-	--ws-uri "$WS_URI" \
+	--ws-uri "$WS_URI_PUBLIC" \
 	--listen "$CWD/$NAME.sock" \
 	--metrics "$CWD/${NAME}_metrics.sock" \
 	$@

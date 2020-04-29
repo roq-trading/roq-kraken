@@ -1,0 +1,10 @@
+{
+"name": "BookItem",
+"type": "array_item",
+"values": [
+	{ "name": "price", "type": "double" },
+	{ "name": "volume", "type": "double"},
+	{ "name": "timestamp", "type": "std::chrono::nanoseconds"},
+	{ "name": "updateType", "type": "std::string_view", "required": false}
+]
+}

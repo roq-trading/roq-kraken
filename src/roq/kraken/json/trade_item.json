@@ -1,0 +1,12 @@
+{
+"name": "TradeItem",
+"type": "array_item",
+"values": [
+	{ "name": "price", "type": "double" },
+	{ "name": "volume", "type": "double"},
+	{ "name": "time", "type": "std::chrono::nanoseconds"},
+	{ "name": "side", "type": "std::string_view"},
+	{ "name": "orderType", "type": "std::string_view"},
+	{ "name": "misc", "type": "std::string_view"}
+]
+}

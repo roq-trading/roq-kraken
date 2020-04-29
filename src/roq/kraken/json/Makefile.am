@@ -8,49 +8,35 @@ libroq_kraken_json_la_CPPFLAGS = \
 	$(LIBCONFIG_CFLAGS) \
 	$(ROQ_CFLAGS)
 AUTOGEN_CPP = \
-	error.cpp \
-	method.cpp \
-	orderbook.cpp \
-	orderbook_item.cpp \
+	book.cpp \
+	book_item.cpp \
+	heartbeat.cpp \
+	open_positions.cpp \
 	order.cpp \
-	orders.cpp \
-	report.cpp \
-	report_type.cpp \
-	request_type.cpp \
-	response.cpp \
-	side.cpp \
-	status.cpp \
-	symbol.cpp \
-	symbols.cpp \
-	ticker.cpp \
-	time_in_force.cpp \
-	trades.cpp \
-	trades_item.cpp \
-	trading_balance.cpp \
-	trading_balance_item.cpp \
-	type.cpp
+	own_trades_item.cpp \
+	ping.cpp \
+	pong.cpp \
+	spread.cpp \
+	subscription_status.cpp \
+	system_status.cpp \
+	time_.cpp \
+	trade.cpp \
+	trade_item.cpp
 AUTOGEN_H = \
-	error.h \
-	method.h \
-	orderbook.h \
-	orderbook_item.h \
+	book.h \
+	book_item.h \
+	heartbeat.h \
+	open_positions.h \
 	order.h \
-	orders.h \
-	report.h \
-	report_type.h \
-	request_type.h \
-	response.h \
-	side.h \
-	status.h \
-	symbol.h \
-	symbols.h \
-	ticker.h \
-	time_in_force.h \
-	trades.h \
-	trades_item.h \
-	trading_balance.h \
-	trading_balance_item.h \
-	type.h
+	own_trades_item.h \
+	ping.h \
+	pong.h \
+	spread.h \
+	subscription_status.h \
+	system_status.h \
+	time_.h \
+	trade.h \
+	trade_item.h
 CLEANFILES = $(AUTOGEN_CPP) $(AUTOGEN_H)
 BUILT_SOURCES = $(CLEANFILES) .gitignore
 libroq_kraken_json_la_SOURCES = \

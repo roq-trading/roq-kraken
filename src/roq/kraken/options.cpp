@@ -12,11 +12,11 @@ DEFINE_string(config_file,
     "config file (path)");
 
 DEFINE_string(rest_uri,
-    "https://api.kraken.com/api/2",
+    "https://api.kraken.com/0",
     "REST end-point (URI)");
 
 DEFINE_string(ws_uri,
-    "wss://api.kraken.com/api/2/ws",
+    "wss://beta-ws-auth.kraken.com",
     "WebSocket end-point (URI)");
 
 DEFINE_uint32(rate_limit_interval_secs,
@@ -68,5 +68,5 @@ DEFINE_bool(log_fix,
     "log fix messages?");
 
 DEFINE_string(rest_ping_path,
-    "/public/ticker/BTCUSD",
+    "/public/Time",
     "URI path used for REST connection keep-alive messages");

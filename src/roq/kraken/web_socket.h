@@ -19,27 +19,15 @@
 
 #include "roq/core/web/socket.h"
 
-#include "roq/core/jsonrpc/parser.h"
-
 #include "roq/kraken/config.h"
 #include "roq/kraken/random.h"
-
-#include "roq/kraken/json/orderbook.h"
-#include "roq/kraken/json/order.h"
-#include "roq/kraken/json/orders.h"
-#include "roq/kraken/json/symbols.h"
-#include "roq/kraken/json/ticker.h"
-#include "roq/kraken/json/trades.h"
-#include "roq/kraken/json/trading_balance.h"
 
 namespace roq {
 namespace kraken {
 
 class Gateway;
 
-class WebSocket final
-    : public core::web::Socket::Handler,
-      public core::jsonrpc::Parser::Handler {
+class WebSocket final : public core::web::Socket::Handler {
 
  public:
   WebSocket(
@@ -61,31 +49,6 @@ class WebSocket final
   void operator()(const StopEvent&);
   void operator()(const TimerEvent&);
 
-  // request
-
-  void login();
-
-  void get_symbols();
-  void get_trading_balance();
-  void get_orders();
-
-  void new_order(
-      const CreateOrder& create_order,
-      const std::string_view& request_id);
-
-  void cancel_replace_order(
-      const ModifyOrder& modify_order,
-      const std::string_view& request_id,
-      const server::OMS_Order& order);
-
-  void cancel_order(const server::OMS_Order& order);
-
-  // subscribe
-
-  void subscribe_ticker(const std::string_view& symbol);
-  void subscribe_trades(const std::string_view& symbol);
-  void subscribe_orderbook(const std::string_view& symbol);
-
   void operator()(Metrics& metrics);
 
  protected:
@@ -97,31 +60,6 @@ class WebSocket final
   void operator()(const core::web::Socket::Text&) override;
 
   void parse(const std::string_view& message);
-
-  void operator()(
-      const core::jsonrpc::Error& error,
-      core::json::value_t& value) override;
-  void operator()(
-      const core::jsonrpc::Result& result,
-      core::json::value_t& value) override;
-  void operator()(
-      const core::jsonrpc::Notification& notification,
-      core::json::value_t& value) override;
-
-  // response
-  void operator()(const json::Symbols& symbols);
-  void operator()(const json::TradingBalance& trading_balance);
-  void operator()(const json::Orders& orders);
-  void operator()(const json::Order& order);
-
-  // notifications
-  void operator()(const json::Ticker& ticker);
-  void operator()(
-      const json::Trades& trades,
-      bool snapshot);
-  void operator()(
-      const json::Orderbook& orderbook,
-      bool snapshot);
 
   void reset();
 
@@ -143,14 +81,7 @@ class WebSocket final
   } _counter;
   struct {
     core::metrics::Profile
-      parse,
-      get_symbols,
-      get_trading_balance,
-      get_orders,
-      order,
-      ticker,
-      trades,
-      orderbook;
+      parse;
   } _profile;
   struct {
     core::metrics::Latency

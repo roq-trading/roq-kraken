@@ -1,0 +1,7 @@
+{
+"name": "Heartbeat",
+"type": "item",
+"values": [
+	{ "name": "event", "type": "std::string_view" }
+]
+}

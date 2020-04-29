@@ -24,11 +24,6 @@
 
 #include "roq/kraken/web_socket_state.h"
 
-#include "roq/kraken/json/order.h"
-#include "roq/kraken/json/orders.h"
-#include "roq/kraken/json/symbols.h"
-#include "roq/kraken/json/trading_balance.h"
-
 namespace roq {
 namespace kraken {
 
@@ -63,15 +58,6 @@ class Gateway final : public server::Handler {
 
   // web socket
   void operator()(const WebSocket&);
-  // ... request
-  void operator()(const json::Symbols& symbols);
-  void operator()(const json::TradingBalance& trading_balance);
-  void operator()(const json::Orders& orders);
-  void operator()(const json::Order& order);
-  // ... notification
-  void operator()(const json::Ticker& ticker);
-  void operator()(const json::Trades& trades);
-  void operator()(const json::Orderbook& orderbook, bool snapshot);
 
  private:
   using WebSocketDownload = server::Download<WebSocketState>;

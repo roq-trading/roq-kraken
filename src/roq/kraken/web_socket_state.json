@@ -2,9 +2,6 @@
 "name": "WebSocketState",
 "type": "enum",
 "values": [
-	{ "name": "symbols" },
-	{ "name": "trading_balance" },
-	{ "name": "orders" },
 	{ "name": "done" }
 ]
 }

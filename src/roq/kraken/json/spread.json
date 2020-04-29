@@ -1,0 +1,11 @@
+{
+"name": "Spread",
+"type": "item",
+"values": [
+	{ "name": "bid", "type": "double" },
+	{ "name": "ask", "type": "double" },
+	{ "name": "timestamp", "type": "std::chrono::nanoseconds" },
+	{ "name": "bidVolume", "type": "double" },
+	{ "name": "askVolume", "type": "double" }
+]
+}
