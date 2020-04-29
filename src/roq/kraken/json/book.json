@@ -5,6 +5,7 @@
 	{ "name": "a", "type": "roq::span<BookItem>", "required": false },
 	{ "name": "as", "type": "roq::span<BookItem>", "required": false },
 	{ "name": "b", "type": "roq::span<BookItem>", "required": false },
-	{ "name": "bs", "type": "roq::span<BookItem>", "required": false }
+	{ "name": "bs", "type": "roq::span<BookItem>", "required": false },
+	{ "name": "c", "required": false, "undoc": true }
 ]
 }

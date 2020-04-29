@@ -1,6 +1,6 @@
 {
 "name": "Trade",
-"type": "comp",
+"type": "array",
 "values": [
 	{ "name": "data", "type": "roq::span<TradeItem>" }
 ]

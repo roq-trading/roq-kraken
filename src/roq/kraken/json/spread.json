@@ -1,6 +1,6 @@
 {
 "name": "Spread",
-"type": "item",
+"type": "array_item",
 "values": [
 	{ "name": "bid", "type": "double" },
 	{ "name": "ask", "type": "double" },

@@ -11,6 +11,8 @@
 #include "roq/kraken/gateway.h"
 #include "roq/kraken/options.h"
 
+#include "roq/kraken/json/parser.h"
+
 namespace roq {
 namespace kraken {
 
@@ -106,6 +108,24 @@ void WebSocket::operator()(Metrics& metrics) {
     .write(_latency.heartbeat);
 }
 
+template <>
+void WebSocket::subscribe(
+    const std::string_view& name,
+    const roq::span<std::string_view const>& pairs) {
+  auto message = fmt::format(
+      FMT_STRING(
+        R"({{)"
+        R"("event":"subscribe",)"
+        R"("pair":["{}"],)"
+        R"("subscription":{{)"
+        R"("name":"{}")"
+        R"(}})"
+        R"(}})"),
+        fmt::join(pairs, R"(",")"),
+        name);
+  _connection.send_text(message);
+}
+
 void WebSocket::operator()(const core::web::Socket::Connected&) {
   // note! wait for upgrade
 }
@@ -135,8 +155,71 @@ void WebSocket::operator()(const core::web::Socket::Text& text) {
 void WebSocket::parse(const std::string_view& message) {
   _profile.parse(
       [&]() {
-        // TODO
+        core::json::Buffer buffer(_decode_buffer);
+        auto result = json::Parser::dispatch(
+            *this,
+            message,
+            buffer);
       });
+}
+
+void WebSocket::operator()(const json::Error& error) {
+  DLOG(WARNING)(
+      FMT_STRING("error={}"),
+      error);
+}
+
+void WebSocket::operator()(const json::SystemStatus& system_status) {
+  DLOG(INFO)(
+      FMT_STRING("system_status={}"),
+      system_status);
+  const std::string_view pairs[] = {
+    {"XBT/USD"},
+    {"XBT/EUR"},
+  };
+  roq::span span_pairs(
+      pairs,
+      std::size(pairs));
+  subscribe("trade", span_pairs);
+  subscribe("spread", span_pairs);
+  // subscribe("book", span_pairs);
+}
+
+void WebSocket::operator()(const json::Pong& pong) {
+  DLOG(INFO)(
+      FMT_STRING("pong={}"),
+      pong);
+}
+
+void WebSocket::operator()(const json::Heartbeat& heartbeat) {
+  DLOG(INFO)(
+      FMT_STRING("heartbeat={}"),
+      heartbeat);
+}
+
+void WebSocket::operator()(
+    const json::SubscriptionStatus& subscription_status) {
+  DLOG(INFO)(
+      FMT_STRING("subscription_status={}"),
+      subscription_status);
+}
+
+void WebSocket::operator()(const json::Trade& trade) {
+  DLOG(INFO)(
+      FMT_STRING("trade={}"),
+      trade);
+}
+
+void WebSocket::operator()(const json::Spread& spread) {
+  DLOG(INFO)(
+      FMT_STRING("spread={}"),
+      spread);
+}
+
+void WebSocket::operator()(const json::Book& book) {
+  DLOG(INFO)(
+      FMT_STRING("book={}"),
+      book);
 }
 
 }  // namespace kraken

@@ -1,0 +1,13 @@
+{
+"name": "Event",
+"type": "enum",
+"values": [
+	{ "name": "error" },
+	{ "name": "systemStatus" },
+	{ "name": "pong" },
+	{ "name": "heartbeat" },
+	{ "name": "subscriptionStatus" },
+	{ "name": "addOrderStatus" },
+	{ "name": "cancelOrderStatus" }
+]
+}

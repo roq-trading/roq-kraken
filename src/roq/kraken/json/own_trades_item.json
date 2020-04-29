@@ -13,6 +13,6 @@
 	{ "name": "fee", "type": "double" },
 	{ "name": "vol", "type": "double" },
 	{ "name": "margin", "type": "double" },
-	{ "name": "reqid", "type": "int32_t" }
+	{ "name": "reqid", "type": "int64_t" }
 ]
 }

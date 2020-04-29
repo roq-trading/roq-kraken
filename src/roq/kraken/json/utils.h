@@ -25,7 +25,8 @@ template <>
 inline void update(
     std::chrono::nanoseconds& result,
     const core::json::value_t& value) {
-  result = std::chrono::milliseconds{core::json::get<uint64_t>(value)};
+  auto text = core::json::get<std::string_view>(value);
+  result = core::charconv::to_datetime(text);
 }
 
 /*

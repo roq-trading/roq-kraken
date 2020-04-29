@@ -3,7 +3,7 @@
 "type": "item",
 "values": [
 	{ "name": "refid", "type": "std::string_view" },
-	{ "name": "userref", "type": "int32_t" },
+	{ "name": "userref", "type": "int64_t" },
 	{ "name": "status", "type": "std::string_view" },
 	{ "name": "opentm", "type": "std::chrono::nanoseconds" },
 	{ "name": "starttm", "type": "std::chrono::nanoseconds" },

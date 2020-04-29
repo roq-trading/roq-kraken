@@ -10,12 +10,16 @@ libroq_kraken_json_la_CPPFLAGS = \
 AUTOGEN_CPP = \
 	book.cpp \
 	book_item.cpp \
+	channel.cpp \
+	error.cpp \
+	event.cpp \
 	heartbeat.cpp \
 	open_positions.cpp \
 	order.cpp \
 	own_trades_item.cpp \
 	ping.cpp \
 	pong.cpp \
+	result_field.cpp \
 	spread.cpp \
 	subscription_status.cpp \
 	system_status.cpp \
@@ -25,12 +29,16 @@ AUTOGEN_CPP = \
 AUTOGEN_H = \
 	book.h \
 	book_item.h \
+	channel.h \
+	error.h \
+	event.h \
 	heartbeat.h \
 	open_positions.h \
 	order.h \
 	own_trades_item.h \
 	ping.h \
 	pong.h \
+	result_field.h \
 	spread.h \
 	subscription_status.h \
 	system_status.h \
@@ -41,6 +49,7 @@ CLEANFILES = $(AUTOGEN_CPP) $(AUTOGEN_H)
 BUILT_SOURCES = $(CLEANFILES) .gitignore
 libroq_kraken_json_la_SOURCES = \
 	$(AUTOGEN_CPP) \
+	parser.cpp \
 	utils.cpp
 
 .gitignore: Makefile.am
