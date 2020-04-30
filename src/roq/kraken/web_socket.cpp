@@ -182,7 +182,7 @@ void WebSocket::operator()(const json::SystemStatus& system_status) {
       std::size(pairs));
   subscribe("trade", span_pairs);
   subscribe("spread", span_pairs);
-  // subscribe("book", span_pairs);
+  subscribe("book", span_pairs);
 }
 
 void WebSocket::operator()(const json::Pong& pong) {

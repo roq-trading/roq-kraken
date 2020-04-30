@@ -124,19 +124,24 @@ static bool dispatch2(
     core::json::Buffer& buffer,
     int64_t channel_id,
     Channel channel,
-    const std::string_view& pair) {
+    const std::string_view& pair,
+    size_t data_count) {
   DLOG(INFO)(
-      FMT_STRING(R"(channel_id={} channel={} pair={})"),
+      FMT_STRING(R"(channel_id={} channel={} pair={}, len(data)={})"),
       channel_id,
       channel,
-      pair);
+      pair,
+      data_count);
   bool dispatched = false;
   core::json::Parser parser(message);
   auto root = parser.root();
   size_t offset = 0;
+  Book book_1, book_2;
   for (auto value : std::get<core::json::array_t>(root)) {
-    if (++offset != 2)
+    if (++offset == 1)
       continue;
+    if (offset > (1 + data_count))
+      break;
     switch (channel) {
       case Channel::UNDEFINED:
       case Channel::UNKNOWN:
@@ -151,6 +156,7 @@ static bool dispatch2(
         break;
       }
       case Channel::TRADE: {
+        LOG_IF(FATAL, data_count != 1)("Unexpected");
         Trade trade(
             value,
             buffer);
@@ -159,17 +165,24 @@ static bool dispatch2(
         break;
       }
       case Channel::SPREAD: {
+        LOG_IF(FATAL, data_count != 1)("Unexpected");
         Spread spread(value);
         handler(spread);
         dispatched = true;
         break;
       }
       case Channel::BOOK: {
-        Book book(
-            value,
-            buffer);
-        handler(book);
-        dispatched = true;
+        LOG_IF(FATAL, data_count < 1 || data_count > 2)("Unexpected");
+        switch (offset) {
+          case 2:
+            book_1 = Book(value, buffer);
+            break;
+          case 3:
+            book_2 = Book(value, buffer);
+            break;
+          default:
+            LOG(FATAL)("Unexpected");
+        }
         break;
       }
       case Channel::OWN_TRADES: {
@@ -181,6 +194,21 @@ static bool dispatch2(
         break;
       }
     }
+  }
+  if (dispatched == false && channel == Channel::BOOK) {
+    if (data_count == 2) {
+      if (book_2.a.empty() == false) {
+        LOG_IF(FATAL, book_1.a.empty() == false)("Unexpected");
+        book_1.a = book_2.a;
+      } else if (book_2.b.empty() == false) {
+        LOG_IF(FATAL, book_1.b.empty() == false)("Unexpected");
+        book_1.b = book_2.b;
+      } else {
+        LOG(FATAL)("Unexpected");
+      }
+    }
+    handler(book_1);
+    dispatched = true;
   }
   return dispatched;
 }
@@ -195,42 +223,46 @@ bool Parser::dispatch(
   Channel channel = Channel::UNDEFINED;
   std::string_view pair;
   size_t offset = 0;
+  size_t data_count = 0;
   for (auto value : root) {
-    switch (++offset) {
-      case 1:
+    if (offset == 0) {
         channel_id = std::get<int64_t>(value);
-        break;
-      case 2:
-        // we need a second pass to parse this...
-        break;
-      case 3: {
-        auto name = std::get<std::string_view>(value);
-        auto pos = name.find_first_of('-');
-        if (pos != name.npos)
-          name.remove_suffix(name.size() - pos);
-        channel = Channel(name);
-        DLOG_IF(FATAL, channel == Channel::UNKNOWN)(
-            FMT_STRING(R"(Unknown channel="{}")"),
-            name);
-        break;
+        ++offset;
+    } else {
+      if (core::json::is_pod(value)) {
+        switch (offset) {
+          case 1: {
+            auto name = std::get<std::string_view>(value);
+            auto pos = name.find_first_of('-');
+            if (pos != name.npos)
+              name.remove_suffix(name.size() - pos);
+            channel = Channel(name);
+            DLOG_IF(FATAL, channel == Channel::UNKNOWN)(
+                FMT_STRING(R"(Unknown channel="{}")"),
+                name);
+            break;
+          }
+          case 2:
+            pair = std::get<std::string_view>(value);
+            break;
+        }
+        ++offset;
+      } else {
+        ++data_count;
       }
-      case 4:
-        pair = std::get<std::string_view>(value);
-        break;
-      default:
-        break;
     }
   }
-  LOG_IF(FATAL, offset != 4)(
-      FMT_STRING(R"(Recived {} columns, expected 4)"),
-      offset);
+  LOG_IF(FATAL, offset != 3)(
+      FMT_STRING(R"(message={})"),
+      message);
   return dispatch2(
       handler,
       message,
       buffer,
       channel_id,
       channel,
-      pair);
+      pair,
+      data_count);
 }
 
 }  // namespace json
