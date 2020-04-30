@@ -75,9 +75,16 @@ class WebSocket final
   void operator()(const json::Pong&) override;
   void operator()(const json::Heartbeat&) override;
   void operator()(const json::SubscriptionStatus&) override;
-  void operator()(const json::Trade&) override;
-  void operator()(const json::Spread&) override;
-  void operator()(const json::Book&) override;
+
+  void operator()(
+      const json::Trade& trade,
+      const std::string_view& pair) override;
+  void operator()(
+      const json::Spread& spread,
+      const std::string_view& pair) override;
+  void operator()(
+      const json::Book& book,
+      const std::string_view& pair) override;
 
  protected:
   void reset();

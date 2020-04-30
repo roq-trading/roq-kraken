@@ -204,22 +204,34 @@ void WebSocket::operator()(
       subscription_status);
 }
 
-void WebSocket::operator()(const json::Trade& trade) {
-  DLOG(INFO)(
-      FMT_STRING("trade={}"),
-      trade);
+void WebSocket::operator()(
+    const json::Trade& trade,
+    const std::string_view& pair) {
+  VLOG(3)(
+      FMT_STRING(R"(trade={}, pair="{}")"),
+      trade,
+      pair);
+  _gateway(trade, pair);
 }
 
-void WebSocket::operator()(const json::Spread& spread) {
-  DLOG(INFO)(
-      FMT_STRING("spread={}"),
-      spread);
+void WebSocket::operator()(
+    const json::Spread& spread,
+    const std::string_view& pair) {
+  VLOG(3)(
+      FMT_STRING(R"(spread={}, pair="{}")"),
+      spread,
+      pair);
+  _gateway(spread, pair);
 }
 
-void WebSocket::operator()(const json::Book& book) {
-  DLOG(INFO)(
-      FMT_STRING("book={}"),
-      book);
+void WebSocket::operator()(
+    const json::Book& book,
+    const std::string_view& pair) {
+  VLOG(3)(
+      FMT_STRING(R"(book={}, pair="{}")"),
+      book,
+      pair);
+  _gateway(book, pair);
 }
 
 }  // namespace kraken

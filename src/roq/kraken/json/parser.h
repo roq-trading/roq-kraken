@@ -27,9 +27,16 @@ struct Parser final {
     virtual void operator()(const Pong&) = 0;
     virtual void operator()(const Heartbeat&) = 0;
     virtual void operator()(const SubscriptionStatus&) = 0;
-    virtual void operator()(const Trade&) = 0;
-    virtual void operator()(const Spread&) = 0;
-    virtual void operator()(const Book&) = 0;
+
+    virtual void operator()(
+        const Trade& trade,
+        const std::string_view& pair) = 0;
+    virtual void operator()(
+        const Spread& spread,
+        const std::string_view& pair) = 0;
+    virtual void operator()(
+        const Book& book,
+        const std::string_view& pair) = 0;
   };
 
   static bool dispatch(

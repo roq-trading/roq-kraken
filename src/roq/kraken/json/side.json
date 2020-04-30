@@ -1,0 +1,10 @@
+{
+"name": "Side",
+"type": "enum",
+"values": [
+	{ "name": "b" },
+	{ "name": "buy" },
+	{ "name": "s" },
+	{ "name": "sell" }
+]
+}

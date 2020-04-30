@@ -5,8 +5,8 @@
 	{ "name": "price", "type": "double" },
 	{ "name": "volume", "type": "double"},
 	{ "name": "time", "type": "std::chrono::nanoseconds"},
-	{ "name": "side", "type": "std::string_view"},
-	{ "name": "orderType", "type": "std::string_view"},
+	{ "name": "side", "type": "Side"},
+	{ "name": "orderType", "type": "OrderType"},
 	{ "name": "misc", "type": "std::string_view"}
 ]
 }

@@ -59,6 +59,16 @@ class Gateway final : public server::Handler {
   // web socket
   void operator()(const WebSocket&);
 
+  void operator()(
+      const json::Trade& trade,
+      const std::string_view& pair);
+  void operator()(
+      const json::Spread& spread,
+      const std::string_view& pair);
+  void operator()(
+      const json::Book& book,
+      const std::string_view& pair);
+
  private:
   using WebSocketDownload = server::Download<WebSocketState>;
 

@@ -49,7 +49,7 @@ bool Parser::dispatch(
 bool Parser::dispatch(
     Handler& handler,
     const std::string_view& message,
-    core::json::Buffer& buffer,
+    core::json::Buffer&,
     core::json::object_t& root) {
   bool dispatched = false;
   for (auto [key, value] : root) {
@@ -160,14 +160,14 @@ static bool dispatch2(
         Trade trade(
             value,
             buffer);
-        handler(trade);
+        handler(trade, pair);
         dispatched = true;
         break;
       }
       case Channel::SPREAD: {
         LOG_IF(FATAL, data_count != 1)("Unexpected");
         Spread spread(value);
-        handler(spread);
+        handler(spread, pair);
         dispatched = true;
         break;
       }
@@ -207,7 +207,7 @@ static bool dispatch2(
         LOG(FATAL)("Unexpected");
       }
     }
-    handler(book_1);
+    handler(book_1, pair);
     dispatched = true;
   }
   return dispatched;

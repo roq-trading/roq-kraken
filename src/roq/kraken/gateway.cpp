@@ -14,7 +14,6 @@
 namespace roq {
 namespace kraken {
 
-/*
 template <typename T>
 static bool mbp_update(
     auto& data,
@@ -23,7 +22,7 @@ static bool mbp_update(
   auto& obj = data[offset];
   new (&obj) MBPUpdate {
     .price = item.price,
-    .quantity = item.size,
+    .quantity = item.volume,
   };
   ++offset;
   return offset < data.size();
@@ -38,14 +37,12 @@ static bool trade_update(
   new (&obj) Trade {
     .side = json::map(item.side),
     .price = item.price,
-    .quantity = item.quantity,
+    .quantity = item.volume,
     .trade_id = {},
   };
-  // XXX write tradeid
   ++offset;
   return offset < data.size();
 }
-*/
 
 Gateway::Gateway(
     server::Dispatcher& dispatcher,
@@ -120,21 +117,21 @@ void Gateway::operator()(
     const CreateOrderEvent& event,
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
-  // TODO
+  // TODO(thraneh): implement
 }
 
 void Gateway::operator()(
     const ModifyOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  // TODO
+  // TODO(thraneh): implement
 }
 
 void Gateway::operator()(
     const CancelOrderEvent& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
-  // TODO
+  // TODO(thraneh): implement
 }
 
 void Gateway::operator()(Metrics& metrics) {
@@ -170,6 +167,150 @@ void Gateway::operator()(const WebSocket&) {
   } else {
     _web_socket.download.reset();
     _symbols.clear();
+  }
+}
+
+void Gateway::operator()(
+    const json::Trade& trade,
+    const std::string_view& pair) {
+  bool success = true;
+  std::chrono::nanoseconds exchange_time_utc = {};
+  size_t trade_length = 0;
+  for (auto& item : trade.data) {
+    if (success == false)
+      break;
+    success = trade_update(
+        _trade,
+        trade_length,
+        item);
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.time;
+  }
+  if (unlikely(success == false)) {
+    LOG(FATAL)(
+        FMT_STRING(
+          R"(Insufficient trade array size: )"
+          R"(len(trade)={}/{})"),
+        trade_length, _trade.size());
+  }
+  if (trade_length > 0) {
+    TradeSummary trade_summary {
+      .exchange = FLAGS_exchange,
+      .symbol = pair,
+      .trades = {
+        .items = _trade.data(),
+        .length = trade_length,
+      },
+      .exchange_time_utc = exchange_time_utc,
+    };
+    DLOG(INFO)(FMT_STRING(R"(trade_summary={})"), trade_summary);
+    enqueue(
+        trade_summary,
+        true);
+  }
+}
+
+void Gateway::operator()(
+    const json::Spread& spread,
+    const std::string_view& pair) {
+  TopOfBook top_of_book {
+    .exchange = FLAGS_exchange,
+    .symbol = pair,
+    .layer = {
+      .bid_price = spread.bid,
+      .bid_quantity = spread.bid_volume,
+      .ask_price = spread.ask,
+      .ask_quantity = spread.ask_volume,
+    },
+    .snapshot = false,  // note! we don't know... false is probably ok
+    .exchange_time_utc = spread.timestamp,
+  };
+  DLOG(INFO)(FMT_STRING(R"(top_of_book={})"), top_of_book);
+  enqueue(
+      top_of_book,
+      true);
+}
+
+void Gateway::operator()(
+    const json::Book& book,
+    const std::string_view& pair) {
+  bool snapshot =
+    book.bs.empty() == false &&
+    book.as.empty() == false;
+  bool live =
+    book.b.empty() == false &&
+    book.a.empty() == false;
+  LOG_IF(FATAL, snapshot && live)("Unexpected");
+  bool success = true;
+  std::chrono::nanoseconds exchange_time_utc = {};
+  size_t bid_length = 0, ask_length = 0;
+  for (auto& item : book.b) {
+    if (success == false)
+      break;
+    success = mbp_update(
+        _bid,
+        bid_length,
+        item);
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
+  }
+  for (auto& item : book.bs) {
+    if (success == false)
+      break;
+    success = mbp_update(
+        _bid,
+        bid_length,
+        item);
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
+  }
+  for (auto& item : book.a) {
+    if (success == false)
+      break;
+    success = mbp_update(
+        _ask,
+        ask_length,
+        item);
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
+  }
+  for (auto& item : book.as) {
+    if (success == false)
+      break;
+    success = mbp_update(
+        _ask,
+        ask_length,
+        item);
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
+  }
+  if (unlikely(success == false)) {
+    LOG(FATAL)(
+        FMT_STRING(
+          R"(Insufficient bid/ask array size(s): )"
+          R"(len(bid={}/{}, len(ask)={}/{})"),
+        bid_length, _bid.size(),
+        ask_length, _ask.size());
+  }
+  if (bid_length > 0 || ask_length > 0) {
+    MarketByPrice market_by_price {
+      .exchange = FLAGS_exchange,
+      .symbol = pair,
+      .bids = {
+        .items = _bid.data(),
+        .length = bid_length,
+      },
+      .asks = {
+        .items = _ask.data(),
+        .length = ask_length,
+      },
+      .snapshot = snapshot,
+      .exchange_time_utc = exchange_time_utc,
+    };
+    DLOG(INFO)(FMT_STRING(R"(market_by_price={})"), market_by_price);
+    enqueue(
+        market_by_price,
+        true);
   }
 }
 
