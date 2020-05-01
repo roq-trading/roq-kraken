@@ -142,6 +142,11 @@ void Gateway::operator()(Metrics& metrics) {
 // rest
 
 void Gateway::operator()(const Rest&) {
+  if (_rest.connection.ready()) {
+    _rest.connection.get_asset_pairs(
+        [this](auto& response) {
+        });
+  }
 }
 
 // web socket

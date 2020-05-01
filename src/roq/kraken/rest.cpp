@@ -12,6 +12,8 @@
 
 #include "roq/kraken/json/utils.h"
 
+#include "roq/kraken/json/asset_pairs.h"
+
 namespace roq {
 namespace kraken {
 
@@ -71,6 +73,7 @@ Rest::Rest(
         .disconnect = create_counter("disconnect"),
       },
       _profile {
+        .asset_pairs = create_profile("asset_pairs"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -105,6 +108,35 @@ void Rest::operator()(Metrics& metrics) {
     // profile
     // latency
     .write(_latency.ping);
+}
+
+void Rest::get_asset_pairs(
+    std::function<void(const core::web::Response&)>&& callback) {
+  _connection.request(
+      core::http::Method::GET,
+      "/public/AssetPairs",
+      std::string_view(),  // headers
+      std::string_view(),  // body
+      [this, callback](auto& response) {
+        if (response.success()) {
+          auto [status, body] = response.get();
+          if (status == core::http::Status::OK) {
+            _profile.asset_pairs(
+                [&]() {
+                  core::json::Buffer buffer(_decode_buffer);
+                  auto asset_pairs =
+                    core::json::Parser::create<json::AssetPairs>(
+                        body,
+                        buffer);
+                  VLOG(1)(
+                      FMT_STRING(R"(asset_pairs={})"),
+                      asset_pairs);
+                  // _gateway(asset_pairs);
+                });
+          }
+        }
+        callback(response);
+      });
 }
 
 void Rest::operator()(const core::web::Client::Connected&) {

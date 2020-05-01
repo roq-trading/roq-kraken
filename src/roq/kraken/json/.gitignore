@@ -1,3 +1,7 @@
+asset_pairs.cpp
+asset_pairs.h
+asset_pairs_item.cpp
+asset_pairs_item.h
 book.cpp
 book.h
 book_item.cpp

@@ -8,6 +8,8 @@ libroq_kraken_json_la_CPPFLAGS = \
 	$(LIBCONFIG_CFLAGS) \
 	$(ROQ_CFLAGS)
 AUTOGEN_CPP = \
+	asset_pairs.cpp \
+	asset_pairs_item.cpp \
 	book.cpp \
 	book_item.cpp \
 	channel.cpp \
@@ -30,6 +32,8 @@ AUTOGEN_CPP = \
 	trade_item.cpp \
 	update_type.cpp
 AUTOGEN_H = \
+	asset_pairs.h \
+	asset_pairs_item.h \
 	book.h \
 	book_item.h \
 	channel.h \

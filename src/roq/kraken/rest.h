@@ -49,6 +49,9 @@ class Rest final
 
   void operator()(Metrics& metrics);
 
+  void get_asset_pairs(
+      std::function<void(const core::web::Response&)>&& callback);
+
  protected:
   void operator()(const core::web::Client::Connected&) override;
   void operator()(const core::web::Client::Disconnected&) override;
@@ -68,7 +71,8 @@ class Rest final
       disconnect;
   } _counter;
   struct {
-    // core::metrics::Profile
+    core::metrics::Profile
+      asset_pairs;
   } _profile;
   struct {
     core::metrics::Latency

@@ -1,0 +1,23 @@
+{
+"name": "AssetPairsItem",
+"type": "item2",
+"values": [
+	{ "name": "altname", "type": "std::string_view" },
+	{ "name": "wsname", "type": "std::string_view" },
+	{ "name": "aclass_base", "type": "std::string_view" },
+	{ "name": "base", "type": "std::string_view" },
+	{ "name": "aclass_quote", "type": "std::string_view" },
+	{ "name": "quote", "type": "std::string_view" },
+	{ "name": "lot", "type": "std::string_view" },
+	{ "name": "pair_decimals", "type": "uint32_t" },
+	{ "name": "lot_decimals", "type": "uint32_t" },
+	{ "name": "lot_multiplier", "type": "double" },
+	{ "name": "leverage_buy" },
+	{ "name": "leverage_sell" },
+	{ "name": "fees" },
+	{ "name": "fees_maker" },
+	{ "name": "fee_volume_currency", "type": "std::string_view" },
+	{ "name": "margin_call", "type": "double" },
+	{ "name": "margin_stop", "type": "double" }
+]
+}
