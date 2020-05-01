@@ -24,6 +24,8 @@
 
 #include "roq/kraken/web_socket_state.h"
 
+#include "roq/kraken/json/asset_pairs.h"
+
 namespace roq {
 namespace kraken {
 
@@ -56,6 +58,8 @@ class Gateway final : public server::Handler {
   // rest
   void operator()(const Rest&);
 
+  void operator()(const json::AssetPairs&);
+
   // web socket
   void operator()(const WebSocket&);
 
@@ -77,11 +81,9 @@ class Gateway final : public server::Handler {
  private:
   void update(GatewayStatus gateway_status);
 
-  void download_symbols();
-  void download_trading_balance();
-  void download_orders();
+  void download_asset_pairs();
 
-  void subscribe_market_data();
+  void subscribe();
 
   template <typename T>
   void enqueue(

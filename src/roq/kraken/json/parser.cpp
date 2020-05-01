@@ -126,12 +126,14 @@ static bool dispatch2(
     Channel channel,
     const std::string_view& pair,
     size_t data_count) {
+  /*
   DLOG(INFO)(
       FMT_STRING(R"(channel_id={} channel={} pair={}, len(data)={})"),
       channel_id,
       channel,
       pair,
       data_count);
+  */
   bool dispatched = false;
   core::json::Parser parser(message);
   auto root = parser.root();

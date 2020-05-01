@@ -142,10 +142,76 @@ void Gateway::operator()(Metrics& metrics) {
 // rest
 
 void Gateway::operator()(const Rest&) {
-  if (_rest.connection.ready()) {
-    _rest.connection.get_asset_pairs(
-        [this](auto& response) {
-        });
+  if (_rest.connection.ready())
+    _web_socket.download.bump();
+}
+
+void Gateway::download_asset_pairs() {
+  constexpr auto state = WebSocketDownload::State::ASSET_PAIRS;
+  _rest.connection.get_asset_pairs(
+      [this](auto& response) {
+        try {
+          auto status = response.status();
+          switch (status) {
+            case core::http::Status::OK:
+              _web_socket.download.check(state);
+              break;
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(
+                      R"(Unable to get products, )"
+                      R"(status={})"),
+                  status);
+          }
+        } catch (NotConnected&) {
+          _web_socket.download.retry(state);
+        } catch (TimedOut&) {
+          _web_socket.download.retry(state);
+        }
+      });
+}
+
+void Gateway::operator()(const json::AssetPairs& asset_pairs) {
+  assert(_symbols.empty());
+  _symbols.reserve(asset_pairs.result.size());
+  for (auto& item : asset_pairs.result) {
+    if (item.wsname.empty()) {
+      VLOG(1)(
+          FMT_STRING(R"(Skipping altname={}, reason: wsname is empty)"),
+          item.altname);
+      continue;
+    }
+    std::string symbol(item.wsname);
+    // XXX remove escape
+    symbol.erase(
+        std::remove(
+            symbol.begin(),
+            symbol.end(),
+            '\\'),
+        symbol.end());
+    _symbols.push_back(symbol);
+    ReferenceData reference_data {
+      .exchange = FLAGS_exchange,
+      .symbol = symbol,
+      .security_type = SecurityType::UNDEFINED,
+      .currency = item.aclass_quote,  // XXX check
+      .settlement_currency = item.aclass_base,  // XXX check
+      .commission_currency = item.aclass_base,  // XXX check
+      .tick_size = std::pow(10.0, -item.pair_decimals),  // XXX check
+      .limit_up = std::numeric_limits<double>::quiet_NaN(),
+      .limit_down = std::numeric_limits<double>::quiet_NaN(),
+      .multiplier = item.lot_multiplier,  // XXX check
+      .min_trade_vol = std::pow(10.0, -item.lot_decimals),  // XXX check
+      .option_type = OptionType::UNDEFINED,
+      .strike_currency = std::string_view(),
+      .strike_price = std::numeric_limits<double>::quiet_NaN(),
+    };
+    VLOG(1)(
+        FMT_STRING(R"(reference_data={})"),
+        reference_data);
+    enqueue(
+        reference_data,
+        true);
   }
 }
 
@@ -158,6 +224,12 @@ int32_t Gateway::download(WebSocketDownload::State state) {
     case WebSocketDownload::State::UNDEFINED:
       assert(false);
       break;
+    case WebSocketDownload::State::ASSET_PAIRS:
+      download_asset_pairs();
+      return 1;
+    case WebSocketDownload::State::SUBSCRIBE:
+      subscribe();
+      return 0;
     case WebSocketDownload::State::DONE:
       update(GatewayStatus::READY);
       return 0;
@@ -173,6 +245,21 @@ void Gateway::operator()(const WebSocket&) {
     _web_socket.download.reset();
     _symbols.clear();
   }
+}
+
+void Gateway::subscribe() {
+  roq::span pairs(
+      _symbols.data(),
+      _symbols.size());
+  _web_socket.connection.subscribe(
+      "trade",
+      pairs);
+  _web_socket.connection.subscribe(
+      "spread",
+      pairs);
+  _web_socket.connection.subscribe(
+      "book",
+      pairs);
 }
 
 void Gateway::operator()(
@@ -208,7 +295,9 @@ void Gateway::operator()(
       },
       .exchange_time_utc = exchange_time_utc,
     };
-    DLOG(INFO)(FMT_STRING(R"(trade_summary={})"), trade_summary);
+    VLOG(3)(
+        FMT_STRING(R"(trade_summary={})"),
+        trade_summary);
     enqueue(
         trade_summary,
         true);
@@ -230,7 +319,9 @@ void Gateway::operator()(
     .snapshot = false,  // note! we don't know... false is probably ok
     .exchange_time_utc = spread.timestamp,
   };
-  DLOG(INFO)(FMT_STRING(R"(top_of_book={})"), top_of_book);
+  VLOG(3)(
+      FMT_STRING(R"(top_of_book={})"),
+      top_of_book);
   enqueue(
       top_of_book,
       true);
@@ -312,7 +403,9 @@ void Gateway::operator()(
       .snapshot = snapshot,
       .exchange_time_utc = exchange_time_utc,
     };
-    DLOG(INFO)(FMT_STRING(R"(market_by_price={})"), market_by_price);
+    VLOG(3)(
+        FMT_STRING(R"(market_by_price={})"),
+        market_by_price);
     enqueue(
         market_by_price,
         true);

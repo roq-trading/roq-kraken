@@ -106,6 +106,7 @@ void Rest::operator()(Metrics& metrics) {
     // counter
     .write(_counter.disconnect)
     // profile
+    .write(_profile.asset_pairs)
     // latency
     .write(_latency.ping);
 }
@@ -131,7 +132,7 @@ void Rest::get_asset_pairs(
                   VLOG(1)(
                       FMT_STRING(R"(asset_pairs={})"),
                       asset_pairs);
-                  // _gateway(asset_pairs);
+                  _gateway(asset_pairs);
                 });
           }
         }

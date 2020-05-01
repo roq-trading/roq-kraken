@@ -111,7 +111,11 @@ void WebSocket::operator()(Metrics& metrics) {
 template <>
 void WebSocket::subscribe(
     const std::string_view& name,
-    const roq::span<std::string_view const>& pairs) {
+    const roq::span<std::string>& pairs) {
+  LOG(INFO)(
+      FMT_STRING(R"(subscribe name="{}", len(pairs)={})"),
+      name,
+      std::size(pairs));
   auto message = fmt::format(
       FMT_STRING(
         R"({{)"
@@ -136,7 +140,8 @@ void WebSocket::operator()(const core::web::Socket::Disconnected&) {
 }
 
 void WebSocket::operator()(const core::web::Socket::Ready&) {
-  // XXX login();
+  LOG(INFO)("Ready");
+  _gateway(*this);
 }
 
 void WebSocket::operator()(const core::web::Socket::Close&) {
@@ -164,42 +169,32 @@ void WebSocket::parse(const std::string_view& message) {
 }
 
 void WebSocket::operator()(const json::Error& error) {
-  DLOG(WARNING)(
+  LOG(FATAL)(
       FMT_STRING("error={}"),
       error);
 }
 
 void WebSocket::operator()(const json::SystemStatus& system_status) {
-  DLOG(INFO)(
+  LOG(INFO)(
       FMT_STRING("system_status={}"),
       system_status);
-  const std::string_view pairs[] = {
-    {"XBT/USD"},
-    {"XBT/EUR"},
-  };
-  roq::span span_pairs(
-      pairs,
-      std::size(pairs));
-  subscribe("trade", span_pairs);
-  subscribe("spread", span_pairs);
-  subscribe("book", span_pairs);
 }
 
 void WebSocket::operator()(const json::Pong& pong) {
-  DLOG(INFO)(
+  VLOG(1)(
       FMT_STRING("pong={}"),
       pong);
 }
 
 void WebSocket::operator()(const json::Heartbeat& heartbeat) {
-  DLOG(INFO)(
+  VLOG(1)(
       FMT_STRING("heartbeat={}"),
       heartbeat);
 }
 
 void WebSocket::operator()(
     const json::SubscriptionStatus& subscription_status) {
-  DLOG(INFO)(
+  VLOG(1)(
       FMT_STRING("subscription_status={}"),
       subscription_status);
 }
