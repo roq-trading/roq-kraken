@@ -189,7 +189,9 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
             symbol.end(),
             '\\'),
         symbol.end());
-    _symbols.push_back(symbol);
+    if (_dispatcher.discard_symbol(symbol))
+      continue;
+    _symbols.emplace_back(symbol);
     ReferenceData reference_data {
       .exchange = FLAGS_exchange,
       .symbol = symbol,
@@ -211,6 +213,17 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
         reference_data);
     enqueue(
         reference_data,
+        true);
+    MarketStatus market_status {
+      .exchange = FLAGS_exchange,
+      .symbol = symbol,
+      .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
+    };
+    VLOG(2)(
+        FMT_STRING(R"(market_status={})"),
+        market_status);
+    enqueue(
+        market_status,
         true);
   }
 }
