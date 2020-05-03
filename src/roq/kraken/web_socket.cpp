@@ -116,18 +116,41 @@ void WebSocket::subscribe(
       FMT_STRING(R"(subscribe name="{}", len(pairs)={})"),
       name,
       std::size(pairs));
-  auto message = fmt::format(
-      FMT_STRING(
-        R"({{)"
-        R"("event":"subscribe",)"
-        R"("pair":["{}"],)"
-        R"("subscription":{{)"
-        R"("name":"{}")"
-        R"(}})"
-        R"(}})"),
-        fmt::join(pairs, R"(",")"),
-        name);
-  _connection.send_text(message);
+  if (FLAGS_book_depth && name.compare("book") == 0) {
+    auto message = fmt::format(
+        FMT_STRING(
+          R"({{)"
+          R"("event":"subscribe",)"
+          R"("pair":["{}"],)"
+          R"("subscription":{{)"
+          R"("name":"{}",)"
+          R"("depth":{})"
+          R"(}})"
+          R"(}})"),
+          fmt::join(pairs, R"(",")"),
+          name,
+          FLAGS_book_depth);
+    DLOG(INFO)(
+        FMT_STRING(R"(request="{}")"),
+        message);
+    _connection.send_text(message);
+  } else {
+    auto message = fmt::format(
+        FMT_STRING(
+          R"({{)"
+          R"("event":"subscribe",)"
+          R"("pair":["{}"],)"
+          R"("subscription":{{)"
+          R"("name":"{}")"
+          R"(}})"
+          R"(}})"),
+          fmt::join(pairs, R"(",")"),
+          name);
+    DLOG(INFO)(
+        FMT_STRING(R"(request="{}")"),
+        message);
+    _connection.send_text(message);
+  }
 }
 
 void WebSocket::operator()(const core::web::Socket::Connected&) {

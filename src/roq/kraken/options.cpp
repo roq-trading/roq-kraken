@@ -70,3 +70,8 @@ DEFINE_bool(log_fix,
 DEFINE_string(rest_ping_path,
     "/public/Time",
     "URI path used for REST connection keep-alive messages");
+
+DEFINE_uint32(book_depth,
+    0,
+    "book depth (0 == exchange default)");
+

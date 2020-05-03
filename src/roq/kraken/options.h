@@ -26,6 +26,8 @@ DECLARE_bool(log_fix);
 
 DECLARE_string(rest_ping_path);
 
+DECLARE_uint32(book_depth);
+
 // external
 
 DECLARE_string(name);
