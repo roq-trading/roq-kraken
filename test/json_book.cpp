@@ -5,6 +5,8 @@
 
 #include "roq/core/datetime.h"
 
+#include "roq/core/market/bad_state.h"
+
 #include "roq/kraken/json/parser.h"
 
 using namespace roq;  // NOLINT
@@ -235,7 +237,6 @@ TEST(json_book, parse_test_update_complex) {
 // what: timestamps (3rd column) appears to be completely off
 // reason? did their server not synchronize NTP before allowing orders?
 
-/*
 TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   const std::string_view message =
     R"([)"
@@ -300,9 +301,10 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  json::Parser::dispatch(
-      handler,
-      message,
-      buffer);
+  EXPECT_THROW(
+      json::Parser::dispatch(
+          handler,
+          message,
+          buffer),
+      std::out_of_range);  //  XXX maybe wrap as core::market::BadState?
 }
-*/
