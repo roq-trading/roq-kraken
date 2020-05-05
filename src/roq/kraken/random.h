@@ -6,6 +6,7 @@
 #include <string>
 
 #include "roq/core/crypto/hmac.h"
+#include "roq/core/crypto/sha.h"
 
 namespace roq {
 namespace kraken {
@@ -21,6 +22,7 @@ class Random final {
   std::string create_signature(const std::string_view& nonce);
 
  private:
+  core::crypto::SHA256 _sha;
   core::crypto::HMAC_SHA256 _hmac;
 };
 
