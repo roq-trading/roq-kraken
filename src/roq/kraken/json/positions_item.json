@@ -1,0 +1,20 @@
+{
+"name": "PositionsItem",
+"type": "item2",
+"values": [
+	{ "name": "ordertxid", "type": "std::string_view" },
+	{ "name": "pair", "type": "std::string_view" },
+	{ "name": "time", "type": "std::chrono::nanoseconds" },
+	{ "name": "type", "type": "Side" },
+	{ "name": "ordertype", "type": "OrderType" },
+	{ "name": "cost", "type": "double" },
+	{ "name": "fee", "type": "double" },
+	{ "name": "vol", "type": "double" },
+	{ "name": "vol_closed", "type": "double" },
+	{ "name": "margin", "type": "double" },
+	{ "name": "value", "type": "double" },
+	{ "name": "net", "type": "double" },
+	{ "name": "misc" },
+	{ "name": "oflags" }
+]
+}

@@ -50,7 +50,10 @@ Gateway::Gateway(
     : _dispatcher(dispatcher),
       _account(config.get_account()),
       _access_key(config.get_access_key()),
-      _random(config.get_access_secret()),
+      _random(
+          config.get_access_key(),
+          config.get_access_secret(),
+          config.get_access_password()),
       _dns_base(_base, true),
       _web_socket {
         .connection = {
@@ -171,7 +174,58 @@ void Gateway::download_asset_pairs() {
       });
 }
 
+void Gateway::download_balance() {
+  constexpr auto state = WebSocketDownload::State::BALANCE;
+  _rest.connection.get_balance(
+      [this](auto& response) {
+        try {
+          auto status = response.status();
+          switch (status) {
+            case core::http::Status::OK:
+              _web_socket.download.check(state);
+              break;
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(
+                      R"(Unable to get trade balance, )"
+                      R"(status={})"),
+                  status);
+          }
+        } catch (NotConnected&) {
+          _web_socket.download.retry(state);
+        } catch (TimedOut&) {
+          _web_socket.download.retry(state);
+        }
+      });
+}
+
+void Gateway::download_open_positions() {
+  constexpr auto state = WebSocketDownload::State::OPEN_POSITIONS;
+  _rest.connection.get_open_positions(
+      [this](auto& response) {
+        try {
+          auto status = response.status();
+          switch (status) {
+            case core::http::Status::OK:
+              _web_socket.download.check(state);
+              break;
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(
+                      R"(Unable to get open positions, )"
+                      R"(status={})"),
+                  status);
+          }
+        } catch (NotConnected&) {
+          _web_socket.download.retry(state);
+        } catch (TimedOut&) {
+          _web_socket.download.retry(state);
+        }
+      });
+}
+
 void Gateway::operator()(const json::AssetPairs& asset_pairs) {
+  assert(asset_pairs.error.empty());
   assert(_symbols.empty());
   _symbols.reserve(asset_pairs.result.size());
   for (auto& item : asset_pairs.result) {
@@ -228,6 +282,14 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
   }
 }
 
+void Gateway::operator()(const json::TradeBalance& trade_balance) {
+  assert(trade_balance.error.empty());
+}
+
+void Gateway::operator()(const json::Positions& positions) {
+  assert(positions.error.empty());
+}
+
 // web socket
 
 int32_t Gateway::download(WebSocketDownload::State state) {
@@ -239,6 +301,12 @@ int32_t Gateway::download(WebSocketDownload::State state) {
       break;
     case WebSocketDownload::State::ASSET_PAIRS:
       download_asset_pairs();
+      return 1;
+    case WebSocketDownload::State::BALANCE:
+      download_balance();
+      return 1;
+    case WebSocketDownload::State::OPEN_POSITIONS:
+      download_open_positions();
       return 1;
     case WebSocketDownload::State::SUBSCRIBE:
       subscribe();

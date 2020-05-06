@@ -52,6 +52,12 @@ class Rest final
   void get_asset_pairs(
       std::function<void(const core::web::Response&)>&& callback);
 
+  void get_balance(
+      std::function<void(const core::web::Response&)>&& callback);
+
+  void get_open_positions(
+      std::function<void(const core::web::Response&)>&& callback);
+
  protected:
   void operator()(const core::web::Client::Connected&) override;
   void operator()(const core::web::Client::Disconnected&) override;
@@ -72,7 +78,9 @@ class Rest final
   } _counter;
   struct {
     core::metrics::Profile
-      asset_pairs;
+      asset_pairs,
+      balance,
+      open_positions;
   } _profile;
   struct {
     core::metrics::Latency

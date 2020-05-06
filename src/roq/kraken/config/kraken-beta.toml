@@ -5,8 +5,9 @@ symbols = ".*"
 
   [accounts.A1]
   master = true
-  login = "GqF8l3B-ufLb_2z8X9cyV4KRXgIIc4ns"
-  secret = "WKltV1MSWfHOze6f8TlmUWxFcBeQuoNy"
+  login = "tNShm3cu+MS4Hx2D+Q3U4CiqDFxu0kEoOK36BiAmU73AjfN/dYy+MZax"
+  secret = "1W5Zar/uyMoOilIDVki6Lzl/eGfRCvaN8vXbNmiDOitwXfrtoAdhxDcQqt0KQjpsEVGfW07IoSSmHb0RguYmKA=="
+  password = ""
   symbols = [ "BTC.*", "ETH.*" ]
 
 [users]

@@ -35,6 +35,11 @@ class Config final
       throw std::runtime_error("More accounts not yet supported");
     return (*accounts.begin()).second.secret;
   }
+  auto get_access_password() const {
+    if (accounts.size() != 1)
+      throw std::runtime_error("More accounts not yet supported");
+    return (*accounts.begin()).second.password;
+  }
 
  protected:
   // server::Config

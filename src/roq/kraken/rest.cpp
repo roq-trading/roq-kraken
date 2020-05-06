@@ -13,6 +13,7 @@
 #include "roq/kraken/json/utils.h"
 
 #include "roq/kraken/json/asset_pairs.h"
+#include "roq/kraken/json/positions.h"
 
 namespace roq {
 namespace kraken {
@@ -74,6 +75,8 @@ Rest::Rest(
       },
       _profile {
         .asset_pairs = create_profile("asset_pairs"),
+        .balance = create_profile("balance"),
+        .open_positions = create_profile("open_positions"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -107,6 +110,8 @@ void Rest::operator()(Metrics& metrics) {
     .write(_counter.disconnect)
     // profile
     .write(_profile.asset_pairs)
+    .write(_profile.balance)
+    .write(_profile.open_positions)
     // latency
     .write(_latency.ping);
 }
@@ -129,10 +134,99 @@ void Rest::get_asset_pairs(
                     core::json::Parser::create<json::AssetPairs>(
                         body,
                         buffer);
-                  VLOG(1)(
-                      FMT_STRING(R"(asset_pairs={})"),
-                      asset_pairs);
-                  _gateway(asset_pairs);
+                  if (asset_pairs.error.empty()) {
+                    VLOG(1)(
+                        FMT_STRING(R"(asset_pairs={})"),
+                        asset_pairs);
+                    _gateway(asset_pairs);
+                  } else {
+                    LOG(WARNING)(
+                        FMT_STRING(R"(asset_pairs={})"),
+                        asset_pairs);
+                    LOG(FATAL)("Unexpected");
+                  }
+                });
+          }
+        }
+        callback(response);
+      });
+}
+
+void Rest::get_balance(
+    std::function<void(const core::web::Response&)>&& callback) {
+  auto body = _random.create_body();
+  auto headers = _random.create_headers(
+      core::http::Method::POST,
+      "/0/private/Balance",
+      body);
+  _connection.request(
+      core::http::Method::POST,
+      "/private/Balance",
+      headers,
+      body,
+      [this, callback](auto& response) {
+        if (response.success()) {
+          auto [status, body] = response.get();
+          if (status == core::http::Status::OK) {
+            _profile.balance(
+                [&]() {
+                  core::json::Buffer buffer(_decode_buffer);
+                  auto balance =
+                    core::json::Parser::create<json::TradeBalance>(
+                        body,
+                        buffer);
+                  if (balance.error.empty()) {
+                    VLOG(1)(
+                        FMT_STRING(R"(balance={})"),
+                        balance);
+                    _gateway(balance);
+                  } else {
+                    LOG(WARNING)(
+                        FMT_STRING(R"(balance={})"),
+                        balance);
+                    LOG(FATAL)("Unexpected");
+                  }
+                });
+          }
+        }
+        callback(response);
+      });
+}
+
+void Rest::get_open_positions(
+    std::function<void(const core::web::Response&)>&& callback) {
+  auto body = _random.create_body();
+  auto headers = _random.create_headers(
+      core::http::Method::POST,
+      "/0/private/OpenPositions",
+      body);
+  _connection.request(
+      core::http::Method::POST,
+      "/private/OpenPositions",
+      headers,
+      body,
+      [this, callback](auto& response) {
+        if (response.success()) {
+          auto [status, body] = response.get();
+          if (status == core::http::Status::OK) {
+            _profile.open_positions(
+                [&]() {
+                  core::json::Buffer buffer(_decode_buffer);
+                  auto positions =
+                    core::json::Parser::create<json::Positions>(
+                        body,
+                        buffer);
+                  if (positions.error.empty()) {
+                    VLOG(1)(
+                        FMT_STRING(R"(positions={})"),
+                        positions);
+                    _gateway(positions);
+                  } else {
+                    LOG(WARNING)(
+                        FMT_STRING(R"(positions={})"),
+                        positions);
+                    LOG(FATAL)("Unexpected");
+                  }
                 });
           }
         }

@@ -3,6 +3,8 @@
 "type": "enum",
 "values": [
 	{ "name": "asset_pairs" },
+	{ "name": "balance" },
+	{ "name": "open_positions" },
 	{ "name": "subscribe" },
 	{ "name": "done" }
 ]

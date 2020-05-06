@@ -22,6 +22,8 @@ AUTOGEN_CPP = \
 	own_trades_item.cpp \
 	ping.cpp \
 	pong.cpp \
+	positions.cpp \
+	positions_item.cpp \
 	result_field.cpp \
 	side.cpp \
 	spread.cpp \
@@ -29,6 +31,8 @@ AUTOGEN_CPP = \
 	system_status.cpp \
 	time_.cpp \
 	trade.cpp \
+	trade_balance.cpp \
+	trade_balance_item.cpp \
 	trade_item.cpp \
 	update_type.cpp
 AUTOGEN_H = \
@@ -46,6 +50,8 @@ AUTOGEN_H = \
 	own_trades_item.h \
 	ping.h \
 	pong.h \
+	positions.h \
+	positions_item.h \
 	result_field.h \
 	side.h \
 	spread.h \
@@ -53,6 +59,8 @@ AUTOGEN_H = \
 	system_status.h \
 	time_.h \
 	trade.h \
+	trade_balance.h \
+	trade_balance_item.h \
 	trade_item.h \
 	update_type.h
 CLEANFILES = $(AUTOGEN_CPP) $(AUTOGEN_H)

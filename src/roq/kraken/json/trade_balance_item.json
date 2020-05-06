@@ -1,0 +1,15 @@
+{
+"name": "TradeBalanceItem",
+"type": "item",
+"values": [
+	{ "name": "eb", "type": "std::string_view" },
+	{ "name": "tb", "type": "double" },
+	{ "name": "m", "type": "double" },
+	{ "name": "n", "type": "double" },
+	{ "name": "c", "type": "double" },
+	{ "name": "v", "type": "double" },
+	{ "name": "e", "type": "double" },
+	{ "name": "mf", "type": "double" },
+	{ "name": "ml", "type": "double" }
+]
+}
