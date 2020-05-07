@@ -153,6 +153,30 @@ void WebSocket::subscribe(
   }
 }
 
+void WebSocket::subscribe(
+    const std::string_view& name,
+    const std::string_view& token) {
+  LOG(INFO)(
+      FMT_STRING(R"(subscribe name="{}", token="{}")"),
+      name,
+      token);
+  auto message = fmt::format(
+      FMT_STRING(
+        R"({{)"
+        R"("event":"subscribe",)"
+        R"("subscription":{{)"
+        R"("name":"{}",)"
+        R"("token":"{}")"
+        R"(}})"
+        R"(}})"),
+        name,
+        token);
+  DLOG(INFO)(
+      FMT_STRING(R"(request="{}")"),
+      message);
+  _connection.send_text(message);
+}
+
 void WebSocket::operator()(const core::web::Socket::Connected&) {
   // note! wait for upgrade
 }
@@ -217,7 +241,7 @@ void WebSocket::operator()(const json::Heartbeat& heartbeat) {
 
 void WebSocket::operator()(
     const json::SubscriptionStatus& subscription_status) {
-  VLOG(1)(
+  LOG(INFO)(
       FMT_STRING("subscription_status={}"),
       subscription_status);
 }

@@ -9,6 +9,7 @@ DECLARE_string(config_file);
 
 DECLARE_string(rest_uri);
 DECLARE_string(ws_uri);
+DECLARE_string(ws_auth_uri);
 DECLARE_uint32(rate_limit_interval_secs);
 DECLARE_uint32(rate_limit_max_requests);
 DECLARE_uint32(ping_freq_secs);

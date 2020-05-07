@@ -10,10 +10,12 @@
 #include "roq/kraken/gateway.h"
 #include "roq/kraken/options.h"
 
+#include "roq/kraken/json/result.h"
 #include "roq/kraken/json/utils.h"
 
 #include "roq/kraken/json/asset_pairs.h"
 #include "roq/kraken/json/positions.h"
+#include "roq/kraken/json/token.h"
 
 namespace roq {
 namespace kraken {
@@ -77,6 +79,7 @@ Rest::Rest(
         .asset_pairs = create_profile("asset_pairs"),
         .balance = create_profile("balance"),
         .open_positions = create_profile("open_positions"),
+        .get_web_sockets_token = create_profile("get_web_sockets_token"),
       },
       _latency {
         .ping = create_latency("ping"),
@@ -112,15 +115,18 @@ void Rest::operator()(Metrics& metrics) {
     .write(_profile.asset_pairs)
     .write(_profile.balance)
     .write(_profile.open_positions)
+    .write(_profile.get_web_sockets_token)
     // latency
     .write(_latency.ping);
 }
 
 void Rest::get_asset_pairs(
     std::function<void(const core::web::Response&)>&& callback) {
+  constexpr auto method = core::http::Method::GET;
+  constexpr std::string_view path = "/0/public/AssetPairs";
   _connection.request(
-      core::http::Method::GET,
-      "/public/AssetPairs",
+      method,
+      path,
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {
@@ -154,14 +160,16 @@ void Rest::get_asset_pairs(
 
 void Rest::get_balance(
     std::function<void(const core::web::Response&)>&& callback) {
+  constexpr auto method = core::http::Method::POST;
+  constexpr std::string_view path = "/0/private/Balance";
   auto body = _random.create_body();
   auto headers = _random.create_headers(
-      core::http::Method::POST,
-      "/0/private/Balance",
+      method,
+      path,
       body);
   _connection.request(
-      core::http::Method::POST,
-      "/private/Balance",
+      method,
+      path,
       headers,
       body,
       [this, callback](auto& response) {
@@ -170,9 +178,10 @@ void Rest::get_balance(
           if (status == core::http::Status::OK) {
             _profile.balance(
                 [&]() {
+                  /*
                   core::json::Buffer buffer(_decode_buffer);
                   auto balance =
-                    core::json::Parser::create<json::TradeBalance>(
+                    core::json::Parser::create<json::Balance>(
                         body,
                         buffer);
                   if (balance.error.empty()) {
@@ -186,6 +195,7 @@ void Rest::get_balance(
                         balance);
                     LOG(FATAL)("Unexpected");
                   }
+                  */
                 });
           }
         }
@@ -195,14 +205,16 @@ void Rest::get_balance(
 
 void Rest::get_open_positions(
     std::function<void(const core::web::Response&)>&& callback) {
+  constexpr auto method = core::http::Method::POST;
+  constexpr std::string_view path = "/0/private/OpenPositions";
   auto body = _random.create_body();
   auto headers = _random.create_headers(
-      core::http::Method::POST,
-      "/0/private/OpenPositions",
+      method,
+      path,
       body);
   _connection.request(
-      core::http::Method::POST,
-      "/private/OpenPositions",
+      method,
+      path,
       headers,
       body,
       [this, callback](auto& response) {
@@ -227,6 +239,49 @@ void Rest::get_open_positions(
                         positions);
                     LOG(FATAL)("Unexpected");
                   }
+                });
+          }
+        }
+        callback(response);
+      });
+}
+
+void Rest::get_web_sockets_token(
+    std::function<void(const core::web::Response&)>&& callback) {
+  constexpr auto method = core::http::Method::POST;
+  constexpr std::string_view path = "/0/private/GetWebSocketsToken";
+  auto body = _random.create_body();
+  auto headers = _random.create_headers(
+      method,
+      path,
+      body);
+  _connection.request(
+      method,
+      path,
+      headers,
+      body,
+      [this, callback](auto& response) {
+        if (response.success()) {
+          auto [status, body] = response.get();
+          if (status == core::http::Status::OK) {
+            _profile.get_web_sockets_token(
+                [&]() {
+                  core::json::Buffer buffer(_decode_buffer);
+                  json::Result::dispatch<json::Token>(
+                      body,
+                      buffer,
+                      [](const roq::span<std::string_view>& e) {
+                        LOG(WARNING)(
+                            FMT_STRING(R"(error=[{}])"),
+                            fmt::join(e, ","));
+                        LOG(FATAL)("Unexpected");
+                      },
+                      [&](const json::Token& token) {
+                        VLOG(1)(
+                            FMT_STRING(R"(token={})"),
+                            token);
+                        _gateway(token);
+                      });
                 });
           }
         }

@@ -174,6 +174,31 @@ void Gateway::download_asset_pairs() {
       });
 }
 
+void Gateway::download_web_sockets_token() {
+  constexpr auto state = WebSocketDownload::State::WEB_SOCKETS_TOKEN;
+  _rest.connection.get_web_sockets_token(
+      [this](auto& response) {
+        try {
+          auto status = response.status();
+          switch (status) {
+            case core::http::Status::OK:
+              _web_socket.download.check(state);
+              break;
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(
+                      R"(Unable to get web sockets token, )"
+                      R"(status={})"),
+                  status);
+          }
+        } catch (NotConnected&) {
+          _web_socket.download.retry(state);
+        } catch (TimedOut&) {
+          _web_socket.download.retry(state);
+        }
+      });
+}
+
 void Gateway::download_balance() {
   constexpr auto state = WebSocketDownload::State::BALANCE;
   _rest.connection.get_balance(
@@ -187,7 +212,7 @@ void Gateway::download_balance() {
             default:
               LOG(FATAL)(
                   FMT_STRING(
-                      R"(Unable to get trade balance, )"
+                      R"(Unable to get balance, )"
                       R"(status={})"),
                   status);
           }
@@ -282,12 +307,16 @@ void Gateway::operator()(const json::AssetPairs& asset_pairs) {
   }
 }
 
-void Gateway::operator()(const json::TradeBalance& trade_balance) {
-  assert(trade_balance.error.empty());
-}
-
 void Gateway::operator()(const json::Positions& positions) {
   assert(positions.error.empty());
+}
+
+void Gateway::operator()(const json::Token& token) {
+  LOG(INFO)(
+      FMT_STRING(R"(token={})"),
+      token);
+  // XXX maybe we have to URL decode here ???
+  _token = token.token;
 }
 
 // web socket
@@ -307,6 +336,9 @@ int32_t Gateway::download(WebSocketDownload::State state) {
       return 1;
     case WebSocketDownload::State::OPEN_POSITIONS:
       download_open_positions();
+      return 1;
+    case WebSocketDownload::State::WEB_SOCKETS_TOKEN:
+      download_web_sockets_token();
       return 1;
     case WebSocketDownload::State::SUBSCRIBE:
       subscribe();
@@ -329,6 +361,7 @@ void Gateway::operator()(const WebSocket&) {
 }
 
 void Gateway::subscribe() {
+  // public
   roq::span pairs(
       _symbols.data(),
       _symbols.size());
@@ -341,6 +374,15 @@ void Gateway::subscribe() {
   _web_socket.connection.subscribe(
       "book",
       pairs);
+  // private
+  /*
+  _web_socket.connection.subscribe(
+      "ownTrades",
+      _token);
+  _web_socket.connection.subscribe(
+      "openOrders",
+      _token);
+  */
 }
 
 void Gateway::operator()(

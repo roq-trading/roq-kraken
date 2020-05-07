@@ -59,6 +59,10 @@ class WebSocket final
       const std::string_view& name,
       const roq::span<T>& pairs);
 
+  void subscribe(
+      const std::string_view& name,
+      const std::string_view& token);
+
  protected:
   void operator()(const core::web::Socket::Connected&) override;
   void operator()(const core::web::Socket::Disconnected&) override;

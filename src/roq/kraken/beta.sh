@@ -16,8 +16,8 @@ ENV="beta-"
 
 URI="kraken.com"
 
-# REST_URI="https://${ENV}api.$URI/0"
-REST_URI="https://api.$URI/0"
+REST_URI="https://api.$URI"
+
 WS_URI_PUBLIC="wss://${ENV}ws.$URI"
 WS_URI_PRIVATE="wss://${ENV}ws-auth.$URI"
 
@@ -26,6 +26,7 @@ $PREFIX ./roq-kraken \
 	--config-file "$CONFIG_FILE" \
 	--rest-uri "$REST_URI" \
 	--ws-uri "$WS_URI_PUBLIC" \
+	--ws-auth-uri "$WS_URI_PRIVATE" \
 	--listen "$CWD/$NAME.sock" \
 	--metrics "$CWD/${NAME}_metrics.sock" \
 	$@

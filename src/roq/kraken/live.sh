@@ -16,7 +16,8 @@ ENV=""
 
 URI="kraken.com"
 
-REST_URI="https://${ENV}api.$URI/0"
+REST_URI="https://api.$URI"
+
 WS_URI_PUBLIC="wss://${ENV}ws.$URI"
 WS_URI_PRIVATE="wss://${ENV}ws-auth.$URI"
 

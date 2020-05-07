@@ -42,6 +42,8 @@ system_status.cpp
 system_status.h
 time_.cpp
 time_.h
+token.cpp
+token.h
 trade.cpp
 trade.h
 trade_balance.cpp

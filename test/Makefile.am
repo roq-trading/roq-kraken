@@ -27,4 +27,5 @@ roq_kraken_test_CPPFLAGS = \
 	$(DATE_CFLAGS)
 nodist_roq_kraken_test_SOURCES = \
 	json_book.cpp \
+	json_token.cpp \
 	main.cpp

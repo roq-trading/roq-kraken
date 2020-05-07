@@ -30,6 +30,7 @@ AUTOGEN_CPP = \
 	subscription_status.cpp \
 	system_status.cpp \
 	time_.cpp \
+	token.cpp \
 	trade.cpp \
 	trade_balance.cpp \
 	trade_balance_item.cpp \
@@ -58,6 +59,7 @@ AUTOGEN_H = \
 	subscription_status.h \
 	system_status.h \
 	time_.h \
+	token.h \
 	trade.h \
 	trade_balance.h \
 	trade_balance_item.h \
@@ -68,6 +70,7 @@ BUILT_SOURCES = $(CLEANFILES) .gitignore
 libroq_kraken_json_la_SOURCES = \
 	$(AUTOGEN_CPP) \
 	parser.cpp \
+	result.cpp \
 	utils.cpp
 
 .gitignore: Makefile.am

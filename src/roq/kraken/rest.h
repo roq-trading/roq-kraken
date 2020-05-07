@@ -58,6 +58,9 @@ class Rest final
   void get_open_positions(
       std::function<void(const core::web::Response&)>&& callback);
 
+  void get_web_sockets_token(
+      std::function<void(const core::web::Response&)>&& callback);
+
  protected:
   void operator()(const core::web::Client::Connected&) override;
   void operator()(const core::web::Client::Disconnected&) override;
@@ -80,7 +83,8 @@ class Rest final
     core::metrics::Profile
       asset_pairs,
       balance,
-      open_positions;
+      open_positions,
+      get_web_sockets_token;
   } _profile;
   struct {
     core::metrics::Latency

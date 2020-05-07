@@ -26,7 +26,7 @@
 
 #include "roq/kraken/json/asset_pairs.h"
 #include "roq/kraken/json/positions.h"
-#include "roq/kraken/json/trade_balance.h"
+#include "roq/kraken/json/token.h"
 
 namespace roq {
 namespace kraken {
@@ -61,8 +61,8 @@ class Gateway final : public server::Handler {
   void operator()(const Rest&);
 
   void operator()(const json::AssetPairs&);
-  void operator()(const json::TradeBalance&);
   void operator()(const json::Positions&);
+  void operator()(const json::Token&);
 
   // web socket
   void operator()(const WebSocket&);
@@ -86,6 +86,8 @@ class Gateway final : public server::Handler {
   void update(GatewayStatus gateway_status);
 
   void download_asset_pairs();
+
+  void download_web_sockets_token();
 
   void download_balance();
   void download_open_positions();
@@ -130,6 +132,9 @@ class Gateway final : public server::Handler {
   // market data
   core::page_aligned_vector<MBPUpdate> _bid, _ask;
   core::page_aligned_vector<Trade> _trade;
+
+  // experimental
+  std::string _token;
 };
 
 }  // namespace kraken

@@ -16,6 +16,10 @@ DEFINE_string(rest_uri,
     "REST end-point (URI)");
 
 DEFINE_string(ws_uri,
+    "wss://beta-ws.kraken.com",
+    "WebSocket end-point (URI)");
+
+DEFINE_string(ws_auth_uri,
     "wss://beta-ws-auth.kraken.com",
     "WebSocket end-point (URI)");
 
@@ -68,7 +72,7 @@ DEFINE_bool(log_fix,
     "log fix messages?");
 
 DEFINE_string(rest_ping_path,
-    "/public/Time",
+    "/0/public/Time",
     "URI path used for REST connection keep-alive messages");
 
 DEFINE_uint32(book_depth,

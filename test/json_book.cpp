@@ -14,7 +14,6 @@ using namespace roq::kraken;  // NOLINT
 
 namespace {
 struct Handler : public json::Parser::Handler {
-
  protected:
   void operator()(const json::Error&) override {
   }
