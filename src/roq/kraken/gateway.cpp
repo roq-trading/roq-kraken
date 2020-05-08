@@ -55,7 +55,7 @@ Gateway::Gateway(
           config.get_access_secret(),
           config.get_access_password()),
       _dns_base(_base, true),
-      _web_socket {
+      _web_socket_public {
         .connection = {
           *this,
           config,
@@ -65,6 +65,21 @@ Gateway::Gateway(
           _ssl_context,
         },
         .download = WebSocketDownload(
+            std::chrono::seconds { FLAGS_download_timeout_secs },
+            [this](auto state) {
+              return download(state);
+            }),
+      },
+      _web_socket_private {
+        .connection = {
+          *this,
+          config,
+          _random,
+          _base,
+          _dns_base,
+          _ssl_context,
+        },
+        .download = WebSocketPrivateDownload(
             std::chrono::seconds { FLAGS_download_timeout_secs },
             [this](auto state) {
               return download(state);
@@ -89,18 +104,21 @@ Gateway::Gateway(
 
 void Gateway::operator()(const StartEvent& event) {
   LOG(INFO)("Starting the gateway...");
-  _web_socket.connection(event);
+  _web_socket_public.connection(event);
+  _web_socket_private.connection(event);
   _rest.connection(event);
 }
 
 void Gateway::operator()(const StopEvent& event) {
   LOG(INFO)("Stopping the gateway...");
   _rest.connection(event);
-  _web_socket.connection(event);
+  _web_socket_private.connection(event);
+  _web_socket_public.connection(event);
 }
 
 void Gateway::operator()(const TimerEvent& event) {
-  _web_socket.connection(event);
+  _web_socket_public.connection(event);
+  _web_socket_private.connection(event);
   _rest.connection(event);
   // download
   /*
@@ -139,14 +157,17 @@ void Gateway::operator()(
 
 void Gateway::operator()(Metrics& metrics) {
   _rest.connection(metrics);
-  _web_socket.connection(metrics);
+  _web_socket_public.connection(metrics);
+  _web_socket_private.connection(metrics);
 }
 
 // rest
 
 void Gateway::operator()(const Rest&) {
-  if (_rest.connection.ready())
-    _web_socket.download.bump();
+  if (_rest.connection.ready()) {
+    _web_socket_public.download.bump();
+    _web_socket_private.download.bump();
+  }
 }
 
 void Gateway::download_asset_pairs() {
@@ -157,7 +178,7 @@ void Gateway::download_asset_pairs() {
           auto status = response.status();
           switch (status) {
             case core::http::Status::OK:
-              _web_socket.download.check(state);
+              _web_socket_public.download.check(state);
               break;
             default:
               LOG(FATAL)(
@@ -167,22 +188,22 @@ void Gateway::download_asset_pairs() {
                   status);
           }
         } catch (NotConnected&) {
-          _web_socket.download.retry(state);
+          _web_socket_public.download.retry(state);
         } catch (TimedOut&) {
-          _web_socket.download.retry(state);
+          _web_socket_public.download.retry(state);
         }
       });
 }
 
 void Gateway::download_web_sockets_token() {
-  constexpr auto state = WebSocketDownload::State::WEB_SOCKETS_TOKEN;
+  constexpr auto state = WebSocketPrivateDownload::State::WEB_SOCKETS_TOKEN;
   _rest.connection.get_web_sockets_token(
       [this](auto& response) {
         try {
           auto status = response.status();
           switch (status) {
             case core::http::Status::OK:
-              _web_socket.download.check(state);
+              _web_socket_private.download.check(state);
               break;
             default:
               LOG(FATAL)(
@@ -192,9 +213,9 @@ void Gateway::download_web_sockets_token() {
                   status);
           }
         } catch (NotConnected&) {
-          _web_socket.download.retry(state);
+          _web_socket_private.download.retry(state);
         } catch (TimedOut&) {
-          _web_socket.download.retry(state);
+          _web_socket_private.download.retry(state);
         }
       });
 }
@@ -207,7 +228,7 @@ void Gateway::download_balance() {
           auto status = response.status();
           switch (status) {
             case core::http::Status::OK:
-              _web_socket.download.check(state);
+              _web_socket_public.download.check(state);
               break;
             default:
               LOG(FATAL)(
@@ -217,9 +238,9 @@ void Gateway::download_balance() {
                   status);
           }
         } catch (NotConnected&) {
-          _web_socket.download.retry(state);
+          _web_socket_public.download.retry(state);
         } catch (TimedOut&) {
-          _web_socket.download.retry(state);
+          _web_socket_public.download.retry(state);
         }
       });
 }
@@ -232,7 +253,7 @@ void Gateway::download_open_positions() {
           auto status = response.status();
           switch (status) {
             case core::http::Status::OK:
-              _web_socket.download.check(state);
+              _web_socket_public.download.check(state);
               break;
             default:
               LOG(FATAL)(
@@ -242,9 +263,9 @@ void Gateway::download_open_positions() {
                   status);
           }
         } catch (NotConnected&) {
-          _web_socket.download.retry(state);
+          _web_socket_public.download.retry(state);
         } catch (TimedOut&) {
-          _web_socket.download.retry(state);
+          _web_socket_public.download.retry(state);
         }
       });
 }
@@ -322,7 +343,7 @@ void Gateway::operator()(const json::Token& token) {
 // web socket
 
 int32_t Gateway::download(WebSocketDownload::State state) {
-  if (_web_socket.connection.ready() == false)
+  if (_web_socket_public.connection.ready() == false)
     return -1;
   switch (state) {
     case WebSocketDownload::State::UNDEFINED:
@@ -337,11 +358,8 @@ int32_t Gateway::download(WebSocketDownload::State state) {
     case WebSocketDownload::State::OPEN_POSITIONS:
       download_open_positions();
       return 1;
-    case WebSocketDownload::State::WEB_SOCKETS_TOKEN:
-      download_web_sockets_token();
-      return 1;
-    case WebSocketDownload::State::SUBSCRIBE:
-      subscribe();
+    case WebSocketDownload::State::SUBSCRIBE_PUBLIC:
+      subscribe_public();
       return 0;
     case WebSocketDownload::State::DONE:
       update(GatewayStatus::READY);
@@ -351,38 +369,28 @@ int32_t Gateway::download(WebSocketDownload::State state) {
   return 0;
 }
 
-void Gateway::operator()(const WebSocket&) {
-  if (_web_socket.connection.ready()) {
-    _web_socket.download.begin();
+void Gateway::operator()(const WebSocketPublic&) {
+  if (_web_socket_public.connection.ready()) {
+    _web_socket_public.download.begin();
   } else {
-    _web_socket.download.reset();
+    _web_socket_public.download.reset();
     _symbols.clear();
   }
 }
 
-void Gateway::subscribe() {
-  // public
+void Gateway::subscribe_public() {
   roq::span pairs(
       _symbols.data(),
       _symbols.size());
-  _web_socket.connection.subscribe(
+  _web_socket_public.connection.subscribe(
       "trade",
       pairs);
-  _web_socket.connection.subscribe(
+  _web_socket_public.connection.subscribe(
       "spread",
       pairs);
-  _web_socket.connection.subscribe(
+  _web_socket_public.connection.subscribe(
       "book",
       pairs);
-  // private
-  /*
-  _web_socket.connection.subscribe(
-      "ownTrades",
-      _token);
-  _web_socket.connection.subscribe(
-      "openOrders",
-      _token);
-  */
 }
 
 void Gateway::operator()(
@@ -533,6 +541,47 @@ void Gateway::operator()(
         market_by_price,
         true);
   }
+}
+
+// web-socket (private)
+
+int32_t Gateway::download(WebSocketPrivateDownload::State state) {
+  if (_web_socket_private.connection.ready() == false)
+    return -1;
+  switch (state) {
+    case WebSocketPrivateDownload::State::UNDEFINED:
+      assert(false);
+      break;
+    case WebSocketPrivateDownload::State::WEB_SOCKETS_TOKEN:
+      download_web_sockets_token();
+      return 1;
+    case WebSocketPrivateDownload::State::SUBSCRIBE_PRIVATE:
+      subscribe_private();
+      return 0;
+    case WebSocketPrivateDownload::State::DONE:
+      update(GatewayStatus::READY);
+      return 0;
+  }
+  assert(false);
+  return 0;
+}
+
+void Gateway::operator()(const WebSocketPrivate&) {
+  if (_web_socket_private.connection.ready()) {
+    _web_socket_private.download.begin();
+  } else {
+    _web_socket_private.download.reset();
+    _symbols.clear();
+  }
+}
+
+void Gateway::subscribe_private() {
+  _web_socket_private.connection.subscribe(
+      "ownTrades",
+      _token);
+  _web_socket_private.connection.subscribe(
+      "openOrders",
+      _token);
 }
 
 void Gateway::update(GatewayStatus gateway_status) {

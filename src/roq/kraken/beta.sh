@@ -18,15 +18,15 @@ URI="kraken.com"
 
 REST_URI="https://api.$URI"
 
-WS_URI_PUBLIC="wss://${ENV}ws.$URI"
-WS_URI_PRIVATE="wss://${ENV}ws-auth.$URI"
+WS_PUBLIC_URI="wss://${ENV}ws.$URI"
+WS_PRIVATE_URI="wss://${ENV}ws-auth.$URI"
 
 $PREFIX ./roq-kraken \
 	--name "$NAME" \
 	--config-file "$CONFIG_FILE" \
 	--rest-uri "$REST_URI" \
-	--ws-uri "$WS_URI_PUBLIC" \
-	--ws-auth-uri "$WS_URI_PRIVATE" \
+	--ws-public-uri "$WS_PUBLIC_URI" \
+	--ws-private-uri "$WS_PRIVATE_URI" \
 	--listen "$CWD/$NAME.sock" \
 	--metrics "$CWD/${NAME}_metrics.sock" \
 	$@

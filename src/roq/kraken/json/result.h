@@ -2,10 +2,10 @@
 
 #pragma once
 
+#include <fmt/format.h>
+
 #include <stdexcept>
 #include <string_view>
-
-#include <fmt/format.h>
 
 #include "roq/core/json/parser.h"
 #include "roq/core/json/array.h"

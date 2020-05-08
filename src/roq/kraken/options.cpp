@@ -15,11 +15,11 @@ DEFINE_string(rest_uri,
     "https://api.kraken.com/0",
     "REST end-point (URI)");
 
-DEFINE_string(ws_uri,
+DEFINE_string(ws_public_uri,
     "wss://beta-ws.kraken.com",
     "WebSocket end-point (URI)");
 
-DEFINE_string(ws_auth_uri,
+DEFINE_string(ws_private_uri,
     "wss://beta-ws-auth.kraken.com",
     "WebSocket end-point (URI)");
 

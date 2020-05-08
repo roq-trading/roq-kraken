@@ -20,9 +20,11 @@
 #include "roq/kraken/config.h"
 #include "roq/kraken/random.h"
 #include "roq/kraken/rest.h"
-#include "roq/kraken/web_socket.h"
+#include "roq/kraken/web_socket_private.h"
+#include "roq/kraken/web_socket_public.h"
 
-#include "roq/kraken/web_socket_state.h"
+#include "roq/kraken/private_state.h"
+#include "roq/kraken/public_state.h"
 
 #include "roq/kraken/json/asset_pairs.h"
 #include "roq/kraken/json/positions.h"
@@ -64,8 +66,8 @@ class Gateway final : public server::Handler {
   void operator()(const json::Positions&);
   void operator()(const json::Token&);
 
-  // web socket
-  void operator()(const WebSocket&);
+  // web socket (public)
+  void operator()(const WebSocketPublic&);
 
   void operator()(
       const json::Trade& trade,
@@ -77,10 +79,18 @@ class Gateway final : public server::Handler {
       const json::Book& book,
       const std::string_view& pair);
 
+  // web socket (private)
+  void operator()(const WebSocketPrivate&);
+
  private:
-  using WebSocketDownload = server::Download<WebSocketState>;
+  using WebSocketDownload = server::Download<PublicState>;
 
   int32_t download(WebSocketDownload::State state);
+
+ private:
+  using WebSocketPrivateDownload = server::Download<PrivateState>;
+
+  int32_t download(WebSocketPrivateDownload::State state);
 
  private:
   void update(GatewayStatus gateway_status);
@@ -92,7 +102,9 @@ class Gateway final : public server::Handler {
   void download_balance();
   void download_open_positions();
 
-  void subscribe();
+  void subscribe_public();
+
+  void subscribe_private();
 
   template <typename T>
   void enqueue(
@@ -119,9 +131,13 @@ class Gateway final : public server::Handler {
   core::ssl::Context _ssl_context;
   // connections
   struct {
-    WebSocket connection;
+    WebSocketPublic connection;
     WebSocketDownload download;
-  } _web_socket;
+  } _web_socket_public;
+  struct {
+    WebSocketPrivate connection;
+    WebSocketPrivateDownload download;
+  } _web_socket_private;
   struct {
     Rest connection;
   } _rest;

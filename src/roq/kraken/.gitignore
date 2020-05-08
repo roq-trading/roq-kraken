@@ -1,2 +1,4 @@
-web_socket_state.cpp
-web_socket_state.h
+private_state.cpp
+private_state.h
+public_state.cpp
+public_state.h

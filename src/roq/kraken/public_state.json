@@ -1,12 +1,11 @@
 {
-"name": "WebSocketState",
+"name": "PublicState",
 "type": "enum",
 "values": [
 	{ "name": "asset_pairs" },
 	{ "name": "balance" },
 	{ "name": "open_positions" },
-	{ "name": "web_sockets_token" },
-	{ "name": "subscribe" },
+	{ "name": "subscribe_public" },
 	{ "name": "done" }
 ]
 }

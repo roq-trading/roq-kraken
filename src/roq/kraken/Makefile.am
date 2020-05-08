@@ -33,9 +33,11 @@ roq_kraken_CPPFLAGS = \
 	$(ROQ_CORE_CFLAGS) \
 	$(ROQ_SERVER_CFLAGS)
 AUTOGEN_CPP = \
-	web_socket_state.cpp
+	private_state.cpp \
+	public_state.cpp
 AUTOGEN_H = \
-	web_socket_state.h
+	private_state.h \
+	public_state.h
 CLEANFILES = $(AUTOGEN_CPP) $(AUTOGEN_H)
 BUILT_SOURCES = $(CLEANFILES) .gitignore
 roq_kraken_SOURCES = \
@@ -46,7 +48,8 @@ roq_kraken_SOURCES = \
 	options.cpp \
 	random.cpp \
 	rest.cpp \
-	web_socket.cpp \
+	web_socket_private.cpp \
+	web_socket_public.cpp \
 	main.cpp
 
 .gitignore: Makefile.am

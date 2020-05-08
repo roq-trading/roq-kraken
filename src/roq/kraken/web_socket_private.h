@@ -29,11 +29,11 @@ namespace kraken {
 
 class Gateway;
 
-class WebSocket final
+class WebSocketPrivate final
     : public core::web::Socket::Handler,
       public json::Parser::Handler {
  public:
-  WebSocket(
+  WebSocketPrivate(
       Gateway& gateway,
       const Config& config,
       Random& random,
@@ -41,8 +41,8 @@ class WebSocket final
       core::event::DNSBase& dns_base,
       core::ssl::Context& ssl_context);
 
-  WebSocket(WebSocket&&) = delete;
-  WebSocket(const WebSocket&) = delete;
+  WebSocketPrivate(WebSocketPrivate&&) = delete;
+  WebSocketPrivate(const WebSocketPrivate&) = delete;
 
   bool ready() const;
 
@@ -53,11 +53,6 @@ class WebSocket final
   void operator()(const TimerEvent&);
 
   void operator()(Metrics& metrics);
-
-  template <typename T>
-  void subscribe(
-      const std::string_view& name,
-      const roq::span<T>& pairs);
 
   void subscribe(
       const std::string_view& name,

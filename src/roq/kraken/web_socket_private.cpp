@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/kraken/web_socket.h"
+#include "roq/kraken/web_socket_private.h"
 
 #include <fmt/format.h>
 
@@ -17,7 +17,7 @@ namespace roq {
 namespace kraken {
 
 namespace {
-constexpr std::string_view CONNECTION = "ws";
+constexpr std::string_view CONNECTION = "ws_private";
 
 static auto create_counter(
     const std::string_view& function) {
@@ -44,7 +44,7 @@ static auto create_latency(
 }
 }  // namespace
 
-WebSocket::WebSocket(
+WebSocketPrivate::WebSocketPrivate(
     Gateway& gateway,
     const Config& config,
     Random& random,
@@ -59,7 +59,7 @@ WebSocket::WebSocket(
           base,
           dns_base,
           ssl_context,
-          core::URI(FLAGS_ws_uri),
+          core::URI(FLAGS_ws_private_uri),
           std::chrono::seconds { FLAGS_ping_freq_secs },
           FLAGS_decode_buffer_size,  // XXX need read buffer size
           FLAGS_encode_buffer_size,
@@ -77,27 +77,27 @@ WebSocket::WebSocket(
       } {
 }
 
-bool WebSocket::ready() const {
+bool WebSocketPrivate::ready() const {
   return _connection.ready();
 }
 
-void WebSocket::close() {
+void WebSocketPrivate::close() {
   _connection.close();
 }
 
-void WebSocket::operator()(const StartEvent&) {
+void WebSocketPrivate::operator()(const StartEvent&) {
   _connection.start();
 }
 
-void WebSocket::operator()(const StopEvent&) {
+void WebSocketPrivate::operator()(const StopEvent&) {
   _connection.stop();
 }
 
-void WebSocket::operator()(const TimerEvent& event) {
+void WebSocketPrivate::operator()(const TimerEvent& event) {
   _connection.refresh(event.now);
 }
 
-void WebSocket::operator()(Metrics& metrics) {
+void WebSocketPrivate::operator()(Metrics& metrics) {
   metrics
     // counter
     .write(_counter.disconnect)
@@ -108,52 +108,7 @@ void WebSocket::operator()(Metrics& metrics) {
     .write(_latency.heartbeat);
 }
 
-template <>
-void WebSocket::subscribe(
-    const std::string_view& name,
-    const roq::span<std::string>& pairs) {
-  LOG(INFO)(
-      FMT_STRING(R"(subscribe name="{}", len(pairs)={})"),
-      name,
-      std::size(pairs));
-  if (FLAGS_book_depth && name.compare("book") == 0) {
-    auto message = fmt::format(
-        FMT_STRING(
-          R"({{)"
-          R"("event":"subscribe",)"
-          R"("pair":["{}"],)"
-          R"("subscription":{{)"
-          R"("name":"{}",)"
-          R"("depth":{})"
-          R"(}})"
-          R"(}})"),
-          fmt::join(pairs, R"(",")"),
-          name,
-          FLAGS_book_depth);
-    DLOG(INFO)(
-        FMT_STRING(R"(request="{}")"),
-        message);
-    _connection.send_text(message);
-  } else {
-    auto message = fmt::format(
-        FMT_STRING(
-          R"({{)"
-          R"("event":"subscribe",)"
-          R"("pair":["{}"],)"
-          R"("subscription":{{)"
-          R"("name":"{}")"
-          R"(}})"
-          R"(}})"),
-          fmt::join(pairs, R"(",")"),
-          name);
-    DLOG(INFO)(
-        FMT_STRING(R"(request="{}")"),
-        message);
-    _connection.send_text(message);
-  }
-}
-
-void WebSocket::subscribe(
+void WebSocketPrivate::subscribe(
     const std::string_view& name,
     const std::string_view& token) {
   LOG(INFO)(
@@ -171,40 +126,40 @@ void WebSocket::subscribe(
         R"(}})"),
         name,
         token);
-  DLOG(INFO)(
+  VLOG(3)(
       FMT_STRING(R"(request="{}")"),
       message);
   _connection.send_text(message);
 }
 
-void WebSocket::operator()(const core::web::Socket::Connected&) {
+void WebSocketPrivate::operator()(const core::web::Socket::Connected&) {
   // note! wait for upgrade
 }
 
-void WebSocket::operator()(const core::web::Socket::Disconnected&) {
+void WebSocketPrivate::operator()(const core::web::Socket::Disconnected&) {
   ++_counter.disconnect;
   _gateway(*this);
 }
 
-void WebSocket::operator()(const core::web::Socket::Ready&) {
+void WebSocketPrivate::operator()(const core::web::Socket::Ready&) {
   LOG(INFO)("Ready");
   _gateway(*this);
 }
 
-void WebSocket::operator()(const core::web::Socket::Close&) {
+void WebSocketPrivate::operator()(const core::web::Socket::Close&) {
 }
 
-void WebSocket::operator()(const core::web::Socket::Latency& latency) {
+void WebSocketPrivate::operator()(const core::web::Socket::Latency& latency) {
   _latency.ping.update(
       std::chrono::duration_cast<std::chrono::nanoseconds>(
           latency.sample).count());
 }
 
-void WebSocket::operator()(const core::web::Socket::Text& text) {
+void WebSocketPrivate::operator()(const core::web::Socket::Text& text) {
   parse(text.payload);
 }
 
-void WebSocket::parse(const std::string_view& message) {
+void WebSocketPrivate::parse(const std::string_view& message) {
   _profile.parse(
       [&]() {
         core::json::Buffer buffer(_decode_buffer);
@@ -215,65 +170,53 @@ void WebSocket::parse(const std::string_view& message) {
       });
 }
 
-void WebSocket::operator()(const json::Error& error) {
+void WebSocketPrivate::operator()(const json::Error& error) {
   LOG(FATAL)(
       FMT_STRING("error={}"),
       error);
 }
 
-void WebSocket::operator()(const json::SystemStatus& system_status) {
+void WebSocketPrivate::operator()(const json::SystemStatus& system_status) {
   LOG(INFO)(
       FMT_STRING("system_status={}"),
       system_status);
 }
 
-void WebSocket::operator()(const json::Pong& pong) {
+void WebSocketPrivate::operator()(const json::Pong& pong) {
   VLOG(1)(
       FMT_STRING("pong={}"),
       pong);
 }
 
-void WebSocket::operator()(const json::Heartbeat& heartbeat) {
+void WebSocketPrivate::operator()(const json::Heartbeat& heartbeat) {
   VLOG(1)(
       FMT_STRING("heartbeat={}"),
       heartbeat);
 }
 
-void WebSocket::operator()(
+void WebSocketPrivate::operator()(
     const json::SubscriptionStatus& subscription_status) {
   LOG(INFO)(
       FMT_STRING("subscription_status={}"),
       subscription_status);
 }
 
-void WebSocket::operator()(
+void WebSocketPrivate::operator()(
     const json::Trade& trade,
     const std::string_view& pair) {
-  VLOG(3)(
-      FMT_STRING(R"(trade={}, pair="{}")"),
-      trade,
-      pair);
-  _gateway(trade, pair);
+  LOG(FATAL)("Unexpected");
 }
 
-void WebSocket::operator()(
+void WebSocketPrivate::operator()(
     const json::Spread& spread,
     const std::string_view& pair) {
-  VLOG(3)(
-      FMT_STRING(R"(spread={}, pair="{}")"),
-      spread,
-      pair);
-  _gateway(spread, pair);
+  LOG(FATAL)("Unexpected");
 }
 
-void WebSocket::operator()(
+void WebSocketPrivate::operator()(
     const json::Book& book,
     const std::string_view& pair) {
-  VLOG(3)(
-      FMT_STRING(R"(book={}, pair="{}")"),
-      book,
-      pair);
-  _gateway(book, pair);
+  LOG(FATAL)("Unexpected");
 }
 
 }  // namespace kraken

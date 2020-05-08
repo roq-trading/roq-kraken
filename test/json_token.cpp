@@ -10,7 +10,6 @@ using namespace roq;  // NOLINT
 using namespace roq::kraken;  // NOLINT
 
 TEST(json_token, parse) {
-  /*
   const std::string_view message =
     R"({)"
     R"("error":[],)"
@@ -21,10 +20,14 @@ TEST(json_token, parse) {
     R"(})";
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  auto token = json::Result::parse<json::Token>(
+  json::Result::dispatch<json::Token>(
       message,
-      buffer);
-  EXPECT_EQ(token.token, "abc");
-  EXPECT_EQ(token.expires, 123);
-  */
+      buffer,
+      [](auto&) {
+        ASSERT_FALSE(true);
+      },
+      [](auto& token) {
+        EXPECT_EQ(token.token, "abc");
+        EXPECT_EQ(token.expires, 123);
+      });
 }
