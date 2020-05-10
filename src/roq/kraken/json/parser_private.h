@@ -12,15 +12,17 @@
 #include "roq/kraken/json/subscription_status.h"
 #include "roq/kraken/json/system_status.h"
 
-#include "roq/kraken/json/book.h"
-#include "roq/kraken/json/spread.h"
-#include "roq/kraken/json/trade.h"
+#include "roq/kraken/json/add_order_status.h"
+#include "roq/kraken/json/cancel_order_status.h"
+
+#include "roq/kraken/json/open_orders.h"
+#include "roq/kraken/json/own_trades.h"
 
 namespace roq {
 namespace kraken {
 namespace json {
 
-struct Parser final {
+struct ParserPrivate final {
   struct Handler {
     virtual void operator()(const Error&) = 0;
     virtual void operator()(const SystemStatus&) = 0;
@@ -28,15 +30,11 @@ struct Parser final {
     virtual void operator()(const Heartbeat&) = 0;
     virtual void operator()(const SubscriptionStatus&) = 0;
 
-    virtual void operator()(
-        const Trade& trade,
-        const std::string_view& pair) = 0;
-    virtual void operator()(
-        const Spread& spread,
-        const std::string_view& pair) = 0;
-    virtual void operator()(
-        const Book& book,
-        const std::string_view& pair) = 0;
+    virtual void operator()(const AddOrderStatus&) = 0;
+    virtual void operator()(const CancelOrderStatus&) = 0;
+
+    virtual void operator()(const OpenOrders&) = 0;
+    virtual void operator()(const OwnTrades&) = 0;
   };
 
   static bool dispatch(

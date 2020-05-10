@@ -8,17 +8,24 @@ libroq_kraken_json_la_CPPFLAGS = \
 	$(LIBCONFIG_CFLAGS) \
 	$(ROQ_CFLAGS)
 AUTOGEN_CPP = \
+	add_order_status.cpp \
 	asset_pairs.cpp \
 	asset_pairs_item.cpp \
+	assets.cpp \
+	assets_item.cpp \
 	book.cpp \
 	book_item.cpp \
+	cancel_order_status.cpp \
 	channel.cpp \
 	error.cpp \
 	event.cpp \
 	heartbeat.cpp \
+	open_orders.cpp \
+	open_orders_item.cpp \
 	open_positions.cpp \
 	order.cpp \
 	order_type.cpp \
+	own_trades.cpp \
 	own_trades_item.cpp \
 	ping.cpp \
 	pong.cpp \
@@ -37,17 +44,24 @@ AUTOGEN_CPP = \
 	trade_item.cpp \
 	update_type.cpp
 AUTOGEN_H = \
+	add_order_status.h \
 	asset_pairs.h \
 	asset_pairs_item.h \
+	assets.h \
+	assets_item.h \
 	book.h \
 	book_item.h \
+	cancel_order_status.h \
 	channel.h \
 	error.h \
 	event.h \
 	heartbeat.h \
+	open_orders.h \
+	open_orders_item.h \
 	open_positions.h \
 	order.h \
 	order_type.h \
+	own_trades.h \
 	own_trades_item.h \
 	ping.h \
 	pong.h \
@@ -69,7 +83,8 @@ CLEANFILES = $(AUTOGEN_CPP) $(AUTOGEN_H)
 BUILT_SOURCES = $(CLEANFILES) .gitignore
 libroq_kraken_json_la_SOURCES = \
 	$(AUTOGEN_CPP) \
-	parser.cpp \
+	parser_private.cpp \
+	parser_public.cpp \
 	result.cpp \
 	utils.cpp
 

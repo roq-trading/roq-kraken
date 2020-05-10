@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2020, Hans Erik Thrane */
 
-#include "roq/kraken/json/parser.h"
+#include "roq/kraken/json/parser_private.h"
 
 #include "roq/logging.h"
 
@@ -12,7 +12,7 @@ namespace roq {
 namespace kraken {
 namespace json {
 
-bool Parser::dispatch(
+bool ParserPrivate::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer) {
@@ -46,7 +46,7 @@ bool Parser::dispatch(
       root);
 }
 
-bool Parser::dispatch(
+bool ParserPrivate::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer&,
@@ -103,11 +103,17 @@ bool Parser::dispatch(
             break;
           }
           case Event::ADD_ORDER_STATUS: {
-            throw std::runtime_error("addOrderStatus not supported");
+            auto add_order_status =
+              core::json::Parser::create<AddOrderStatus>(message);
+            handler(add_order_status);
+            dispatched = true;
             break;
           }
           case Event::CANCEL_ORDER_STATUS:
-            throw std::runtime_error("cancelOrderStatus not supported");
+            auto cancel_order_status =
+              core::json::Parser::create<CancelOrderStatus>(message);
+            handler(cancel_order_status);
+            dispatched = true;
             break;
         }
         break;
@@ -119,22 +125,12 @@ bool Parser::dispatch(
 
 namespace {
 static bool dispatch2(
-    Parser::Handler& handler,
+    ParserPrivate::Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
-    int64_t channel_id,
-    Channel channel,
-    const std::string_view& pair,
-    size_t data_count) {
-  /*
-  DLOG(INFO)(
-      FMT_STRING(R"(channel_id={} channel={} pair={}, len(data)={})"),
-      channel_id,
-      channel,
-      pair,
-      data_count);
-  */
+    Channel channel) {
   bool dispatched = false;
+  /*
   core::json::Parser parser(message);
   auto root = parser.root();
   size_t offset = 0;
@@ -212,59 +208,45 @@ static bool dispatch2(
     handler(book_1, pair);
     dispatched = true;
   }
+*/
   return dispatched;
 }
 }  // namespace
 
-bool Parser::dispatch(
+bool ParserPrivate::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
     core::json::array_t& root) {
-  int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;
-  std::string_view pair;
   size_t offset = 0;
-  size_t data_count = 0;
   for (auto value : root) {
-    if (offset == 0) {
-        channel_id = std::get<int64_t>(value);
-        ++offset;
-    } else {
-      if (core::json::is_pod(value)) {
-        switch (offset) {
-          case 1: {
-            auto name = std::get<std::string_view>(value);
-            auto pos = name.find_first_of('-');
-            if (pos != name.npos)
-              name.remove_suffix(name.size() - pos);
-            channel = Channel(name);
-            DLOG_IF(FATAL, channel == Channel::UNKNOWN)(
-                FMT_STRING(R"(Unknown channel="{}")"),
-                name);
-            break;
-          }
-          case 2:
-            pair = std::get<std::string_view>(value);
-            break;
-        }
-        ++offset;
-      } else {
-        ++data_count;
+    switch (offset) {
+      case 1: {
+        auto name = std::get<std::string_view>(value);
+        // for example "book-10" --> "book"
+        auto pos = name.find_first_of('-');
+        if (pos != name.npos)
+          name.remove_suffix(name.size() - pos);
+        channel = Channel(name);
+        DLOG_IF(FATAL, channel == Channel::UNKNOWN)(
+            FMT_STRING(R"(Unknown channel="{}")"),
+            name);
+        break;
       }
+      default:
+        break;
     }
+    ++offset;
   }
-  LOG_IF(FATAL, offset != 3)(
+  LOG_IF(FATAL, offset != 2)(
       FMT_STRING(R"(message={})"),
       message);
   return dispatch2(
       handler,
       message,
       buffer,
-      channel_id,
-      channel,
-      pair,
-      data_count);
+      channel);
 }
 
 }  // namespace json

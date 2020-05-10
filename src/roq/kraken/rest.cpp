@@ -13,6 +13,7 @@
 #include "roq/kraken/json/result.h"
 #include "roq/kraken/json/utils.h"
 
+#include "roq/kraken/json/assets.h"
 #include "roq/kraken/json/asset_pairs.h"
 #include "roq/kraken/json/positions.h"
 #include "roq/kraken/json/token.h"
@@ -76,6 +77,7 @@ Rest::Rest(
         .disconnect = create_counter("disconnect"),
       },
       _profile {
+        .assets = create_profile("assets"),
         .asset_pairs = create_profile("asset_pairs"),
         .balance = create_profile("balance"),
         .open_positions = create_profile("open_positions"),
@@ -112,12 +114,51 @@ void Rest::operator()(Metrics& metrics) {
     // counter
     .write(_counter.disconnect)
     // profile
+    .write(_profile.assets)
     .write(_profile.asset_pairs)
     .write(_profile.balance)
     .write(_profile.open_positions)
     .write(_profile.get_web_sockets_token)
     // latency
     .write(_latency.ping);
+}
+
+void Rest::get_assets(
+    std::function<void(const core::web::Response&)>&& callback) {
+  constexpr auto method = core::http::Method::GET;
+  constexpr std::string_view path = "/0/public/Assets";
+  _connection.request(
+      method,
+      path,
+      std::string_view(),  // headers
+      std::string_view(),  // body
+      [this, callback](auto& response) {
+        if (response.success()) {
+          auto [status, body] = response.get();
+          if (status == core::http::Status::OK) {
+            _profile.assets(
+                [&]() {
+                  core::json::Buffer buffer(_decode_buffer);
+                  auto assets =
+                    core::json::Parser::create<json::Assets>(
+                        body,
+                        buffer);
+                  if (assets.error.empty()) {
+                    VLOG(1)(
+                        FMT_STRING(R"(assets={})"),
+                        assets);
+                    _gateway(assets);
+                  } else {
+                    LOG(WARNING)(
+                        FMT_STRING(R"(assets={})"),
+                        assets);
+                    LOG(FATAL)("Unexpected");
+                  }
+                });
+          }
+        }
+        callback(response);
+      });
 }
 
 void Rest::get_asset_pairs(

@@ -1,0 +1,8 @@
+{
+"name": "Assets",
+"type": "comp",
+"values": [
+	{ "name": "error", "type": "roq::span<std::string_view>", "required": false },
+	{ "name": "result", "type": "roq::span<AssetsItem>", "map": true, "required": false }
+]
+}

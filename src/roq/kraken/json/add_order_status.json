@@ -1,0 +1,14 @@
+{
+"name": "AddOrderStatus",
+"type": "item",
+"values": [
+	{ "name": "event", "type": "std::string_view" },
+	{ "name": "channelID", "type": "int64_t" },
+	{ "name": "channelName", "type": "std::string_view" },
+	{ "name": "reqid", "type": "int64_t" },
+	{ "name": "pair", "type": "std::string_view" },
+	{ "name": "status", "type": "std::string_view" },
+	{ "name": "subscription" },
+	{ "name": "errorMessage", "type": "std::string_view" }
+]
+}

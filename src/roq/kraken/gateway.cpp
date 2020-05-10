@@ -170,6 +170,31 @@ void Gateway::operator()(const Rest&) {
   }
 }
 
+void Gateway::download_assets() {
+  constexpr auto state = WebSocketDownload::State::ASSETS;
+  _rest.connection.get_assets(
+      [this](auto& response) {
+        try {
+          auto status = response.status();
+          switch (status) {
+            case core::http::Status::OK:
+              _web_socket_public.download.check(state);
+              break;
+            default:
+              LOG(FATAL)(
+                  FMT_STRING(
+                      R"(Unable to get assets, )"
+                      R"(status={})"),
+                  status);
+          }
+        } catch (NotConnected&) {
+          _web_socket_public.download.retry(state);
+        } catch (TimedOut&) {
+          _web_socket_public.download.retry(state);
+        }
+      });
+}
+
 void Gateway::download_asset_pairs() {
   constexpr auto state = WebSocketDownload::State::ASSET_PAIRS;
   _rest.connection.get_asset_pairs(
@@ -183,7 +208,7 @@ void Gateway::download_asset_pairs() {
             default:
               LOG(FATAL)(
                   FMT_STRING(
-                      R"(Unable to get products, )"
+                      R"(Unable to get asset pairs, )"
                       R"(status={})"),
                   status);
           }
@@ -270,6 +295,9 @@ void Gateway::download_open_positions() {
       });
 }
 
+void Gateway::operator()(const json::Assets&) {
+}
+
 void Gateway::operator()(const json::AssetPairs& asset_pairs) {
   assert(asset_pairs.error.empty());
   assert(_symbols.empty());
@@ -349,6 +377,9 @@ int32_t Gateway::download(WebSocketDownload::State state) {
     case WebSocketDownload::State::UNDEFINED:
       assert(false);
       break;
+    case WebSocketDownload::State::ASSETS:
+      download_assets();
+      return 1;
     case WebSocketDownload::State::ASSET_PAIRS:
       download_asset_pairs();
       return 1;
@@ -582,6 +613,18 @@ void Gateway::subscribe_private() {
   _web_socket_private.connection.subscribe(
       "openOrders",
       _token);
+}
+
+void Gateway::operator()(const json::AddOrderStatus& add_order_status) {
+}
+
+void Gateway::operator()(const json::CancelOrderStatus& cancel_order_status) {
+}
+
+void Gateway::operator()(const json::OpenOrders& open_orders) {
+}
+
+void Gateway::operator()(const json::OwnTrades& own_trades) {
 }
 
 void Gateway::update(GatewayStatus gateway_status) {

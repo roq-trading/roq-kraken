@@ -2,6 +2,7 @@
 "name": "PublicState",
 "type": "enum",
 "values": [
+	{ "name": "assets" },
 	{ "name": "asset_pairs" },
 	{ "name": "balance" },
 	{ "name": "open_positions" },

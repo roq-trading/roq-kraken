@@ -1,6 +1,6 @@
 {
 "name": "OwnTradesItem",
-"type": "item",
+"type": "item2",
 "values": [
 	{ "name": "ordertxid", "type": "std::string_view" },
 	{ "name": "postxid", "type": "std::string_view" },

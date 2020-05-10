@@ -26,9 +26,16 @@
 #include "roq/kraken/private_state.h"
 #include "roq/kraken/public_state.h"
 
+#include "roq/kraken/json/assets.h"
 #include "roq/kraken/json/asset_pairs.h"
 #include "roq/kraken/json/positions.h"
 #include "roq/kraken/json/token.h"
+
+#include "roq/kraken/json/add_order_status.h"
+#include "roq/kraken/json/cancel_order_status.h"
+
+#include "roq/kraken/json/open_orders.h"
+#include "roq/kraken/json/own_trades.h"
 
 namespace roq {
 namespace kraken {
@@ -62,6 +69,7 @@ class Gateway final : public server::Handler {
   // rest
   void operator()(const Rest&);
 
+  void operator()(const json::Assets&);
   void operator()(const json::AssetPairs&);
   void operator()(const json::Positions&);
   void operator()(const json::Token&);
@@ -82,6 +90,12 @@ class Gateway final : public server::Handler {
   // web socket (private)
   void operator()(const WebSocketPrivate&);
 
+  void operator()(const json::AddOrderStatus&);
+  void operator()(const json::CancelOrderStatus&);
+
+  void operator()(const json::OpenOrders&);
+  void operator()(const json::OwnTrades&);
+
  private:
   using WebSocketDownload = server::Download<PublicState>;
 
@@ -95,6 +109,7 @@ class Gateway final : public server::Handler {
  private:
   void update(GatewayStatus gateway_status);
 
+  void download_assets();
   void download_asset_pairs();
 
   void download_web_sockets_token();

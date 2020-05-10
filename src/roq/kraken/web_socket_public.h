@@ -22,7 +22,7 @@
 #include "roq/kraken/config.h"
 #include "roq/kraken/random.h"
 
-#include "roq/kraken/json/parser.h"
+#include "roq/kraken/json/parser_public.h"
 
 namespace roq {
 namespace kraken {
@@ -31,7 +31,7 @@ class Gateway;
 
 class WebSocketPublic final
     : public core::web::Socket::Handler,
-      public json::Parser::Handler {
+      public json::ParserPublic::Handler {
  public:
   WebSocketPublic(
       Gateway& gateway,

@@ -11,8 +11,6 @@
 #include "roq/kraken/gateway.h"
 #include "roq/kraken/options.h"
 
-#include "roq/kraken/json/parser.h"
-
 namespace roq {
 namespace kraken {
 
@@ -184,7 +182,7 @@ void WebSocketPublic::parse(const std::string_view& message) {
   _profile.parse(
       [&]() {
         core::json::Buffer buffer(_decode_buffer);
-        auto result = json::Parser::dispatch(
+        auto result = json::ParserPublic::dispatch(
             *this,
             message,
             buffer);

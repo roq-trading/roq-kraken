@@ -11,8 +11,6 @@
 #include "roq/kraken/gateway.h"
 #include "roq/kraken/options.h"
 
-#include "roq/kraken/json/parser.h"
-
 namespace roq {
 namespace kraken {
 
@@ -163,7 +161,7 @@ void WebSocketPrivate::parse(const std::string_view& message) {
   _profile.parse(
       [&]() {
         core::json::Buffer buffer(_decode_buffer);
-        auto result = json::Parser::dispatch(
+        auto result = json::ParserPrivate::dispatch(
             *this,
             message,
             buffer);
@@ -202,21 +200,27 @@ void WebSocketPrivate::operator()(
 }
 
 void WebSocketPrivate::operator()(
-    const json::Trade& trade,
-    const std::string_view& pair) {
-  LOG(FATAL)("Unexpected");
+    const json::AddOrderStatus& add_order_status) {
+  LOG(INFO)(
+      FMT_STRING("add_order_status={}"),
+      add_order_status);
+  _gateway(add_order_status);
 }
 
 void WebSocketPrivate::operator()(
-    const json::Spread& spread,
-    const std::string_view& pair) {
-  LOG(FATAL)("Unexpected");
+    const json::CancelOrderStatus& cancel_order_status) {
+  LOG(INFO)(
+      FMT_STRING("cancel_order_status={}"),
+      cancel_order_status);
+  _gateway(cancel_order_status);
 }
 
-void WebSocketPrivate::operator()(
-    const json::Book& book,
-    const std::string_view& pair) {
-  LOG(FATAL)("Unexpected");
+void WebSocketPrivate::operator()(const json::OpenOrders& open_orders) {
+  _gateway(open_orders);
+}
+
+void WebSocketPrivate::operator()(const json::OwnTrades& own_trades) {
+  _gateway(own_trades);
 }
 
 }  // namespace kraken

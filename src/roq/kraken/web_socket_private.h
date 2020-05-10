@@ -22,7 +22,7 @@
 #include "roq/kraken/config.h"
 #include "roq/kraken/random.h"
 
-#include "roq/kraken/json/parser.h"
+#include "roq/kraken/json/parser_private.h"
 
 namespace roq {
 namespace kraken {
@@ -31,7 +31,7 @@ class Gateway;
 
 class WebSocketPrivate final
     : public core::web::Socket::Handler,
-      public json::Parser::Handler {
+      public json::ParserPrivate::Handler {
  public:
   WebSocketPrivate(
       Gateway& gateway,
@@ -75,15 +75,11 @@ class WebSocketPrivate final
   void operator()(const json::Heartbeat&) override;
   void operator()(const json::SubscriptionStatus&) override;
 
-  void operator()(
-      const json::Trade& trade,
-      const std::string_view& pair) override;
-  void operator()(
-      const json::Spread& spread,
-      const std::string_view& pair) override;
-  void operator()(
-      const json::Book& book,
-      const std::string_view& pair) override;
+  void operator()(const json::AddOrderStatus&) override;
+  void operator()(const json::CancelOrderStatus&) override;
+
+  void operator()(const json::OpenOrders&) override;
+  void operator()(const json::OwnTrades&) override;
 
  protected:
   void reset();

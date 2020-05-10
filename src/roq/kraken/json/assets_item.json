@@ -1,0 +1,10 @@
+{
+"name": "AssetsItem",
+"type": "item2",
+"values": [
+	{ "name": "altname", "type": "std::string_view" },
+	{ "name": "aclass", "type": "std::string_view" },
+	{ "name": "decimals", "type": "uint32_t" },
+	{ "name": "display_decimals", "type": "uint32_t" }
+]
+}

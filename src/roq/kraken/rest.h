@@ -49,6 +49,9 @@ class Rest final
 
   void operator()(Metrics& metrics);
 
+  void get_assets(
+      std::function<void(const core::web::Response&)>&& callback);
+
   void get_asset_pairs(
       std::function<void(const core::web::Response&)>&& callback);
 
@@ -81,6 +84,7 @@ class Rest final
   } _counter;
   struct {
     core::metrics::Profile
+      assets,
       asset_pairs,
       balance,
       open_positions,

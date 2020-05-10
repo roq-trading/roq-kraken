@@ -7,13 +7,13 @@
 
 #include "roq/core/market/bad_state.h"
 
-#include "roq/kraken/json/parser.h"
+#include "roq/kraken/json/parser_public.h"
 
 using namespace roq;  // NOLINT
 using namespace roq::kraken;  // NOLINT
 
 namespace {
-struct Handler : public json::Parser::Handler {
+struct Handler : public json::ParserPublic::Handler {
  protected:
   void operator()(const json::Error&) override {
   }
@@ -79,7 +79,7 @@ TEST(json_book, parse_test_snapshot) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  json::Parser::dispatch(
+  json::ParserPublic::dispatch(
       handler,
       message,
       buffer);
@@ -100,7 +100,7 @@ TEST(json_book, parse_test_update_bid_1) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  json::Parser::dispatch(
+  json::ParserPublic::dispatch(
       handler,
       message,
       buffer);
@@ -121,7 +121,7 @@ TEST(json_book, parse_test_update_ask_1) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  json::Parser::dispatch(
+  json::ParserPublic::dispatch(
       handler,
       message,
       buffer);
@@ -224,7 +224,7 @@ TEST(json_book, parse_test_update_complex) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  json::Parser::dispatch(
+  json::ParserPublic::dispatch(
       handler,
       message,
       buffer);
@@ -301,7 +301,7 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   EXPECT_THROW(
-      json::Parser::dispatch(
+      json::ParserPublic::dispatch(
           handler,
           message,
           buffer),
