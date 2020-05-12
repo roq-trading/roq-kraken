@@ -4,6 +4,8 @@
 
 #include <string_view>
 
+#include "roq/core/promise.h"
+
 #include "roq/core/utils/buffer.h"
 
 #include "roq/core/metrics/counter.h"
@@ -49,20 +51,8 @@ class Rest final
 
   void operator()(Metrics& metrics);
 
-  void get_assets(
-      std::function<void(const core::web::Response&)>&& callback);
-
-  void get_asset_pairs(
-      std::function<void(const core::web::Response&)>&& callback);
-
-  void get_balance(
-      std::function<void(const core::web::Response&)>&& callback);
-
-  void get_open_positions(
-      std::function<void(const core::web::Response&)>&& callback);
-
-  void get_web_sockets_token(
-      std::function<void(const core::web::Response&)>&& callback);
+  template <typename T>
+  void get(std::function<void(const core::Promise<T>&)>&& callback);
 
  protected:
   void operator()(const core::web::Client::Connected&) override;

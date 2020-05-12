@@ -172,127 +172,69 @@ void Gateway::operator()(const Rest&) {
 
 void Gateway::download_assets() {
   constexpr auto state = WebSocketDownload::State::ASSETS;
-  _rest.connection.get_assets(
-      [this](auto& response) {
-        try {
-          auto status = response.status();
-          switch (status) {
-            case core::http::Status::OK:
-              _web_socket_public.download.check(state);
-              break;
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(
-                      R"(Unable to get assets, )"
-                      R"(status={})"),
-                  status);
-          }
-        } catch (NotConnected&) {
-          _web_socket_public.download.retry(state);
-        } catch (TimedOut&) {
-          _web_socket_public.download.retry(state);
-        }
-      });
+  _rest.connection.get<json::Assets>(
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      _web_socket_public.download.check(state);
+    } catch (NetworkError&) {
+      _web_socket_public.download.retry(state);
+    }
+  });
 }
 
 void Gateway::download_asset_pairs() {
   constexpr auto state = WebSocketDownload::State::ASSET_PAIRS;
-  _rest.connection.get_asset_pairs(
-      [this](auto& response) {
-        try {
-          auto status = response.status();
-          switch (status) {
-            case core::http::Status::OK:
-              _web_socket_public.download.check(state);
-              break;
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(
-                      R"(Unable to get asset pairs, )"
-                      R"(status={})"),
-                  status);
-          }
-        } catch (NotConnected&) {
-          _web_socket_public.download.retry(state);
-        } catch (TimedOut&) {
-          _web_socket_public.download.retry(state);
-        }
-      });
+  _rest.connection.get<json::AssetPairs>(
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      _web_socket_public.download.check(state);
+    } catch (NetworkError&) {
+      _web_socket_public.download.retry(state);
+    }
+  });
 }
 
 void Gateway::download_web_sockets_token() {
   constexpr auto state = WebSocketPrivateDownload::State::WEB_SOCKETS_TOKEN;
-  _rest.connection.get_web_sockets_token(
-      [this](auto& response) {
-        try {
-          auto status = response.status();
-          switch (status) {
-            case core::http::Status::OK:
-              _web_socket_private.download.check(state);
-              break;
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(
-                      R"(Unable to get web sockets token, )"
-                      R"(status={})"),
-                  status);
-          }
-        } catch (NotConnected&) {
-          _web_socket_private.download.retry(state);
-        } catch (TimedOut&) {
-          _web_socket_private.download.retry(state);
-        }
-      });
+  _rest.connection.get<json::Token>(
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      _web_socket_private.download.check(state);
+    } catch (NetworkError&) {
+      _web_socket_private.download.retry(state);
+    }
+  });
 }
 
 void Gateway::download_balance() {
   constexpr auto state = WebSocketDownload::State::BALANCE;
-  _rest.connection.get_balance(
-      [this](auto& response) {
-        try {
-          auto status = response.status();
-          switch (status) {
-            case core::http::Status::OK:
-              _web_socket_public.download.check(state);
-              break;
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(
-                      R"(Unable to get balance, )"
-                      R"(status={})"),
-                  status);
-          }
-        } catch (NotConnected&) {
-          _web_socket_public.download.retry(state);
-        } catch (TimedOut&) {
-          _web_socket_public.download.retry(state);
-        }
-      });
+  /*
+  _rest.connection.get<json::Balance>(
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      _web_socket_public.download.check(state);
+    } catch (NetworkError&) {
+      _web_socket_public.download.retry(state);
+    }
+  });
+  */
 }
 
 void Gateway::download_open_positions() {
   constexpr auto state = WebSocketDownload::State::OPEN_POSITIONS;
-  _rest.connection.get_open_positions(
-      [this](auto& response) {
-        try {
-          auto status = response.status();
-          switch (status) {
-            case core::http::Status::OK:
-              _web_socket_public.download.check(state);
-              break;
-            default:
-              LOG(FATAL)(
-                  FMT_STRING(
-                      R"(Unable to get open positions, )"
-                      R"(status={})"),
-                  status);
-          }
-        } catch (NotConnected&) {
-          _web_socket_public.download.retry(state);
-        } catch (TimedOut&) {
-          _web_socket_public.download.retry(state);
-        }
-      });
+  _rest.connection.get<json::Positions>(
+      [this](auto& promise) {
+    try {
+      (*this)(promise.get());
+      _web_socket_public.download.check(state);
+    } catch (NetworkError&) {
+      _web_socket_public.download.retry(state);
+    }
+  });
 }
 
 void Gateway::operator()(const json::Assets&) {
@@ -385,7 +327,8 @@ int32_t Gateway::download(WebSocketDownload::State state) {
       return 1;
     case WebSocketDownload::State::BALANCE:
       download_balance();
-      return 1;
+      // return 1;
+      return 0;
     case WebSocketDownload::State::OPEN_POSITIONS:
       download_open_positions();
       return 1;

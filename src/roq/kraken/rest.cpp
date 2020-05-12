@@ -123,8 +123,9 @@ void Rest::operator()(Metrics& metrics) {
     .write(_latency.ping);
 }
 
-void Rest::get_assets(
-    std::function<void(const core::web::Response&)>&& callback) {
+template <>
+void Rest::get(
+    std::function<void(const core::Promise<json::Assets>&)>&& callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/0/public/Assets";
   _connection.request(
@@ -133,36 +134,42 @@ void Rest::get_assets(
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {
-        if (response.success()) {
-          auto [status, body] = response.get();
-          if (status == core::http::Status::OK) {
-            _profile.assets(
-                [&]() {
-                  core::json::Buffer buffer(_decode_buffer);
-                  auto assets =
-                    core::json::Parser::create<json::Assets>(
-                        body,
-                        buffer);
-                  if (assets.error.empty()) {
-                    VLOG(1)(
-                        FMT_STRING(R"(assets={})"),
-                        assets);
-                    _gateway(assets);
-                  } else {
-                    LOG(WARNING)(
-                        FMT_STRING(R"(assets={})"),
-                        assets);
-                    LOG(FATAL)("Unexpected");
-                  }
-                });
-          }
+    _profile.assets(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(_decode_buffer);
+        auto assets = core::json::Parser::create<json::Assets>(
+            response.body(),
+            buffer);
+        if (assets.error.empty()) {
+          VLOG(1)(
+              FMT_STRING(R"(assets={})"),
+              assets);
+          core::Promise<json::Assets> promise(assets);
+          callback(promise);
+        } else {
+          LOG(WARNING)(
+              FMT_STRING(R"(assets={})"),
+              assets);
+          LOG(FATAL)("Unexpected");
         }
-        callback(response);
-      });
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::Assets> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
-void Rest::get_asset_pairs(
-    std::function<void(const core::web::Response&)>&& callback) {
+template <>
+void Rest::get(
+    std::function<void(const core::Promise<json::AssetPairs>&)>&& callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/0/public/AssetPairs";
   _connection.request(
@@ -171,36 +178,44 @@ void Rest::get_asset_pairs(
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto& response) {
-        if (response.success()) {
-          auto [status, body] = response.get();
-          if (status == core::http::Status::OK) {
-            _profile.asset_pairs(
-                [&]() {
-                  core::json::Buffer buffer(_decode_buffer);
-                  auto asset_pairs =
-                    core::json::Parser::create<json::AssetPairs>(
-                        body,
-                        buffer);
-                  if (asset_pairs.error.empty()) {
-                    VLOG(1)(
-                        FMT_STRING(R"(asset_pairs={})"),
-                        asset_pairs);
-                    _gateway(asset_pairs);
-                  } else {
-                    LOG(WARNING)(
-                        FMT_STRING(R"(asset_pairs={})"),
-                        asset_pairs);
-                    LOG(FATAL)("Unexpected");
-                  }
-                });
-          }
+    _profile.asset_pairs(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(_decode_buffer);
+        auto asset_pairs =
+          core::json::Parser::create<json::AssetPairs>(
+              response.body(),
+              buffer);
+        if (asset_pairs.error.empty()) {
+          VLOG(1)(
+              FMT_STRING(R"(asset_pairs={})"),
+              asset_pairs);
+          core::Promise<json::AssetPairs> promise(asset_pairs);
+          callback(promise);
+        } else {
+          LOG(WARNING)(
+              FMT_STRING(R"(asset_pairs={})"),
+              asset_pairs);
+          LOG(FATAL)("Unexpected");
         }
-        callback(response);
-      });
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::AssetPairs> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
-void Rest::get_balance(
-    std::function<void(const core::web::Response&)>&& callback) {
+/*
+template <>
+void Rest::get(
+    std::function<void(const core::Promise<json::Balance>&)>&& callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/Balance";
   auto body = _random.create_body();
@@ -214,38 +229,43 @@ void Rest::get_balance(
       headers,
       body,
       [this, callback](auto& response) {
-        if (response.success()) {
-          auto [status, body] = response.get();
-          if (status == core::http::Status::OK) {
-            _profile.balance(
-                [&]() {
-                  /*
-                  core::json::Buffer buffer(_decode_buffer);
-                  auto balance =
-                    core::json::Parser::create<json::Balance>(
-                        body,
-                        buffer);
-                  if (balance.error.empty()) {
-                    VLOG(1)(
-                        FMT_STRING(R"(balance={})"),
-                        balance);
-                    _gateway(balance);
-                  } else {
-                    LOG(WARNING)(
-                        FMT_STRING(R"(balance={})"),
-                        balance);
-                    LOG(FATAL)("Unexpected");
-                  }
-                  */
-                });
-          }
+    _profile.balance(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(_decode_buffer);
+        auto balance =
+          core::json::Parser::create<json::Balance>(
+              response.body(),
+              buffer);
+        if (balance.error.empty()) {
+          VLOG(1)(
+              FMT_STRING(R"(balance={})"),
+              balance);
+          _gateway(balance);
+        } else {
+          LOG(WARNING)(
+              FMT_STRING(R"(balance={})"),
+              balance);
+          LOG(FATAL)("Unexpected");
         }
-        callback(response);
-      });
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::Products> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
+*/
 
-void Rest::get_open_positions(
-    std::function<void(const core::web::Response&)>&& callback) {
+template <>
+void Rest::get(
+    std::function<void(const core::Promise<json::Positions>&)>&& callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/OpenPositions";
   auto body = _random.create_body();
@@ -259,36 +279,43 @@ void Rest::get_open_positions(
       headers,
       body,
       [this, callback](auto& response) {
-        if (response.success()) {
-          auto [status, body] = response.get();
-          if (status == core::http::Status::OK) {
-            _profile.open_positions(
-                [&]() {
-                  core::json::Buffer buffer(_decode_buffer);
-                  auto positions =
-                    core::json::Parser::create<json::Positions>(
-                        body,
-                        buffer);
-                  if (positions.error.empty()) {
-                    VLOG(1)(
-                        FMT_STRING(R"(positions={})"),
-                        positions);
-                    _gateway(positions);
-                  } else {
-                    LOG(WARNING)(
-                        FMT_STRING(R"(positions={})"),
-                        positions);
-                    LOG(FATAL)("Unexpected");
-                  }
-                });
-          }
+    _profile.open_positions(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(_decode_buffer);
+        auto positions =
+          core::json::Parser::create<json::Positions>(
+              response.body(),
+              buffer);
+        if (positions.error.empty()) {
+          VLOG(1)(
+              FMT_STRING(R"(positions={})"),
+              positions);
+          core::Promise<json::Positions> promise(positions);
+          callback(promise);
+        } else {
+          LOG(WARNING)(
+              FMT_STRING(R"(positions={})"),
+              positions);
+          LOG(FATAL)("Unexpected");
         }
-        callback(response);
-      });
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::Positions> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
-void Rest::get_web_sockets_token(
-    std::function<void(const core::web::Response&)>&& callback) {
+template <>
+void Rest::get(
+    std::function<void(const core::Promise<json::Token>&)>&& callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/GetWebSocketsToken";
   auto body = _random.create_body();
@@ -302,32 +329,38 @@ void Rest::get_web_sockets_token(
       headers,
       body,
       [this, callback](auto& response) {
-        if (response.success()) {
-          auto [status, body] = response.get();
-          if (status == core::http::Status::OK) {
-            _profile.get_web_sockets_token(
-                [&]() {
-                  core::json::Buffer buffer(_decode_buffer);
-                  json::Result::dispatch<json::Token>(
-                      body,
-                      buffer,
-                      [](const roq::span<std::string_view>& e) {
-                        LOG(WARNING)(
-                            FMT_STRING(R"(error=[{}])"),
-                            fmt::join(e, ","));
-                        LOG(FATAL)("Unexpected");
-                      },
-                      [&](const json::Token& token) {
-                        VLOG(1)(
-                            FMT_STRING(R"(token={})"),
-                            token);
-                        _gateway(token);
-                      });
-                });
-          }
-        }
-        callback(response);
-      });
+    _profile.get_web_sockets_token(
+        [&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(_decode_buffer);
+        json::Result::dispatch<json::Token>(
+            response.body(),
+            buffer,
+            [](const roq::span<std::string_view>& e) {
+              LOG(WARNING)(
+                  FMT_STRING(R"(error=[{}])"),
+                  fmt::join(e, ","));
+              LOG(FATAL)("Unexpected");
+            },
+            [&](const json::Token& token) {
+              VLOG(1)(
+                  FMT_STRING(R"(token={})"),
+                  token);
+              core::Promise<json::Token> promise(token);
+              callback(promise);
+            });
+      } catch (NetworkError& e) {
+        LOG(WARNING)(
+            FMT_STRING(R"(Exception type={}, what="{}")"),
+            typeid(e).name(),
+            e.what());
+        close();
+        core::Promise<json::Token> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 void Rest::operator()(const core::web::Client::Connected&) {
