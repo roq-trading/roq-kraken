@@ -27,14 +27,20 @@
 namespace roq {
 namespace kraken {
 
-class Gateway;
-
 class WebSocketPrivate final
     : public core::web::Socket::Handler,
       public json::ParserPrivate::Handler {
  public:
+  struct Handler {
+    virtual void operator()(const WebSocketPrivate&) = 0;
+    virtual void operator()(const json::AddOrderStatus&) = 0;
+    virtual void operator()(const json::CancelOrderStatus&) = 0;
+    virtual void operator()(const json::OpenOrders&) = 0;
+    virtual void operator()(const json::OwnTrades&) = 0;
+  };
+
   WebSocketPrivate(
-      Gateway& gateway,
+      Handler& handler,
       const Config& config,
       Random& random,
       core::event::Base& base,
@@ -59,6 +65,8 @@ class WebSocketPrivate final
       const std::string_view& token);
 
  protected:
+  // core::web::Socket::Handler
+
   void operator()(const core::web::Socket::Connected&) override;
   void operator()(const core::web::Socket::Disconnected&) override;
   void operator()(const core::web::Socket::Ready&) override;
@@ -66,9 +74,8 @@ class WebSocketPrivate final
   void operator()(const core::web::Socket::Latency&) override;
   void operator()(const core::web::Socket::Text&) override;
 
-  void parse(const std::string_view& message);
+  // json::ParserPrivate::Handler
 
- public:
   void operator()(const json::Error&) override;
   void operator()(const json::SystemStatus&) override;
   void operator()(const json::Pong&) override;
@@ -84,8 +91,10 @@ class WebSocketPrivate final
  protected:
   void reset();
 
+  void parse(const std::string_view& message);
+
  private:
-  Gateway& _gateway;
+  Handler& _handler;
   // config
   const std::string _access_key;
   // authentication

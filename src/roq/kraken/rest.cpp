@@ -7,7 +7,6 @@
 
 #include "roq/core/json/parser.h"
 
-#include "roq/kraken/gateway.h"
 #include "roq/kraken/options.h"
 
 #include "roq/kraken/json/result.h"
@@ -50,13 +49,13 @@ static auto create_latency(
 }  // namespace
 
 Rest::Rest(
-    Gateway& gateway,
+    Handler& handler,
     const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
     core::ssl::Context& ssl_context)
-    : _gateway(gateway),
+    : _handler(handler),
       _random(random),
       _connection(
           *this,
@@ -242,7 +241,7 @@ void Rest::get(
           VLOG(1)(
               FMT_STRING(R"(balance={})"),
               balance);
-          _gateway(balance);
+          _handler(balance);
         } else {
           LOG(WARNING)(
               FMT_STRING(R"(balance={})"),
@@ -364,12 +363,12 @@ void Rest::get(
 }
 
 void Rest::operator()(const core::web::Client::Connected&) {
-  _gateway(*this);
+  _handler(*this);
 }
 
 void Rest::operator()(const core::web::Client::Disconnected&) {
   ++_counter.disconnect;
-  _gateway(*this);
+  _handler(*this);
 }
 
 void Rest::operator()(const core::web::Client::Latency& latency) {

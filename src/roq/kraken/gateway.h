@@ -26,25 +26,26 @@
 #include "roq/kraken/private_state.h"
 #include "roq/kraken/public_state.h"
 
-#include "roq/kraken/json/assets.h"
 #include "roq/kraken/json/asset_pairs.h"
+#include "roq/kraken/json/assets.h"
 #include "roq/kraken/json/positions.h"
 #include "roq/kraken/json/token.h"
-
-#include "roq/kraken/json/add_order_status.h"
-#include "roq/kraken/json/cancel_order_status.h"
-
-#include "roq/kraken/json/open_orders.h"
-#include "roq/kraken/json/own_trades.h"
 
 namespace roq {
 namespace kraken {
 
-class Gateway final : public server::Handler {
+class Gateway final
+    : public server::Handler,
+      public Rest::Handler,
+      public WebSocketPublic::Handler,
+      public WebSocketPrivate::Handler {
  public:
   Gateway(
       server::Dispatcher& dispatcher,
       const Config& config);
+
+ protected:
+  // server::Handler
 
   void operator()(const StartEvent&) override;
   void operator()(const StopEvent&) override;
@@ -66,47 +67,48 @@ class Gateway final : public server::Handler {
 
   void operator()(Metrics& metrics) override;
 
-  // rest
-  void operator()(const Rest&);
+  // Rest::Handler
 
+  void operator()(const Rest&) override;
+
+  // WebSocketPublic::Handler
+
+  void operator()(const WebSocketPublic&) override;
+
+  void operator()(
+      const json::Trade& trade,
+      const std::string_view& pair) override;
+  void operator()(
+      const json::Spread& spread,
+      const std::string_view& pair) override;
+  void operator()(
+      const json::Book& book,
+      const std::string_view& pair) override;
+
+  // WebSocketPrivate::Handler
+
+  void operator()(const WebSocketPrivate&) override;
+
+  void operator()(const json::AddOrderStatus&) override;
+  void operator()(const json::CancelOrderStatus&) override;
+
+  void operator()(const json::OpenOrders&) override;
+  void operator()(const json::OwnTrades&) override;
+
+ private:
   void operator()(const json::Assets&);
   void operator()(const json::AssetPairs&);
   void operator()(const json::Positions&);
   void operator()(const json::Token&);
 
-  // web socket (public)
-  void operator()(const WebSocketPublic&);
-
-  void operator()(
-      const json::Trade& trade,
-      const std::string_view& pair);
-  void operator()(
-      const json::Spread& spread,
-      const std::string_view& pair);
-  void operator()(
-      const json::Book& book,
-      const std::string_view& pair);
-
-  // web socket (private)
-  void operator()(const WebSocketPrivate&);
-
-  void operator()(const json::AddOrderStatus&);
-  void operator()(const json::CancelOrderStatus&);
-
-  void operator()(const json::OpenOrders&);
-  void operator()(const json::OwnTrades&);
-
- private:
   using WebSocketDownload = server::Download<PublicState>;
 
   int32_t download(WebSocketDownload::State state);
 
- private:
   using WebSocketPrivateDownload = server::Download<PrivateState>;
 
   int32_t download(WebSocketPrivateDownload::State state);
 
- private:
   void update(GatewayStatus gateway_status);
 
   void download_assets();

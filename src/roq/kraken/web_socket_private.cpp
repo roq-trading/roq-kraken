@@ -8,7 +8,6 @@
 
 #include "roq/core/clock.h"
 
-#include "roq/kraken/gateway.h"
 #include "roq/kraken/options.h"
 
 namespace roq {
@@ -43,13 +42,13 @@ static auto create_latency(
 }  // namespace
 
 WebSocketPrivate::WebSocketPrivate(
-    Gateway& gateway,
+    Handler& handler,
     const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
     core::ssl::Context& ssl_context)
-    : _gateway(gateway),
+    : _handler(handler),
       _access_key(config.get_access_key()),
       _random(random),
       _connection(
@@ -136,12 +135,12 @@ void WebSocketPrivate::operator()(const core::web::Socket::Connected&) {
 
 void WebSocketPrivate::operator()(const core::web::Socket::Disconnected&) {
   ++_counter.disconnect;
-  _gateway(*this);
+  _handler(*this);
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Ready&) {
   LOG(INFO)("Ready");
-  _gateway(*this);
+  _handler(*this);
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Close&) {
@@ -204,7 +203,7 @@ void WebSocketPrivate::operator()(
   LOG(INFO)(
       FMT_STRING("add_order_status={}"),
       add_order_status);
-  _gateway(add_order_status);
+  _handler(add_order_status);
 }
 
 void WebSocketPrivate::operator()(
@@ -212,15 +211,15 @@ void WebSocketPrivate::operator()(
   LOG(INFO)(
       FMT_STRING("cancel_order_status={}"),
       cancel_order_status);
-  _gateway(cancel_order_status);
+  _handler(cancel_order_status);
 }
 
 void WebSocketPrivate::operator()(const json::OpenOrders& open_orders) {
-  _gateway(open_orders);
+  _handler(open_orders);
 }
 
 void WebSocketPrivate::operator()(const json::OwnTrades& own_trades) {
-  _gateway(own_trades);
+  _handler(own_trades);
 }
 
 }  // namespace kraken

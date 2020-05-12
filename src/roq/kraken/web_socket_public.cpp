@@ -8,7 +8,6 @@
 
 #include "roq/core/clock.h"
 
-#include "roq/kraken/gateway.h"
 #include "roq/kraken/options.h"
 
 namespace roq {
@@ -43,13 +42,13 @@ static auto create_latency(
 }  // namespace
 
 WebSocketPublic::WebSocketPublic(
-    Gateway& gateway,
+    Handler& handler,
     const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
     core::ssl::Context& ssl_context)
-    : _gateway(gateway),
+    : _handler(handler),
       _access_key(config.get_access_key()),
       _random(random),
       _connection(
@@ -157,12 +156,12 @@ void WebSocketPublic::operator()(const core::web::Socket::Connected&) {
 
 void WebSocketPublic::operator()(const core::web::Socket::Disconnected&) {
   ++_counter.disconnect;
-  _gateway(*this);
+  _handler(*this);
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Ready&) {
   LOG(INFO)("Ready");
-  _gateway(*this);
+  _handler(*this);
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Close&) {
@@ -227,7 +226,7 @@ void WebSocketPublic::operator()(
       FMT_STRING(R"(trade={}, pair="{}")"),
       trade,
       pair);
-  _gateway(trade, pair);
+  _handler(trade, pair);
 }
 
 void WebSocketPublic::operator()(
@@ -237,7 +236,7 @@ void WebSocketPublic::operator()(
       FMT_STRING(R"(spread={}, pair="{}")"),
       spread,
       pair);
-  _gateway(spread, pair);
+  _handler(spread, pair);
 }
 
 void WebSocketPublic::operator()(
@@ -247,7 +246,7 @@ void WebSocketPublic::operator()(
       FMT_STRING(R"(book={}, pair="{}")"),
       book,
       pair);
-  _gateway(book, pair);
+  _handler(book, pair);
 }
 
 }  // namespace kraken

@@ -25,13 +25,15 @@
 namespace roq {
 namespace kraken {
 
-class Gateway;
-
 class Rest final
     : public core::web::Client::Handler {
  public:
+  struct Handler {
+    virtual void operator()(const Rest&) = 0;
+  };
+
   Rest(
-      Gateway& gateway,
+      Handler& handler,
       const Config& config,
       Random& random,
       core::event::Base& base,
@@ -60,7 +62,7 @@ class Rest final
   void operator()(const core::web::Client::Latency&) override;
 
  private:
-  Gateway& _gateway;
+  Handler& _handler;
   // authentication
   Random& _random;
   // connection

@@ -27,14 +27,25 @@
 namespace roq {
 namespace kraken {
 
-class Gateway;
-
 class WebSocketPublic final
     : public core::web::Socket::Handler,
       public json::ParserPublic::Handler {
  public:
+  struct Handler {
+    virtual void operator()(const WebSocketPublic&) = 0;
+    virtual void operator()(
+        const json::Trade& trade,
+        const std::string_view& pair) = 0;
+    virtual void operator()(
+        const json::Spread& spread,
+        const std::string_view& pair) = 0;
+    virtual void operator()(
+        const json::Book& book,
+        const std::string_view& pair) = 0;
+  };
+
   WebSocketPublic(
-      Gateway& gateway,
+      Handler& handler,
       const Config& config,
       Random& random,
       core::event::Base& base,
@@ -60,6 +71,8 @@ class WebSocketPublic final
       const roq::span<T>& pairs);
 
  protected:
+  // core::web::Socket::Handler
+
   void operator()(const core::web::Socket::Connected&) override;
   void operator()(const core::web::Socket::Disconnected&) override;
   void operator()(const core::web::Socket::Ready&) override;
@@ -67,9 +80,8 @@ class WebSocketPublic final
   void operator()(const core::web::Socket::Latency&) override;
   void operator()(const core::web::Socket::Text&) override;
 
-  void parse(const std::string_view& message);
+  // json::ParserPublic::Handler
 
- public:
   void operator()(const json::Error&) override;
   void operator()(const json::SystemStatus&) override;
   void operator()(const json::Pong&) override;
@@ -86,11 +98,13 @@ class WebSocketPublic final
       const json::Book& book,
       const std::string_view& pair) override;
 
- protected:
+ private:
+  void parse(const std::string_view& message);
+
   void reset();
 
  private:
-  Gateway& _gateway;
+  Handler& _handler;
   // config
   const std::string _access_key;
   // authentication
