@@ -97,7 +97,7 @@ Gateway::Gateway(
       },
       _bid(FLAGS_cache_mbp_max_depth),
       _ask(FLAGS_cache_mbp_max_depth),
-      _trade(FLAGS_max_trades) {
+      _trade(FLAGS_cache_trades_max_depth) {
 }
 
 void Gateway::operator()(const StartEvent& event) {

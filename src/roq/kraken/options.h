@@ -4,8 +4,6 @@
 
 #include <gflags/gflags.h>
 
-DECLARE_string(listen);
-
 DECLARE_string(config_file);
 
 DECLARE_string(exchange);
@@ -27,7 +25,6 @@ DECLARE_uint32(ws_private_ping_freq_secs);
 
 // XXX review
 
-DECLARE_uint32(max_trades);
 DECLARE_uint32(encode_buffer_size);
 DECLARE_uint32(decode_buffer_size);
 
@@ -35,3 +32,4 @@ DECLARE_uint32(decode_buffer_size);
 
 DECLARE_string(name);
 DECLARE_uint32(cache_mbp_max_depth);
+DECLARE_uint32(cache_trades_max_depth);

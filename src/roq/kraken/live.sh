@@ -24,9 +24,9 @@ WS_PRIVATE_URI="wss://${ENV}ws-auth.$URI"
 $PREFIX ./roq-kraken \
 	--name "$NAME" \
 	--config-file "$CONFIG_FILE" \
+	--client-listen-address "$CWD/$NAME.sock" \
+	--metrics-listen-address "$CWD/${NAME}_metrics.sock" \
 	--rest-uri "$REST_URI" \
 	--ws-public-uri "$WS_PUBLIC_URI" \
 	--ws-private-uri "$WS_PRIVATE_URI" \
-	--listen "$CWD/$NAME.sock" \
-	--metrics "$CWD/${NAME}_metrics.sock" \
 	$@

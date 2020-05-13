@@ -2,11 +2,6 @@
 
 #include "roq/kraken/options.h"
 
-DEFINE_string(listen,
-    "",
-    "bind address (path)");
-// DEFINE_validator(listen, ...);
-
 DEFINE_string(config_file,
     "",
     "config file (path)");
@@ -58,10 +53,6 @@ DEFINE_string(ws_private_uri,
 DEFINE_uint32(ws_private_ping_freq_secs,
     5,
     "ping frequency (seconds)");
-
-DEFINE_uint32(max_trades,
-    16384,
-    "maximum trades for trade summary");
 
 DEFINE_uint32(encode_buffer_size,
     1048576,
