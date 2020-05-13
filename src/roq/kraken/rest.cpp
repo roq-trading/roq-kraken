@@ -92,10 +92,6 @@ bool Rest::ready() const {
   return _connection.ready();
 }
 
-void Rest::close() {
-  _connection.close();
-}
-
 void Rest::operator()(const StartEvent&) {
   _connection.start();
 }
@@ -158,7 +154,6 @@ void Rest::get(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::Assets> promise(std::current_exception());
         callback(promise);
       }
@@ -203,7 +198,6 @@ void Rest::get(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::AssetPairs> promise(std::current_exception());
         callback(promise);
       }
@@ -253,7 +247,6 @@ void Rest::get(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::Products> promise(std::current_exception());
         callback(promise);
       }
@@ -304,7 +297,6 @@ void Rest::get(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::Positions> promise(std::current_exception());
         callback(promise);
       }
@@ -354,7 +346,6 @@ void Rest::get(
             FMT_STRING(R"(Exception type={}, what="{}")"),
             typeid(e).name(),
             e.what());
-        close();
         core::Promise<json::Token> promise(std::current_exception());
         callback(promise);
       }

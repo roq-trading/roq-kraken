@@ -45,8 +45,6 @@ class Rest final
 
   bool ready() const;
 
-  void close();
-
   void operator()(const StartEvent&);
   void operator()(const StopEvent&);
   void operator()(const TimerEvent&);
