@@ -57,7 +57,7 @@ WebSocketPublic::WebSocketPublic(
           dns_base,
           ssl_context,
           core::URI(FLAGS_ws_public_uri),
-          std::chrono::seconds { FLAGS_ping_freq_secs },
+          std::chrono::seconds { FLAGS_ws_public_ping_freq_secs },
           FLAGS_decode_buffer_size,  // XXX need read buffer size
           FLAGS_encode_buffer_size,
           []() { return std::string(); }),
@@ -113,7 +113,7 @@ void WebSocketPublic::subscribe(
       FMT_STRING(R"(subscribe name="{}", len(pairs)={})"),
       name,
       std::size(pairs));
-  if (FLAGS_book_depth && name.compare("book") == 0) {
+  if (FLAGS_ws_public_book_depth && name.compare("book") == 0) {
     auto message = fmt::format(
         FMT_STRING(
           R"({{)"
@@ -126,7 +126,7 @@ void WebSocketPublic::subscribe(
           R"(}})"),
           fmt::join(pairs, R"(",")"),
           name,
-          FLAGS_book_depth);
+          FLAGS_ws_public_book_depth);
     DLOG(INFO)(
         FMT_STRING(R"(request="{}")"),
         message);
