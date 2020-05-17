@@ -170,9 +170,12 @@ void Gateway::operator()(const Rest&) {
 
 void Gateway::download_assets() {
   constexpr auto state = WebSocketDownload::State::ASSETS;
+  auto sequence = _web_socket_public.download.sequence();
   _rest.connection.get<json::Assets>(
-      [this](auto& promise) {
+      [this, sequence](auto& promise) {
     try {
+      if (_web_socket_public.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       _web_socket_public.download.check(state);
     } catch (NetworkError&) {
@@ -183,9 +186,12 @@ void Gateway::download_assets() {
 
 void Gateway::download_asset_pairs() {
   constexpr auto state = WebSocketDownload::State::ASSET_PAIRS;
+  auto sequence = _web_socket_public.download.sequence();
   _rest.connection.get<json::AssetPairs>(
-      [this](auto& promise) {
+      [this, sequence](auto& promise) {
     try {
+      if (_web_socket_public.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       _web_socket_public.download.check(state);
     } catch (NetworkError&) {
@@ -194,25 +200,15 @@ void Gateway::download_asset_pairs() {
   });
 }
 
-void Gateway::download_web_sockets_token() {
-  constexpr auto state = WebSocketPrivateDownload::State::WEB_SOCKETS_TOKEN;
-  _rest.connection.get<json::Token>(
-      [this](auto& promise) {
-    try {
-      (*this)(promise.get());
-      _web_socket_private.download.check(state);
-    } catch (NetworkError&) {
-      _web_socket_private.download.retry(state);
-    }
-  });
-}
-
 void Gateway::download_balance() {
   constexpr auto state = WebSocketDownload::State::BALANCE;
   /*
+  auto sequence = _web_socket_public.download.sequence();
   _rest.connection.get<json::Balance>(
-      [this](auto& promise) {
+      [this, sequence](auto& promise) {
     try {
+      if (_web_socket_public.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       _web_socket_public.download.check(state);
     } catch (NetworkError&) {
@@ -224,9 +220,12 @@ void Gateway::download_balance() {
 
 void Gateway::download_open_positions() {
   constexpr auto state = WebSocketDownload::State::OPEN_POSITIONS;
+  auto sequence = _web_socket_public.download.sequence();
   _rest.connection.get<json::Positions>(
-      [this](auto& promise) {
+      [this, sequence](auto& promise) {
     try {
+      if (_web_socket_public.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       _web_socket_public.download.check(state);
     } catch (NetworkError&) {
@@ -543,8 +542,24 @@ void Gateway::operator()(const WebSocketPrivate&) {
     _web_socket_private.download.begin();
   } else {
     _web_socket_private.download.reset();
-    _symbols.clear();
+    _token.clear();
   }
+}
+
+void Gateway::download_web_sockets_token() {
+  constexpr auto state = WebSocketPrivateDownload::State::WEB_SOCKETS_TOKEN;
+  auto sequence = _web_socket_private.download.sequence();
+  _rest.connection.get<json::Token>(
+      [this, sequence](auto& promise) {
+    try {
+      if (_web_socket_private.download.skip(sequence, state))
+        return;
+      (*this)(promise.get());
+      _web_socket_private.download.check(state);
+    } catch (NetworkError&) {
+      _web_socket_private.download.retry(state);
+    }
+  });
 }
 
 void Gateway::subscribe_private() {

@@ -111,15 +111,19 @@ class Gateway final
 
   void update(GatewayStatus gateway_status);
 
+  // public
+
   void download_assets();
   void download_asset_pairs();
-
-  void download_web_sockets_token();
 
   void download_balance();
   void download_open_positions();
 
   void subscribe_public();
+
+  // private
+
+  void download_web_sockets_token();
 
   void subscribe_private();
 
