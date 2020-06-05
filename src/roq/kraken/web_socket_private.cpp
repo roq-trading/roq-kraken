@@ -83,15 +83,15 @@ void WebSocketPrivate::close() {
   _connection.close();
 }
 
-void WebSocketPrivate::operator()(const StartEvent&) {
+void WebSocketPrivate::operator()(const server::StartEvent&) {
   _connection.start();
 }
 
-void WebSocketPrivate::operator()(const StopEvent&) {
+void WebSocketPrivate::operator()(const server::StopEvent&) {
   _connection.stop();
 }
 
-void WebSocketPrivate::operator()(const TimerEvent& event) {
+void WebSocketPrivate::operator()(const server::TimerEvent& event) {
   _connection.refresh(event.now);
 }
 

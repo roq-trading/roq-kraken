@@ -19,6 +19,8 @@
 
 #include "roq/core/web/socket.h"
 
+#include "roq/server.h"
+
 #include "roq/kraken/config.h"
 #include "roq/kraken/random.h"
 
@@ -54,9 +56,9 @@ class WebSocketPrivate final
 
   void close();
 
-  void operator()(const StartEvent&);
-  void operator()(const StopEvent&);
-  void operator()(const TimerEvent&);
+  void operator()(const server::StartEvent&);
+  void operator()(const server::StopEvent&);
+  void operator()(const server::TimerEvent&);
 
   void operator()(Metrics& metrics);
 

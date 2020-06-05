@@ -100,21 +100,21 @@ Gateway::Gateway(
       _trade(FLAGS_cache_trades_max_depth) {
 }
 
-void Gateway::operator()(const StartEvent& event) {
+void Gateway::operator()(const server::StartEvent& event) {
   LOG(INFO)("Starting the gateway...");
   _web_socket_public.connection(event);
   _web_socket_private.connection(event);
   _rest.connection(event);
 }
 
-void Gateway::operator()(const StopEvent& event) {
+void Gateway::operator()(const server::StopEvent& event) {
   LOG(INFO)("Stopping the gateway...");
   _rest.connection(event);
   _web_socket_private.connection(event);
   _web_socket_public.connection(event);
 }
 
-void Gateway::operator()(const TimerEvent& event) {
+void Gateway::operator()(const server::TimerEvent& event) {
   _web_socket_public.connection(event);
   _web_socket_private.connection(event);
   _rest.connection(event);
@@ -129,7 +129,7 @@ void Gateway::operator()(const TimerEvent& event) {
   _base.loop(EVLOOP_NONBLOCK);
 }
 
-void Gateway::operator()(const ConnectionStatusEvent&) {
+void Gateway::operator()(const server::ConnectionStatusEvent&) {
 }
 
 void Gateway::operator()(
