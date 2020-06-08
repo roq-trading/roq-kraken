@@ -95,15 +95,15 @@ void WebSocketPrivate::operator()(const server::TimerEvent& event) {
   _connection.refresh(event.now);
 }
 
-void WebSocketPrivate::operator()(Metrics& metrics) {
-  metrics
+void WebSocketPrivate::operator()(metrics::Writer& writer) {
+  writer
     // counter
-    .write(_counter.disconnect)
+    .write(_counter.disconnect, metrics::COUNTER)
     // profile
-    .write(_profile.parse)
+    .write(_profile.parse, metrics::PROFILE)
     // latency
-    .write(_latency.ping)
-    .write(_latency.heartbeat);
+    .write(_latency.ping, metrics::LATENCY)
+    .write(_latency.heartbeat, metrics::LATENCY);
 }
 
 void WebSocketPrivate::subscribe(

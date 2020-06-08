@@ -65,7 +65,7 @@ class WebSocketPublic final
   void operator()(const server::StopEvent&);
   void operator()(const server::TimerEvent&);
 
-  void operator()(Metrics& metrics);
+  void operator()(metrics::Writer& writer);
 
   template <typename T>
   void subscribe(

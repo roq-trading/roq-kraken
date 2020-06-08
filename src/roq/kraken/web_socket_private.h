@@ -60,7 +60,7 @@ class WebSocketPrivate final
   void operator()(const server::StopEvent&);
   void operator()(const server::TimerEvent&);
 
-  void operator()(Metrics& metrics);
+  void operator()(metrics::Writer& writer);
 
   void subscribe(
       const std::string_view& name,

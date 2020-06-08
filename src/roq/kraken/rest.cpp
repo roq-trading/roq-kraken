@@ -104,18 +104,18 @@ void Rest::operator()(const server::TimerEvent& event) {
   _connection.refresh(event.now);
 }
 
-void Rest::operator()(Metrics& metrics) {
-  metrics
+void Rest::operator()(metrics::Writer& writer) {
+  writer
     // counter
-    .write(_counter.disconnect)
+    .write(_counter.disconnect, metrics::COUNTER)
     // profile
-    .write(_profile.assets)
-    .write(_profile.asset_pairs)
-    .write(_profile.balance)
-    .write(_profile.open_positions)
-    .write(_profile.get_web_sockets_token)
+    .write(_profile.assets, metrics::PROFILE)
+    .write(_profile.asset_pairs, metrics::PROFILE)
+    .write(_profile.balance, metrics::PROFILE)
+    .write(_profile.open_positions, metrics::PROFILE)
+    .write(_profile.get_web_sockets_token, metrics::PROFILE)
     // latency
-    .write(_latency.ping);
+    .write(_latency.ping, metrics::LATENCY);
 }
 
 template <>
