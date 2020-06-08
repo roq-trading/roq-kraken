@@ -9,8 +9,6 @@
 
 #include "roq/logging.h"
 
-#include "roq/builtins.h"
-
 #include "roq/core/clock.h"
 
 #include "roq/core/binascii/base64.h"
