@@ -15,7 +15,8 @@ namespace json {
 bool ParserPrivate::dispatch(
     Handler& handler,
     const std::string_view& message,
-    core::json::Buffer& buffer) {
+    core::json::Buffer& buffer,
+    const server::Trace& trace) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -37,10 +38,20 @@ bool ParserPrivate::dispatch(
           throw std::bad_cast();
         },
         [&](core::json::object_t& value) -> bool {
-          return dispatch(handler, message, buffer, value);
+          return dispatch(
+              handler,
+              message,
+              buffer,
+              value,
+              trace);
         },
         [&](core::json::array_t& value) -> bool {
-          return dispatch(handler, message, buffer, value);
+          return dispatch(
+              handler,
+              message,
+              buffer,
+              value,
+              trace);
         },
       },
       root);
@@ -50,7 +61,8 @@ bool ParserPrivate::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer&,
-    core::json::object_t& root) {
+    core::json::object_t& root,
+    const server::Trace& trace) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -71,48 +83,62 @@ bool ParserPrivate::dispatch(
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
-            handler(error);
+            handler(
+                error,
+                trace);
             dispatched = true;
             break;
           }
           case Event::SYSTEM_STATUS: {
             auto system_status =
               core::json::Parser::create<SystemStatus>(message);
-            handler(system_status);
+            handler(
+                system_status,
+                trace);
             dispatched = true;
             break;
           }
           case Event::PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
-            handler(pong);
+            handler(
+                pong,
+                trace);
             dispatched = true;
             break;
           }
           case Event::HEARTBEAT: {
             auto heartbeat =
               core::json::Parser::create<Heartbeat>(message);
-            handler(heartbeat);
+            handler(
+                heartbeat,
+                trace);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status =
               core::json::Parser::create<SubscriptionStatus>(message);
-            handler(subscription_status);
+            handler(
+                subscription_status,
+                trace);
             dispatched = true;
             break;
           }
           case Event::ADD_ORDER_STATUS: {
             auto add_order_status =
               core::json::Parser::create<AddOrderStatus>(message);
-            handler(add_order_status);
+            handler(
+                add_order_status,
+                trace);
             dispatched = true;
             break;
           }
           case Event::CANCEL_ORDER_STATUS:
             auto cancel_order_status =
               core::json::Parser::create<CancelOrderStatus>(message);
-            handler(cancel_order_status);
+            handler(
+                cancel_order_status,
+                trace);
             dispatched = true;
             break;
         }
@@ -217,7 +243,8 @@ bool ParserPrivate::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
-    core::json::array_t& root) {
+    core::json::array_t& root,
+    const server::Trace& trace) {
   Channel channel = Channel::UNDEFINED;
   size_t offset = 0;
   for (auto value : root) {

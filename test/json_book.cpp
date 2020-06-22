@@ -15,28 +15,41 @@ using namespace roq::kraken;  // NOLINT
 namespace {
 struct Handler : public json::ParserPublic::Handler {
  protected:
-  void operator()(const json::Error&) override {
+  void operator()(
+      const json::Error&,
+      const server::Trace&) override {
   }
-  void operator()(const json::SystemStatus&) override {
+  void operator()(
+      const json::SystemStatus&,
+      const server::Trace&) override {
   }
-  void operator()(const json::Pong&) override {
+  void operator()(
+      const json::Pong&,
+      const server::Trace&) override {
   }
-  void operator()(const json::Heartbeat&) override {
+  void operator()(
+      const json::Heartbeat&,
+      const server::Trace&) override {
   }
-  void operator()(const json::SubscriptionStatus&) override {
+  void operator()(
+      const json::SubscriptionStatus&,
+      const server::Trace&) override {
   }
 
   void operator()(
       const json::Trade& trade,
-      const std::string_view& pair) override {
+      const std::string_view& pair,
+      const server::Trace&) override {
   }
   void operator()(
       const json::Spread& spread,
-      const std::string_view& pair) override {
+      const std::string_view& pair,
+      const server::Trace&) override {
   }
   void operator()(
       const json::Book& book,
-      const std::string_view& pair) override {
+      const std::string_view& pair,
+      const server::Trace&) override {
   }
 
  private:
@@ -79,10 +92,12 @@ TEST(json_book, parse_test_snapshot) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
+  server::Trace trace;
   json::ParserPublic::dispatch(
       handler,
       message,
-      buffer);
+      buffer,
+      trace);
 }
 
 TEST(json_book, parse_test_update_bid_1) {
@@ -100,10 +115,12 @@ TEST(json_book, parse_test_update_bid_1) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
+  server::Trace trace;
   json::ParserPublic::dispatch(
       handler,
       message,
-      buffer);
+      buffer,
+      trace);
 }
 
 TEST(json_book, parse_test_update_ask_1) {
@@ -121,10 +138,12 @@ TEST(json_book, parse_test_update_ask_1) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
+  server::Trace trace;
   json::ParserPublic::dispatch(
       handler,
       message,
-      buffer);
+      buffer,
+      trace);
 }
 
 TEST(json_book, parse_test_update_complex) {
@@ -224,10 +243,12 @@ TEST(json_book, parse_test_update_complex) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
+  server::Trace trace;
   json::ParserPublic::dispatch(
       handler,
       message,
-      buffer);
+      buffer,
+      trace);
 }
 
 // >>> weirdness >>>
@@ -300,10 +321,12 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
+  server::Trace trace;
   EXPECT_THROW(
       json::ParserPublic::dispatch(
           handler,
           message,
-          buffer),
+          buffer,
+          trace),
       std::out_of_range);  //  XXX maybe wrap as core::market::BadState?
 }

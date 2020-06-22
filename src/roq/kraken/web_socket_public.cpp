@@ -179,40 +179,51 @@ void WebSocketPublic::operator()(const core::web::Socket::Text& text) {
 void WebSocketPublic::parse(const std::string_view& message) {
   _profile.parse(
       [&]() {
+        server::Trace trace;
         core::json::Buffer buffer(_decode_buffer);
         auto result = json::ParserPublic::dispatch(
             *this,
             message,
-            buffer);
+            buffer,
+            trace);
       });
 }
 
-void WebSocketPublic::operator()(const json::Error& error) {
+void WebSocketPublic::operator()(
+    const json::Error& error,
+    const server::Trace&) {
   LOG(FATAL)(
       FMT_STRING("error={}"),
       error);
 }
 
-void WebSocketPublic::operator()(const json::SystemStatus& system_status) {
+void WebSocketPublic::operator()(
+    const json::SystemStatus& system_status,
+    const server::Trace&) {
   LOG(INFO)(
       FMT_STRING("system_status={}"),
       system_status);
 }
 
-void WebSocketPublic::operator()(const json::Pong& pong) {
+void WebSocketPublic::operator()(
+    const json::Pong& pong,
+    const server::Trace&) {
   VLOG(1)(
       FMT_STRING("pong={}"),
       pong);
 }
 
-void WebSocketPublic::operator()(const json::Heartbeat& heartbeat) {
+void WebSocketPublic::operator()(
+    const json::Heartbeat& heartbeat,
+    const server::Trace&) {
   VLOG(1)(
       FMT_STRING("heartbeat={}"),
       heartbeat);
 }
 
 void WebSocketPublic::operator()(
-    const json::SubscriptionStatus& subscription_status) {
+    const json::SubscriptionStatus& subscription_status,
+    const server::Trace&) {
   VLOG(1)(
       FMT_STRING("subscription_status={}"),
       subscription_status);
@@ -220,32 +231,44 @@ void WebSocketPublic::operator()(
 
 void WebSocketPublic::operator()(
     const json::Trade& trade,
-    const std::string_view& pair) {
+    const std::string_view& pair,
+    const server::Trace& trace) {
   VLOG(3)(
       FMT_STRING(R"(trade={}, pair="{}")"),
       trade,
       pair);
-  _handler(trade, pair);
+  _handler(
+      trade,
+      pair,
+      trace);
 }
 
 void WebSocketPublic::operator()(
     const json::Spread& spread,
-    const std::string_view& pair) {
+    const std::string_view& pair,
+    const server::Trace& trace) {
   VLOG(3)(
       FMT_STRING(R"(spread={}, pair="{}")"),
       spread,
       pair);
-  _handler(spread, pair);
+  _handler(
+      spread,
+      pair,
+      trace);
 }
 
 void WebSocketPublic::operator()(
     const json::Book& book,
-    const std::string_view& pair) {
+    const std::string_view& pair,
+    const server::Trace& trace) {
   VLOG(3)(
       FMT_STRING(R"(book={}, pair="{}")"),
       book,
       pair);
-  _handler(book, pair);
+  _handler(
+      book,
+      pair,
+      trace);
 }
 
 }  // namespace kraken

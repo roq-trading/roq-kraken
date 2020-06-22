@@ -77,23 +77,34 @@ class Gateway final
 
   void operator()(
       const json::Trade& trade,
-      const std::string_view& pair) override;
+      const std::string_view& pair,
+      const server::Trace& trace) override;
   void operator()(
       const json::Spread& spread,
-      const std::string_view& pair) override;
+      const std::string_view& pair,
+      const server::Trace& trace) override;
   void operator()(
       const json::Book& book,
-      const std::string_view& pair) override;
+      const std::string_view& pair,
+      const server::Trace& trace) override;
 
   // WebSocketPrivate::Handler
 
   void operator()(const WebSocketPrivate&) override;
 
-  void operator()(const json::AddOrderStatus&) override;
-  void operator()(const json::CancelOrderStatus&) override;
+  void operator()(
+      const json::AddOrderStatus&,
+      const server::Trace&) override;
+  void operator()(
+      const json::CancelOrderStatus&,
+      const server::Trace&) override;
 
-  void operator()(const json::OpenOrders&) override;
-  void operator()(const json::OwnTrades&) override;
+  void operator()(
+      const json::OpenOrders&,
+      const server::Trace&) override;
+  void operator()(
+      const json::OwnTrades&,
+      const server::Trace&) override;
 
  private:
   void operator()(const json::Assets&);
@@ -130,12 +141,14 @@ class Gateway final
   template <typename T>
   void enqueue(
       const T& value,
+      const server::Trace& trace,
       bool is_last);
 
   template <typename T>
   void enqueue(
       uint8_t user_id,
       const T& value,
+      const server::Trace& trace,
       bool is_last);
 
  private:

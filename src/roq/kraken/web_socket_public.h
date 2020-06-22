@@ -35,15 +35,19 @@ class WebSocketPublic final
  public:
   struct Handler {
     virtual void operator()(const WebSocketPublic&) = 0;
+
     virtual void operator()(
         const json::Trade& trade,
-        const std::string_view& pair) = 0;
+        const std::string_view& pair,
+        const server::Trace& trace) = 0;
     virtual void operator()(
         const json::Spread& spread,
-        const std::string_view& pair) = 0;
+        const std::string_view& pair,
+        const server::Trace& trace) = 0;
     virtual void operator()(
         const json::Book& book,
-        const std::string_view& pair) = 0;
+        const std::string_view& pair,
+        const server::Trace& trace) = 0;
   };
 
   WebSocketPublic(
@@ -84,21 +88,34 @@ class WebSocketPublic final
 
   // json::ParserPublic::Handler
 
-  void operator()(const json::Error&) override;
-  void operator()(const json::SystemStatus&) override;
-  void operator()(const json::Pong&) override;
-  void operator()(const json::Heartbeat&) override;
-  void operator()(const json::SubscriptionStatus&) override;
+  void operator()(
+      const json::Error&,
+      const server::Trace&) override;
+  void operator()(
+      const json::SystemStatus&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Pong&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Heartbeat&,
+      const server::Trace&) override;
+  void operator()(
+      const json::SubscriptionStatus&,
+      const server::Trace&) override;
 
   void operator()(
       const json::Trade& trade,
-      const std::string_view& pair) override;
+      const std::string_view& pair,
+      const server::Trace& trace) override;
   void operator()(
       const json::Spread& spread,
-      const std::string_view& pair) override;
+      const std::string_view& pair,
+      const server::Trace& trace) override;
   void operator()(
       const json::Book& book,
-      const std::string_view& pair) override;
+      const std::string_view& pair,
+      const server::Trace& trace) override;
 
  private:
   void parse(const std::string_view& message);

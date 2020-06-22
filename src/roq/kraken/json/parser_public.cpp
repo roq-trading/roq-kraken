@@ -15,7 +15,8 @@ namespace json {
 bool ParserPublic::dispatch(
     Handler& handler,
     const std::string_view& message,
-    core::json::Buffer& buffer) {
+    core::json::Buffer& buffer,
+    const server::Trace& trace) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -37,10 +38,20 @@ bool ParserPublic::dispatch(
           throw std::bad_cast();
         },
         [&](core::json::object_t& value) -> bool {
-          return dispatch(handler, message, buffer, value);
+          return dispatch(
+              handler,
+              message,
+              buffer,
+              value,
+              trace);
         },
         [&](core::json::array_t& value) -> bool {
-          return dispatch(handler, message, buffer, value);
+          return dispatch(
+              handler,
+              message,
+              buffer,
+              value,
+              trace);
         },
       },
       root);
@@ -50,7 +61,8 @@ bool ParserPublic::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer&,
-    core::json::object_t& root) {
+    core::json::object_t& root,
+    const server::Trace& trace) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -71,34 +83,44 @@ bool ParserPublic::dispatch(
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
-            handler(error);
+            handler(
+                error,
+                trace);
             dispatched = true;
             break;
           }
           case Event::SYSTEM_STATUS: {
             auto system_status =
               core::json::Parser::create<SystemStatus>(message);
-            handler(system_status);
+            handler(
+                system_status,
+                trace);
             dispatched = true;
             break;
           }
           case Event::PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
-            handler(pong);
+            handler(
+                pong,
+                trace);
             dispatched = true;
             break;
           }
           case Event::HEARTBEAT: {
             auto heartbeat =
               core::json::Parser::create<Heartbeat>(message);
-            handler(heartbeat);
+            handler(
+                heartbeat,
+                trace);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status =
               core::json::Parser::create<SubscriptionStatus>(message);
-            handler(subscription_status);
+            handler(
+                subscription_status,
+                trace);
             dispatched = true;
             break;
           }
@@ -122,6 +144,7 @@ static bool dispatch2(
     ParserPublic::Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
+    const server::Trace& trace,
     int64_t channel_id,
     Channel channel,
     const std::string_view& pair,
@@ -162,14 +185,20 @@ static bool dispatch2(
         Trade trade(
             value,
             buffer);
-        handler(trade, pair);
+        handler(
+            trade,
+            pair,
+            trace);
         dispatched = true;
         break;
       }
       case Channel::SPREAD: {
         LOG_IF(FATAL, data_count != 1)("Unexpected");
         Spread spread(value);
-        handler(spread, pair);
+        handler(
+            spread,
+            pair,
+            trace);
         dispatched = true;
         break;
       }
@@ -209,7 +238,10 @@ static bool dispatch2(
         LOG(FATAL)("Unexpected");
       }
     }
-    handler(book_1, pair);
+    handler(
+        book_1,
+        pair,
+        trace);
     dispatched = true;
   }
   return dispatched;
@@ -220,7 +252,8 @@ bool ParserPublic::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
-    core::json::array_t& root) {
+    core::json::array_t& root,
+    const server::Trace& trace) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;
   std::string_view pair;
@@ -262,6 +295,7 @@ bool ParserPublic::dispatch(
       handler,
       message,
       buffer,
+      trace,
       channel_id,
       channel,
       pair,

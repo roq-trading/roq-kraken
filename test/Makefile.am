@@ -14,11 +14,18 @@ roq_kraken_test_LDADD = \
 	libgtest.la \
 	$(top_builddir)/src/roq/kraken/json/libroq-kraken-json.la \
 	$(DATE_LIBS) \
+	$(ROQ_SERVER_LIBS) \
 	$(ROQ_CORE_LIBS) \
 	$(ROQ_API_LIBS) \
 	$(ROQ_LOGGING_LIBS) \
+	$(BROTLI_LIBS) \
+	$(HTTP_PARSER_LIBS) \
 	$(FMT_LIBS) \
-	$(DATE_LIBS)
+	$(DATE_LIBS) \
+	$(LIBEVENT_LIBS) \
+	-levent_openssl \
+	$(OPENSSL_LIBS) \
+	$(CROSSGUID_LIBS)
 roq_kraken_test_CPPFLAGS = \
 	-I$(top_builddir)/src \
 	-I$(top_srcdir)/third_party/googletest/googletest/include \

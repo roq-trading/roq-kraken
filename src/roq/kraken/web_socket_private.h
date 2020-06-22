@@ -35,10 +35,19 @@ class WebSocketPrivate final
  public:
   struct Handler {
     virtual void operator()(const WebSocketPrivate&) = 0;
-    virtual void operator()(const json::AddOrderStatus&) = 0;
-    virtual void operator()(const json::CancelOrderStatus&) = 0;
-    virtual void operator()(const json::OpenOrders&) = 0;
-    virtual void operator()(const json::OwnTrades&) = 0;
+
+    virtual void operator()(
+        const json::AddOrderStatus&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const json::CancelOrderStatus&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const json::OpenOrders&,
+        const server::Trace&) = 0;
+    virtual void operator()(
+        const json::OwnTrades&,
+        const server::Trace&) = 0;
   };
 
   WebSocketPrivate(
@@ -78,17 +87,35 @@ class WebSocketPrivate final
 
   // json::ParserPrivate::Handler
 
-  void operator()(const json::Error&) override;
-  void operator()(const json::SystemStatus&) override;
-  void operator()(const json::Pong&) override;
-  void operator()(const json::Heartbeat&) override;
-  void operator()(const json::SubscriptionStatus&) override;
+  void operator()(
+      const json::Error&,
+      const server::Trace&) override;
+  void operator()(
+      const json::SystemStatus&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Pong&,
+      const server::Trace&) override;
+  void operator()(
+      const json::Heartbeat&,
+      const server::Trace&) override;
+  void operator()(
+      const json::SubscriptionStatus&,
+      const server::Trace&) override;
 
-  void operator()(const json::AddOrderStatus&) override;
-  void operator()(const json::CancelOrderStatus&) override;
+  void operator()(
+      const json::AddOrderStatus&,
+      const server::Trace&) override;
+  void operator()(
+      const json::CancelOrderStatus&,
+      const server::Trace&) override;
 
-  void operator()(const json::OpenOrders&) override;
-  void operator()(const json::OwnTrades&) override;
+  void operator()(
+      const json::OpenOrders&,
+      const server::Trace&) override;
+  void operator()(
+      const json::OwnTrades&,
+      const server::Trace&) override;
 
  protected:
   void reset();
