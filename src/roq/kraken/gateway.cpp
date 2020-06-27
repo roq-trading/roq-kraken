@@ -129,11 +129,11 @@ void Gateway::operator()(const server::TimerEvent& event) {
   _base.loop(EVLOOP_NONBLOCK);
 }
 
-void Gateway::operator()(const server::ConnectionStatusEvent&) {
+void Gateway::operator()(const Event<ConnectionStatus>&) {
 }
 
 void Gateway::operator()(
-    const CreateOrderEvent& event,
+    const Event<CreateOrder>& event,
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
   // TODO(thraneh): implement
@@ -143,7 +143,7 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(
-    const ModifyOrderEvent& event,
+    const Event<ModifyOrder>& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
   // TODO(thraneh): implement
@@ -153,7 +153,7 @@ void Gateway::operator()(
 }
 
 void Gateway::operator()(
-    const CancelOrderEvent& event,
+    const Event<CancelOrder>& event,
     const std::string_view& request_id,
     const server::OMS_Order& order) {
   // TODO(thraneh): implement
