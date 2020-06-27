@@ -149,6 +149,7 @@ static bool dispatch2(
     Channel channel,
     const std::string_view& pair,
     size_t data_count) {
+  (void)(channel_id);
   /*
   DLOG(INFO)(
       FMT_STRING(R"(channel_id={} channel={} pair={}, len(data)={})"),

@@ -137,6 +137,9 @@ void Gateway::operator()(
     const std::string_view& request_id,
     uint32_t gateway_order_id) {
   // TODO(thraneh): implement
+  (void)(event);
+  (void)(request_id);
+  (void)(gateway_order_id);
 }
 
 void Gateway::operator()(
@@ -144,6 +147,9 @@ void Gateway::operator()(
     const std::string_view& request_id,
     const server::OMS_Order& order) {
   // TODO(thraneh): implement
+  (void)(event);
+  (void)(request_id);
+  (void)(order);
 }
 
 void Gateway::operator()(
@@ -151,6 +157,9 @@ void Gateway::operator()(
     const std::string_view& request_id,
     const server::OMS_Order& order) {
   // TODO(thraneh): implement
+  (void)(event);
+  (void)(request_id);
+  (void)(order);
 }
 
 void Gateway::operator()(metrics::Writer& writer) {
@@ -202,6 +211,7 @@ void Gateway::download_asset_pairs() {
 
 void Gateway::download_balance() {
   constexpr auto state = WebSocketDownload::State::BALANCE;
+  (void)(state);
   /*
   auto sequence = _web_socket_public.download.sequence();
   _rest.connection.get<json::Balance>(
@@ -499,7 +509,7 @@ void Gateway::operator()(
         ask_length, _ask.size());
   }
   if (bid_length > 0 || ask_length > 0) {
-    MarketByPrice market_by_price {
+    MarketByPriceUpdate market_by_price_update {
       .exchange = FLAGS_exchange,
       .symbol = pair,
       .bids = {
@@ -514,10 +524,10 @@ void Gateway::operator()(
       .exchange_time_utc = exchange_time_utc,
     };
     VLOG(3)(
-        FMT_STRING(R"(market_by_price={})"),
-        market_by_price);
+        FMT_STRING(R"(market_by_price_update={})"),
+        market_by_price_update);
     enqueue(
-        market_by_price,
+        market_by_price_update,
         trace,
         true);
   }
@@ -581,23 +591,23 @@ void Gateway::subscribe_private() {
 }
 
 void Gateway::operator()(
-    const json::AddOrderStatus& add_order_status,
-    const server::Trace& trace) {
+    const json::AddOrderStatus&,
+    const server::Trace&) {
 }
 
 void Gateway::operator()(
-    const json::CancelOrderStatus& cancel_order_status,
-    const server::Trace& trace) {
+    const json::CancelOrderStatus&,
+    const server::Trace&) {
 }
 
 void Gateway::operator()(
-    const json::OpenOrders& open_orders,
-    const server::Trace& trace) {
+    const json::OpenOrders&,
+    const server::Trace&) {
 }
 
 void Gateway::operator()(
-    const json::OwnTrades& own_trades,
-    const server::Trace& trace) {
+    const json::OwnTrades&,
+    const server::Trace&) {
 }
 
 void Gateway::update(GatewayStatus gateway_status) {

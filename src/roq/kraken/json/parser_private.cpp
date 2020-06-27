@@ -155,6 +155,11 @@ static bool dispatch2(
     const std::string_view& message,
     core::json::Buffer& buffer,
     Channel channel) {
+  (void)(handler);
+  (void)(message);
+  (void)(buffer);
+  (void)(channel);
+
   bool dispatched = false;
   /*
   core::json::Parser parser(message);
@@ -244,7 +249,7 @@ bool ParserPrivate::dispatch(
     const std::string_view& message,
     core::json::Buffer& buffer,
     core::json::array_t& root,
-    const server::Trace& trace) {
+    const server::Trace&) {
   Channel channel = Channel::UNDEFINED;
   size_t offset = 0;
   for (auto value : root) {
