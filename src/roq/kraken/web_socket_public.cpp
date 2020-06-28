@@ -81,16 +81,16 @@ void WebSocketPublic::close() {
   _connection.close();
 }
 
-void WebSocketPublic::operator()(const server::StartEvent&) {
+void WebSocketPublic::operator()(const Event<Start>&) {
   _connection.start();
 }
 
-void WebSocketPublic::operator()(const server::StopEvent&) {
+void WebSocketPublic::operator()(const Event<Stop>&) {
   _connection.stop();
 }
 
-void WebSocketPublic::operator()(const server::TimerEvent& event) {
-  _connection.refresh(event.now);
+void WebSocketPublic::operator()(const Event<Timer>& event) {
+  _connection.refresh(event.value.now);
 }
 
 void WebSocketPublic::operator()(metrics::Writer& writer) {
