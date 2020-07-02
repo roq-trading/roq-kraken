@@ -25,7 +25,8 @@ roq_kraken_test_LDADD = \
 	$(LIBEVENT_LIBS) \
 	-levent_openssl \
 	$(OPENSSL_LIBS) \
-	$(CROSSGUID_LIBS)
+	$(CROSSGUID_LIBS) \
+	$(STDCXX_FS_LIBS)
 roq_kraken_test_CPPFLAGS = \
 	-I$(top_builddir)/src \
 	-I$(top_srcdir)/third_party/googletest/googletest/include \
