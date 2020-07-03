@@ -16,7 +16,7 @@ bool ParserPublic::dispatch(
     Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -43,7 +43,7 @@ bool ParserPublic::dispatch(
               message,
               buffer,
               value,
-              trace);
+              trace_info);
         },
         [&](core::json::array_t& value) -> bool {
           return dispatch(
@@ -51,7 +51,7 @@ bool ParserPublic::dispatch(
               message,
               buffer,
               value,
-              trace);
+              trace_info);
         },
       },
       root);
@@ -62,7 +62,7 @@ bool ParserPublic::dispatch(
     const std::string_view& message,
     core::json::Buffer&,
     core::json::object_t& root,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -85,7 +85,7 @@ bool ParserPublic::dispatch(
             auto error = core::json::Parser::create<Error>(message);
             handler(
                 error,
-                trace);
+                trace_info);
             dispatched = true;
             break;
           }
@@ -94,7 +94,7 @@ bool ParserPublic::dispatch(
               core::json::Parser::create<SystemStatus>(message);
             handler(
                 system_status,
-                trace);
+                trace_info);
             dispatched = true;
             break;
           }
@@ -102,7 +102,7 @@ bool ParserPublic::dispatch(
             auto pong = core::json::Parser::create<Pong>(message);
             handler(
                 pong,
-                trace);
+                trace_info);
             dispatched = true;
             break;
           }
@@ -111,7 +111,7 @@ bool ParserPublic::dispatch(
               core::json::Parser::create<Heartbeat>(message);
             handler(
                 heartbeat,
-                trace);
+                trace_info);
             dispatched = true;
             break;
           }
@@ -120,7 +120,7 @@ bool ParserPublic::dispatch(
               core::json::Parser::create<SubscriptionStatus>(message);
             handler(
                 subscription_status,
-                trace);
+                trace_info);
             dispatched = true;
             break;
           }
@@ -144,7 +144,7 @@ static bool dispatch2(
     ParserPublic::Handler& handler,
     const std::string_view& message,
     core::json::Buffer& buffer,
-    const server::Trace& trace,
+    const server::TraceInfo& trace_info,
     int64_t channel_id,
     Channel channel,
     const std::string_view& pair,
@@ -189,7 +189,7 @@ static bool dispatch2(
         handler(
             trade,
             pair,
-            trace);
+            trace_info);
         dispatched = true;
         break;
       }
@@ -199,7 +199,7 @@ static bool dispatch2(
         handler(
             spread,
             pair,
-            trace);
+            trace_info);
         dispatched = true;
         break;
       }
@@ -242,7 +242,7 @@ static bool dispatch2(
     handler(
         book_1,
         pair,
-        trace);
+        trace_info);
     dispatched = true;
   }
   return dispatched;
@@ -254,7 +254,7 @@ bool ParserPublic::dispatch(
     const std::string_view& message,
     core::json::Buffer& buffer,
     core::json::array_t& root,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;
   std::string_view pair;
@@ -296,7 +296,7 @@ bool ParserPublic::dispatch(
       handler,
       message,
       buffer,
-      trace,
+      trace_info,
       channel_id,
       channel,
       pair,

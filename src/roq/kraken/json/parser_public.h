@@ -26,39 +26,39 @@ struct ParserPublic final {
   struct Handler {
     virtual void operator()(
         const Error&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const SystemStatus&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Pong&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const Heartbeat&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const SubscriptionStatus&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
 
     virtual void operator()(
         const Trade& trade,
         const std::string_view& pair,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo& trace_info) = 0;
     virtual void operator()(
         const Spread& spread,
         const std::string_view& pair,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo& trace_info) = 0;
     virtual void operator()(
         const Book& book,
         const std::string_view& pair,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo& trace_info) = 0;
   };
 
   static bool dispatch(
       Handler& handler,
       const std::string_view& message,
       core::json::Buffer& buffer,
-      const server::Trace& trace);
+      const server::TraceInfo& trace_info);
 
  protected:
   static bool dispatch(
@@ -66,14 +66,14 @@ struct ParserPublic final {
       const std::string_view& message,
       core::json::Buffer& buffer,
       core::json::object_t& root,
-      const server::Trace& trace);
+      const server::TraceInfo& trace_info);
 
   static bool dispatch(
       Handler& handler,
       const std::string_view& message,
       core::json::Buffer& buffer,
       core::json::array_t& root,
-      const server::Trace& trace);
+      const server::TraceInfo& trace_info);
 };
 
 }  // namespace json

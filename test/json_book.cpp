@@ -17,39 +17,39 @@ struct Handler : public json::ParserPublic::Handler {
  protected:
   void operator()(
       const json::Error&,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
   void operator()(
       const json::SystemStatus&,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
   void operator()(
       const json::Pong&,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
   void operator()(
       const json::Heartbeat&,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
   void operator()(
       const json::SubscriptionStatus&,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
 
   void operator()(
       const json::Trade& trade,
       const std::string_view& pair,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
   void operator()(
       const json::Spread& spread,
       const std::string_view& pair,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
   void operator()(
       const json::Book& book,
       const std::string_view& pair,
-      const server::Trace&) override {
+      const server::TraceInfo&) override {
   }
 
  private:
@@ -92,12 +92,12 @@ TEST(json_book, parse_test_snapshot) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::Trace trace;
+  server::TraceInfo trace_info;
   json::ParserPublic::dispatch(
       handler,
       message,
       buffer,
-      trace);
+      trace_info);
 }
 
 TEST(json_book, parse_test_update_bid_1) {
@@ -115,12 +115,12 @@ TEST(json_book, parse_test_update_bid_1) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::Trace trace;
+  server::TraceInfo trace_info;
   json::ParserPublic::dispatch(
       handler,
       message,
       buffer,
-      trace);
+      trace_info);
 }
 
 TEST(json_book, parse_test_update_ask_1) {
@@ -138,12 +138,12 @@ TEST(json_book, parse_test_update_ask_1) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::Trace trace;
+  server::TraceInfo trace_info;
   json::ParserPublic::dispatch(
       handler,
       message,
       buffer,
-      trace);
+      trace_info);
 }
 
 TEST(json_book, parse_test_update_complex) {
@@ -243,12 +243,12 @@ TEST(json_book, parse_test_update_complex) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::Trace trace;
+  server::TraceInfo trace_info;
   json::ParserPublic::dispatch(
       handler,
       message,
       buffer,
-      trace);
+      trace_info);
 }
 
 // >>> weirdness >>>
@@ -321,12 +321,12 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   Handler handler;
   core::utils::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::Trace trace;
+  server::TraceInfo trace_info;
   EXPECT_THROW(
       json::ParserPublic::dispatch(
           handler,
           message,
           buffer,
-          trace),
+          trace_info),
       std::out_of_range);  //  XXX maybe wrap as core::market::BadState?
 }

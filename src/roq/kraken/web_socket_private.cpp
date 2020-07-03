@@ -158,19 +158,19 @@ void WebSocketPrivate::operator()(const core::web::Socket::Text& text) {
 void WebSocketPrivate::parse(const std::string_view& message) {
   _profile.parse(
       [&]() {
-        server::Trace trace;
+        server::TraceInfo trace_info;
         core::json::Buffer buffer(_decode_buffer);
         auto result = json::ParserPrivate::dispatch(
             *this,
             message,
             buffer,
-            trace);
+            trace_info);
       });
 }
 
 void WebSocketPrivate::operator()(
     const json::Error& error,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   LOG(FATAL)(
       FMT_STRING("error={}"),
       error);
@@ -178,7 +178,7 @@ void WebSocketPrivate::operator()(
 
 void WebSocketPrivate::operator()(
     const json::SystemStatus& system_status,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   LOG(INFO)(
       FMT_STRING("system_status={}"),
       system_status);
@@ -186,7 +186,7 @@ void WebSocketPrivate::operator()(
 
 void WebSocketPrivate::operator()(
     const json::Pong& pong,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   VLOG(1)(
       FMT_STRING("pong={}"),
       pong);
@@ -194,7 +194,7 @@ void WebSocketPrivate::operator()(
 
 void WebSocketPrivate::operator()(
     const json::Heartbeat& heartbeat,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   VLOG(1)(
       FMT_STRING("heartbeat={}"),
       heartbeat);
@@ -202,7 +202,7 @@ void WebSocketPrivate::operator()(
 
 void WebSocketPrivate::operator()(
     const json::SubscriptionStatus& subscription_status,
-    const server::Trace&) {
+    const server::TraceInfo&) {
   LOG(INFO)(
       FMT_STRING("subscription_status={}"),
       subscription_status);
@@ -210,40 +210,40 @@ void WebSocketPrivate::operator()(
 
 void WebSocketPrivate::operator()(
     const json::AddOrderStatus& add_order_status,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   LOG(INFO)(
       FMT_STRING("add_order_status={}"),
       add_order_status);
   _handler(
       add_order_status,
-      trace);
+      trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::CancelOrderStatus& cancel_order_status,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   LOG(INFO)(
       FMT_STRING("cancel_order_status={}"),
       cancel_order_status);
   _handler(
       cancel_order_status,
-      trace);
+      trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::OpenOrders& open_orders,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _handler(
       open_orders,
-      trace);
+      trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::OwnTrades& own_trades,
-    const server::Trace& trace) {
+    const server::TraceInfo& trace_info) {
   _handler(
       own_trades,
-      trace);
+      trace_info);
 }
 
 }  // namespace kraken

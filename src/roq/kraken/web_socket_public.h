@@ -39,15 +39,15 @@ class WebSocketPublic final
     virtual void operator()(
         const json::Trade& trade,
         const std::string_view& pair,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo& trace_info) = 0;
     virtual void operator()(
         const json::Spread& spread,
         const std::string_view& pair,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo& trace_info) = 0;
     virtual void operator()(
         const json::Book& book,
         const std::string_view& pair,
-        const server::Trace& trace) = 0;
+        const server::TraceInfo& trace_info) = 0;
   };
 
   WebSocketPublic(
@@ -90,32 +90,32 @@ class WebSocketPublic final
 
   void operator()(
       const json::Error&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::SystemStatus&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Pong&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Heartbeat&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::SubscriptionStatus&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
 
   void operator()(
       const json::Trade& trade,
       const std::string_view& pair,
-      const server::Trace& trace) override;
+      const server::TraceInfo& trace_info) override;
   void operator()(
       const json::Spread& spread,
       const std::string_view& pair,
-      const server::Trace& trace) override;
+      const server::TraceInfo& trace_info) override;
   void operator()(
       const json::Book& book,
       const std::string_view& pair,
-      const server::Trace& trace) override;
+      const server::TraceInfo& trace_info) override;
 
  private:
   void parse(const std::string_view& message);

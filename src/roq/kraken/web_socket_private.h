@@ -38,16 +38,16 @@ class WebSocketPrivate final
 
     virtual void operator()(
         const json::AddOrderStatus&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::CancelOrderStatus&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::OpenOrders&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
     virtual void operator()(
         const json::OwnTrades&,
-        const server::Trace&) = 0;
+        const server::TraceInfo&) = 0;
   };
 
   WebSocketPrivate(
@@ -89,33 +89,33 @@ class WebSocketPrivate final
 
   void operator()(
       const json::Error&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::SystemStatus&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Pong&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::Heartbeat&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::SubscriptionStatus&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
 
   void operator()(
       const json::AddOrderStatus&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::CancelOrderStatus&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
 
   void operator()(
       const json::OpenOrders&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
   void operator()(
       const json::OwnTrades&,
-      const server::Trace&) override;
+      const server::TraceInfo&) override;
 
  protected:
   void reset();
