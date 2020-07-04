@@ -45,7 +45,7 @@ std::string Random::create_body() {
       core::get_realtime_clock());
   auto diff = (now - _nonce).count();
   LOG_IF(FATAL, diff < THRESHOLD)(
-      FMT_STRING(R"(Probably something wrong... diff={})"),
+      R"(Probably something wrong... diff={})",
       diff);
   if (diff < 0)
     ++_nonce;
@@ -53,13 +53,12 @@ std::string Random::create_body() {
     _nonce = now;
   if (_password.empty()) {
     return fmt::format(
-        FMT_STRING(R"(nonce={})"),
+        R"(nonce={})",
         _nonce.count());
   } else {
     return fmt::format(
-        FMT_STRING(
-            R"("nonce={}&)"
-            R"("opt={}")"),
+        R"("nonce={}&)"
+        R"("opt={}")",
         _nonce.count(),
         _password);
   }
@@ -72,7 +71,7 @@ std::string Random::create_headers(
   assert(method == core::http::Method::POST);
   assert(body.empty() == false);
   auto nonce = fmt::format(
-      FMT_STRING("{}"),
+      "{}",
       _nonce.count());
   _sha.clear();
   _sha.update(nonce);
@@ -94,9 +93,8 @@ std::string Random::create_headers(
       buffer_2.data(),
       length_2);
   return fmt::format(
-      FMT_STRING(
-        "API-Key: {}\r\n"
-        "API-Sign: {}\r\n"),
+      "API-Key: {}\r\n"
+      "API-Sign: {}\r\n",
       _key,
       sign_2);
 }

@@ -108,22 +108,21 @@ void WebSocketPrivate::subscribe(
     const std::string_view& name,
     const std::string_view& token) {
   LOG(INFO)(
-      FMT_STRING(R"(subscribe name="{}", token="{}")"),
+      R"(subscribe name="{}", token="{}")",
       name,
       token);
   auto message = fmt::format(
-      FMT_STRING(
-        R"({{)"
-        R"("event":"subscribe",)"
-        R"("subscription":{{)"
-        R"("name":"{}",)"
-        R"("token":"{}")"
-        R"(}})"
-        R"(}})"),
-        name,
-        token);
+      R"({{)"
+      R"("event":"subscribe",)"
+      R"("subscription":{{)"
+      R"("name":"{}",)"
+      R"("token":"{}")"
+      R"(}})"
+      R"(}})",
+      name,
+      token);
   VLOG(3)(
-      FMT_STRING(R"(request="{}")"),
+      R"(request="{}")",
       message);
   _connection.send_text(message);
 }
@@ -172,7 +171,7 @@ void WebSocketPrivate::operator()(
     const json::Error& error,
     const server::TraceInfo&) {
   LOG(FATAL)(
-      FMT_STRING("error={}"),
+      "error={}",
       error);
 }
 
@@ -180,7 +179,7 @@ void WebSocketPrivate::operator()(
     const json::SystemStatus& system_status,
     const server::TraceInfo&) {
   LOG(INFO)(
-      FMT_STRING("system_status={}"),
+      "system_status={}",
       system_status);
 }
 
@@ -188,7 +187,7 @@ void WebSocketPrivate::operator()(
     const json::Pong& pong,
     const server::TraceInfo&) {
   VLOG(1)(
-      FMT_STRING("pong={}"),
+      "pong={}",
       pong);
 }
 
@@ -196,7 +195,7 @@ void WebSocketPrivate::operator()(
     const json::Heartbeat& heartbeat,
     const server::TraceInfo&) {
   VLOG(1)(
-      FMT_STRING("heartbeat={}"),
+      "heartbeat={}",
       heartbeat);
 }
 
@@ -204,7 +203,7 @@ void WebSocketPrivate::operator()(
     const json::SubscriptionStatus& subscription_status,
     const server::TraceInfo&) {
   LOG(INFO)(
-      FMT_STRING("subscription_status={}"),
+      "subscription_status={}",
       subscription_status);
 }
 
@@ -212,7 +211,7 @@ void WebSocketPrivate::operator()(
     const json::AddOrderStatus& add_order_status,
     const server::TraceInfo& trace_info) {
   LOG(INFO)(
-      FMT_STRING("add_order_status={}"),
+      "add_order_status={}",
       add_order_status);
   _handler(
       add_order_status,
@@ -223,7 +222,7 @@ void WebSocketPrivate::operator()(
     const json::CancelOrderStatus& cancel_order_status,
     const server::TraceInfo& trace_info) {
   LOG(INFO)(
-      FMT_STRING("cancel_order_status={}"),
+      "cancel_order_status={}",
       cancel_order_status);
   _handler(
       cancel_order_status,

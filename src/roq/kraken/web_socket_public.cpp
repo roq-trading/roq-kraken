@@ -109,41 +109,39 @@ void WebSocketPublic::subscribe(
     const std::string_view& name,
     const roq::span<std::string>& pairs) {
   LOG(INFO)(
-      FMT_STRING(R"(subscribe name="{}", len(pairs)={})"),
+      R"(subscribe name="{}", len(pairs)={})",
       name,
       std::size(pairs));
   if (FLAGS_ws_public_book_depth && name.compare("book") == 0) {
     auto message = fmt::format(
-        FMT_STRING(
-          R"({{)"
-          R"("event":"subscribe",)"
-          R"("pair":["{}"],)"
-          R"("subscription":{{)"
-          R"("name":"{}",)"
-          R"("depth":{})"
-          R"(}})"
-          R"(}})"),
-          fmt::join(pairs, R"(",")"),
-          name,
-          FLAGS_ws_public_book_depth);
+        R"({{)"
+        R"("event":"subscribe",)"
+        R"("pair":["{}"],)"
+        R"("subscription":{{)"
+        R"("name":"{}",)"
+        R"("depth":{})"
+        R"(}})"
+        R"(}})",
+        fmt::join(pairs, R"(",")"),
+        name,
+        FLAGS_ws_public_book_depth);
     DLOG(INFO)(
-        FMT_STRING(R"(request="{}")"),
+        R"(request="{}")",
         message);
     _connection.send_text(message);
   } else {
     auto message = fmt::format(
-        FMT_STRING(
-          R"({{)"
-          R"("event":"subscribe",)"
-          R"("pair":["{}"],)"
-          R"("subscription":{{)"
-          R"("name":"{}")"
-          R"(}})"
-          R"(}})"),
-          fmt::join(pairs, R"(",")"),
-          name);
+        R"({{)"
+        R"("event":"subscribe",)"
+        R"("pair":["{}"],)"
+        R"("subscription":{{)"
+        R"("name":"{}")"
+        R"(}})"
+        R"(}})",
+        fmt::join(pairs, R"(",")"),
+        name);
     VLOG(3)(
-        FMT_STRING(R"(request="{}")"),
+        R"(request="{}")",
         message);
     _connection.send_text(message);
   }
@@ -193,7 +191,7 @@ void WebSocketPublic::operator()(
     const json::Error& error,
     const server::TraceInfo&) {
   LOG(FATAL)(
-      FMT_STRING("error={}"),
+      "error={}",
       error);
 }
 
@@ -201,7 +199,7 @@ void WebSocketPublic::operator()(
     const json::SystemStatus& system_status,
     const server::TraceInfo&) {
   LOG(INFO)(
-      FMT_STRING("system_status={}"),
+      "system_status={}",
       system_status);
 }
 
@@ -209,7 +207,7 @@ void WebSocketPublic::operator()(
     const json::Pong& pong,
     const server::TraceInfo&) {
   VLOG(1)(
-      FMT_STRING("pong={}"),
+      "pong={}",
       pong);
 }
 
@@ -217,7 +215,7 @@ void WebSocketPublic::operator()(
     const json::Heartbeat& heartbeat,
     const server::TraceInfo&) {
   VLOG(1)(
-      FMT_STRING("heartbeat={}"),
+      "heartbeat={}",
       heartbeat);
 }
 
@@ -225,7 +223,7 @@ void WebSocketPublic::operator()(
     const json::SubscriptionStatus& subscription_status,
     const server::TraceInfo&) {
   VLOG(1)(
-      FMT_STRING("subscription_status={}"),
+      "subscription_status={}",
       subscription_status);
 }
 
@@ -234,7 +232,7 @@ void WebSocketPublic::operator()(
     const std::string_view& pair,
     const server::TraceInfo& trace_info) {
   VLOG(3)(
-      FMT_STRING(R"(trade={}, pair="{}")"),
+      R"(trade={}, pair="{}")",
       trade,
       pair);
   _handler(
@@ -248,7 +246,7 @@ void WebSocketPublic::operator()(
     const std::string_view& pair,
     const server::TraceInfo& trace_info) {
   VLOG(3)(
-      FMT_STRING(R"(spread={}, pair="{}")"),
+      R"(spread={}, pair="{}")",
       spread,
       pair);
   _handler(
@@ -262,7 +260,7 @@ void WebSocketPublic::operator()(
     const std::string_view& pair,
     const server::TraceInfo& trace_info) {
   VLOG(3)(
-      FMT_STRING(R"(book={}, pair="{}")"),
+      R"(book={}, pair="{}")",
       book,
       pair);
   _handler(

@@ -140,19 +140,19 @@ void Rest::get(
             buffer);
         if (assets.error.empty()) {
           VLOG(1)(
-              FMT_STRING(R"(assets={})"),
+              R"(assets={})",
               assets);
           core::Promise<json::Assets> promise(assets);
           callback(promise);
         } else {
           LOG(WARNING)(
-              FMT_STRING(R"(assets={})"),
+              R"(assets={})",
               assets);
           LOG(FATAL)("Unexpected");
         }
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::Assets> promise(std::current_exception());
@@ -185,19 +185,19 @@ void Rest::get(
               buffer);
         if (asset_pairs.error.empty()) {
           VLOG(1)(
-              FMT_STRING(R"(asset_pairs={})"),
+              R"(asset_pairs={})",
               asset_pairs);
           core::Promise<json::AssetPairs> promise(asset_pairs);
           callback(promise);
         } else {
           LOG(WARNING)(
-              FMT_STRING(R"(asset_pairs={})"),
+              R"(asset_pairs={})",
               asset_pairs);
           LOG(FATAL)("Unexpected");
         }
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::AssetPairs> promise(std::current_exception());
@@ -236,18 +236,18 @@ void Rest::get(
               buffer);
         if (balance.error.empty()) {
           VLOG(1)(
-              FMT_STRING(R"(balance={})"),
+              R"(balance={})",
               balance);
           _handler(balance);
         } else {
           LOG(WARNING)(
-              FMT_STRING(R"(balance={})"),
+              R"(balance={})",
               balance);
           LOG(FATAL)("Unexpected");
         }
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::Products> promise(std::current_exception());
@@ -286,19 +286,19 @@ void Rest::get(
               buffer);
         if (positions.error.empty()) {
           VLOG(1)(
-              FMT_STRING(R"(positions={})"),
+              R"(positions={})",
               positions);
           core::Promise<json::Positions> promise(positions);
           callback(promise);
         } else {
           LOG(WARNING)(
-              FMT_STRING(R"(positions={})"),
+              R"(positions={})",
               positions);
           LOG(FATAL)("Unexpected");
         }
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::Positions> promise(std::current_exception());
@@ -335,20 +335,20 @@ void Rest::get(
             buffer,
             [](const roq::span<std::string_view>& e) {
               LOG(WARNING)(
-                  FMT_STRING(R"(error=[{}])"),
+                  R"(error=[{}])",
                   fmt::join(e, ","));
               LOG(FATAL)("Unexpected");
             },
             [&](const json::Token& token) {
               VLOG(1)(
-                  FMT_STRING(R"(token={})"),
+                  R"(token={})",
                   token);
               core::Promise<json::Token> promise(token);
               callback(promise);
             });
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            FMT_STRING(R"(Exception type={}, what="{}")"),
+            R"(Exception type={}, what="{}")",
             typeid(e).name(),
             e.what());
         core::Promise<json::Token> promise(std::current_exception());

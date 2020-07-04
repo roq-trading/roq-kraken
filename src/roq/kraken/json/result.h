@@ -40,7 +40,7 @@ struct Result final {
       } else {
         throw std::runtime_error(
             fmt::format(
-                FMT_STRING(R"(Unexpected key="{}")"),
+                R"(Unexpected key="{}")",
                 key));
       }
     }
