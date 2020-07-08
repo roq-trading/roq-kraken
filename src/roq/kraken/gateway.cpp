@@ -396,7 +396,7 @@ void Gateway::operator()(
     if (exchange_time_utc.count() == 0)
       exchange_time_utc = item.time;
   }
-  if (ROQ_PREDICT_FALSE(success == false)) {
+  if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)(
         R"(Insufficient trade array size: )"
         R"(len(trade)={}/{})",
@@ -503,7 +503,7 @@ void Gateway::operator()(
     if (exchange_time_utc.count() == 0)
       exchange_time_utc = item.timestamp;
   }
-  if (ROQ_PREDICT_FALSE(success == false)) {
+  if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)(
         R"(Insufficient bid/ask array size(s): )"
         R"(len(bid={}/{}, len(ask)={}/{})",
