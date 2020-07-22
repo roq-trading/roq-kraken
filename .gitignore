@@ -57,6 +57,7 @@ build/
 
 # project specific
 
+roq-kraken.pc
 roq-kraken
 roq-kraken-benchmark
 roq-kraken-test
