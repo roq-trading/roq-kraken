@@ -133,33 +133,24 @@ void Gateway::operator()(const Event<Connection>&) {
 }
 
 void Gateway::operator()(
-    const Event<CreateOrder>& event,
-    const std::string_view& request_id,
-    uint32_t gateway_order_id) {
+    [[ maybe_unused ]] const Event<CreateOrder>& event,
+    [[ maybe_unused ]] const std::string_view& request_id,
+    [[ maybe_unused ]] uint32_t gateway_order_id) {
   // TODO(thraneh): implement
-  (void)(event);
-  (void)(request_id);
-  (void)(gateway_order_id);
 }
 
 void Gateway::operator()(
-    const Event<ModifyOrder>& event,
-    const std::string_view& request_id,
-    const server::OMS_Order& order) {
+    [[ maybe_unused ]] const Event<ModifyOrder>& event,
+    [[ maybe_unused ]] const std::string_view& request_id,
+    [[ maybe_unused ]] const server::OMS_Order& order) {
   // TODO(thraneh): implement
-  (void)(event);
-  (void)(request_id);
-  (void)(order);
 }
 
 void Gateway::operator()(
-    const Event<CancelOrder>& event,
-    const std::string_view& request_id,
-    const server::OMS_Order& order) {
+    [[ maybe_unused ]] const Event<CancelOrder>& event,
+    [[ maybe_unused ]] const std::string_view& request_id,
+    [[ maybe_unused ]] const server::OMS_Order& order) {
   // TODO(thraneh): implement
-  (void)(event);
-  (void)(request_id);
-  (void)(order);
 }
 
 void Gateway::operator()(metrics::Writer& writer) {
@@ -211,7 +202,7 @@ void Gateway::download_asset_pairs() {
 
 void Gateway::download_balance() {
   constexpr auto state = WebSocketDownload::State::BALANCE;
-  (void)(state);
+  std::ignore = state;
   /*
   auto sequence = _web_socket_public.download.sequence();
   _rest.connection.get<json::Balance>(

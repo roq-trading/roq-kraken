@@ -50,7 +50,7 @@ static auto create_latency(
 
 Rest::Rest(
     Handler& handler,
-    const Config& config,
+    [[ maybe_unused ]] const Config& config,
     Random& random,
     core::event::Base& base,
     core::event::DNSBase& dns_base,
@@ -85,7 +85,6 @@ Rest::Rest(
       _latency {
         .ping = create_latency("ping"),
       } {
-  (void) config;  // avoid warning
 }
 
 bool Rest::ready() const {

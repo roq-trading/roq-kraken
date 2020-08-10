@@ -151,15 +151,10 @@ bool ParserPrivate::dispatch(
 
 namespace {
 static bool dispatch2(
-    ParserPrivate::Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer,
-    Channel channel) {
-  (void)(handler);
-  (void)(message);
-  (void)(buffer);
-  (void)(channel);
-
+    [[ maybe_unused ]] ParserPrivate::Handler& handler,
+    [[ maybe_unused ]] const std::string_view& message,
+    [[ maybe_unused ]] core::json::Buffer& buffer,
+    [[ maybe_unused ]] Channel channel) {
   bool dispatched = false;
   /*
   core::json::Parser parser(message);

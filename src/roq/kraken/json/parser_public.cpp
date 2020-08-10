@@ -145,11 +145,10 @@ static bool dispatch2(
     const std::string_view& message,
     core::json::Buffer& buffer,
     const server::TraceInfo& trace_info,
-    int64_t channel_id,
+    [[ maybe_unused ]] int64_t channel_id,
     Channel channel,
     const std::string_view& pair,
     size_t data_count) {
-  (void)(channel_id);
   /*
   DLOG(INFO)(
       R"(channel_id={} channel={} pair={}, len(data)={})",
