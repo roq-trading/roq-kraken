@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* AssetPairs now parse the `ordermin` flag
+
 ## 0.4.3 &ndash; 2020-09-02
 
 ## 0.4.2 &ndash; 2020-07-27

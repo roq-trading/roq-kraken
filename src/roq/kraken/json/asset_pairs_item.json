@@ -18,6 +18,7 @@
 	{ "name": "fees_maker" },
 	{ "name": "fee_volume_currency", "type": "std::string_view" },
 	{ "name": "margin_call", "type": "double" },
-	{ "name": "margin_stop", "type": "double" }
+	{ "name": "margin_stop", "type": "double" },
+	{ "name": "ordermin", "type": "double" }
 ]
 }
