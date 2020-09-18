@@ -1,5 +1,4 @@
 symbols = ".*"
-# symbols = "PROCBTC"
 
 [accounts]
 
@@ -7,8 +6,7 @@ symbols = ".*"
   master = true
   login = "tNShm3cu+MS4Hx2D+Q3U4CiqDFxu0kEoOK36BiAmU73AjfN/dYy+MZax"
   secret = "1W5Zar/uyMoOilIDVki6Lzl/eGfRCvaN8vXbNmiDOitwXfrtoAdhxDcQqt0KQjpsEVGfW07IoSSmHb0RguYmKA=="
-  password = ""
-  symbols = [ "BTC.*", "ETH.*" ]
+  symbols = ".*"
 
 [users]
 
@@ -19,23 +17,7 @@ symbols = ".*"
   [users.trader]
   password = "secret"
   accounts = [ "A1" ]
-  symbols = [ "BTC-\\d{2}\\D{3}\\d{2}" ]
-  monitor_period_secs = 60
-  ban_period_secs = 300
-  request_limit = 10
-
-  [users.example-1]
-  password = "1234"
-  symbols = ".*"
-
-  [users.example-2]
-  password = "1234"
-  symbols = ".*"
-
-  [users.example-3]
-  password = "secret"
-  accounts = [ "A1" ]
-  symbols = [ "BTC-\\d{2}\\D{3}\\d{2}" ]
+  symbols = "XBT/USD"
   monitor_period_secs = 60
   ban_period_secs = 300
   request_limit = 10
