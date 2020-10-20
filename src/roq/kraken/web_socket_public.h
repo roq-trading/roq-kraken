@@ -29,105 +29,94 @@
 namespace roq {
 namespace kraken {
 
-class WebSocketPublic final
-    : public core::web::Socket::Handler,
-      public json::ParserPublic::Handler {
+class WebSocketPublic final : public core::web::Socket::Handler,
+                              public json::ParserPublic::Handler {
  public:
   struct Handler {
-    virtual void operator()(const WebSocketPublic&) = 0;
+    virtual void operator()(const WebSocketPublic &) = 0;
 
     virtual void operator()(
-        const json::Trade& trade,
-        const std::string_view& pair,
-        const server::TraceInfo& trace_info) = 0;
+        const json::Trade &trade,
+        const std::string_view &pair,
+        const server::TraceInfo &trace_info) = 0;
     virtual void operator()(
-        const json::Spread& spread,
-        const std::string_view& pair,
-        const server::TraceInfo& trace_info) = 0;
+        const json::Spread &spread,
+        const std::string_view &pair,
+        const server::TraceInfo &trace_info) = 0;
     virtual void operator()(
-        const json::Book& book,
-        const std::string_view& pair,
-        const server::TraceInfo& trace_info) = 0;
+        const json::Book &book,
+        const std::string_view &pair,
+        const server::TraceInfo &trace_info) = 0;
   };
 
   WebSocketPublic(
-      Handler& handler,
-      const Config& config,
-      Random& random,
-      core::event::Base& base,
-      core::event::DNSBase& dns_base,
-      core::ssl::Context& ssl_context);
+      Handler &handler,
+      const Config &config,
+      Random &random,
+      core::event::Base &base,
+      core::event::DNSBase &dns_base,
+      core::ssl::Context &ssl_context);
 
-  WebSocketPublic(WebSocketPublic&&) = delete;
-  WebSocketPublic(const WebSocketPublic&) = delete;
+  WebSocketPublic(WebSocketPublic &&) = delete;
+  WebSocketPublic(const WebSocketPublic &) = delete;
 
   bool ready() const;
 
   void close();
 
-  void operator()(const Event<Start>&);
-  void operator()(const Event<Stop>&);
-  void operator()(const Event<Timer>&);
+  void operator()(const Event<Start> &);
+  void operator()(const Event<Stop> &);
+  void operator()(const Event<Timer> &);
 
-  void operator()(metrics::Writer& writer);
+  void operator()(metrics::Writer &writer);
 
   template <typename T>
-  void subscribe(
-      const std::string_view& name,
-      const roq::span<T>& pairs);
+  void subscribe(const std::string_view &name, const roq::span<T> &pairs);
 
  protected:
   // core::web::Socket::Handler
 
-  void operator()(const core::web::Socket::Connected&) override;
-  void operator()(const core::web::Socket::Disconnected&) override;
-  void operator()(const core::web::Socket::Ready&) override;
-  void operator()(const core::web::Socket::Close&) override;
-  void operator()(const core::web::Socket::Latency&) override;
-  void operator()(const core::web::Socket::Text&) override;
+  void operator()(const core::web::Socket::Connected &) override;
+  void operator()(const core::web::Socket::Disconnected &) override;
+  void operator()(const core::web::Socket::Ready &) override;
+  void operator()(const core::web::Socket::Close &) override;
+  void operator()(const core::web::Socket::Latency &) override;
+  void operator()(const core::web::Socket::Text &) override;
 
   // json::ParserPublic::Handler
 
+  void operator()(const json::Error &, const server::TraceInfo &) override;
   void operator()(
-      const json::Error&,
-      const server::TraceInfo&) override;
+      const json::SystemStatus &, const server::TraceInfo &) override;
+  void operator()(const json::Pong &, const server::TraceInfo &) override;
+  void operator()(const json::Heartbeat &, const server::TraceInfo &) override;
   void operator()(
-      const json::SystemStatus&,
-      const server::TraceInfo&) override;
-  void operator()(
-      const json::Pong&,
-      const server::TraceInfo&) override;
-  void operator()(
-      const json::Heartbeat&,
-      const server::TraceInfo&) override;
-  void operator()(
-      const json::SubscriptionStatus&,
-      const server::TraceInfo&) override;
+      const json::SubscriptionStatus &, const server::TraceInfo &) override;
 
   void operator()(
-      const json::Trade& trade,
-      const std::string_view& pair,
-      const server::TraceInfo& trace_info) override;
+      const json::Trade &trade,
+      const std::string_view &pair,
+      const server::TraceInfo &trace_info) override;
   void operator()(
-      const json::Spread& spread,
-      const std::string_view& pair,
-      const server::TraceInfo& trace_info) override;
+      const json::Spread &spread,
+      const std::string_view &pair,
+      const server::TraceInfo &trace_info) override;
   void operator()(
-      const json::Book& book,
-      const std::string_view& pair,
-      const server::TraceInfo& trace_info) override;
+      const json::Book &book,
+      const std::string_view &pair,
+      const server::TraceInfo &trace_info) override;
 
  private:
-  void parse(const std::string_view& message);
+  void parse(const std::string_view &message);
 
   void reset();
 
  private:
-  Handler& _handler;
+  Handler &_handler;
   // config
   const std::string _access_key;
   // authentication
-  Random& _random;
+  Random &_random;
   // web socket
   core::web::Socket _connection;
   // buffers
@@ -135,17 +124,13 @@ class WebSocketPublic final
   core::stack::Buffer<char, 32> _stack_buffer;
   // metrics
   struct {
-    core::metrics::Counter
-      disconnect;
+    core::metrics::Counter disconnect;
   } _counter;
   struct {
-    core::metrics::Profile
-      parse;
+    core::metrics::Profile parse;
   } _profile;
   struct {
-    core::metrics::Latency
-      ping,
-      heartbeat;
+    core::metrics::Latency ping, heartbeat;
   } _latency;
 };
 

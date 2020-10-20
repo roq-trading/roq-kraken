@@ -4,8 +4,6 @@
 
 namespace roq {
 namespace kraken {
-namespace json {
-
-}  // namespace json
+namespace json {}  // namespace json
 }  // namespace kraken
 }  // namespace roq

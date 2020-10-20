@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "roq/server.h"
 #include "roq/download.h"
+#include "roq/server.h"
 
 #include "roq/core/hash/map.h"
 #include "roq/core/hash/set.h"
@@ -33,83 +33,74 @@
 namespace roq {
 namespace kraken {
 
-class Gateway final
-    : public server::Handler,
-      public Rest::Handler,
-      public WebSocketPublic::Handler,
-      public WebSocketPrivate::Handler {
+class Gateway final : public server::Handler,
+                      public Rest::Handler,
+                      public WebSocketPublic::Handler,
+                      public WebSocketPrivate::Handler {
  public:
-  Gateway(
-      server::Dispatcher& dispatcher,
-      const Config& config);
+  Gateway(server::Dispatcher &dispatcher, const Config &config);
 
  protected:
   // server::Handler
 
-  void operator()(const Event<Start>&) override;
-  void operator()(const Event<Stop>&) override;
-  void operator()(const Event<Timer>&) override;
-  void operator()(const Event<Connection>&) override;
+  void operator()(const Event<Start> &) override;
+  void operator()(const Event<Stop> &) override;
+  void operator()(const Event<Timer> &) override;
+  void operator()(const Event<Connection> &) override;
 
   void operator()(
-      const Event<CreateOrder>& event,
-      const std::string_view& request_id,
+      const Event<CreateOrder> &event,
+      const std::string_view &request_id,
       uint32_t gateway_order_id) override;
   void operator()(
-      const Event<ModifyOrder>& event,
-      const std::string_view& request_id,
-      const server::OMS_Order& order) override;
+      const Event<ModifyOrder> &event,
+      const std::string_view &request_id,
+      const server::OMS_Order &order) override;
   void operator()(
-      const Event<CancelOrder>& event,
-      const std::string_view& request_id,
-      const server::OMS_Order& order) override;
+      const Event<CancelOrder> &event,
+      const std::string_view &request_id,
+      const server::OMS_Order &order) override;
 
-  void operator()(metrics::Writer& writer) override;
+  void operator()(metrics::Writer &writer) override;
 
   // Rest::Handler
 
-  void operator()(const Rest&) override;
+  void operator()(const Rest &) override;
 
   // WebSocketPublic::Handler
 
-  void operator()(const WebSocketPublic&) override;
+  void operator()(const WebSocketPublic &) override;
 
   void operator()(
-      const json::Trade& trade,
-      const std::string_view& pair,
-      const server::TraceInfo& trace_info) override;
+      const json::Trade &trade,
+      const std::string_view &pair,
+      const server::TraceInfo &trace_info) override;
   void operator()(
-      const json::Spread& spread,
-      const std::string_view& pair,
-      const server::TraceInfo& trace_info) override;
+      const json::Spread &spread,
+      const std::string_view &pair,
+      const server::TraceInfo &trace_info) override;
   void operator()(
-      const json::Book& book,
-      const std::string_view& pair,
-      const server::TraceInfo& trace_info) override;
+      const json::Book &book,
+      const std::string_view &pair,
+      const server::TraceInfo &trace_info) override;
 
   // WebSocketPrivate::Handler
 
-  void operator()(const WebSocketPrivate&) override;
+  void operator()(const WebSocketPrivate &) override;
 
   void operator()(
-      const json::AddOrderStatus&,
-      const server::TraceInfo&) override;
+      const json::AddOrderStatus &, const server::TraceInfo &) override;
   void operator()(
-      const json::CancelOrderStatus&,
-      const server::TraceInfo&) override;
+      const json::CancelOrderStatus &, const server::TraceInfo &) override;
 
-  void operator()(
-      const json::OpenOrders&,
-      const server::TraceInfo&) override;
-  void operator()(
-      const json::OwnTrades&,
-      const server::TraceInfo&) override;
+  void operator()(const json::OpenOrders &, const server::TraceInfo &) override;
+  void operator()(const json::OwnTrades &, const server::TraceInfo &) override;
 
  private:
-  void operator()(const json::Assets&);
-  void operator()(const json::AssetPairs&);
-  void operator()(const json::Positions&);
-  void operator()(const json::Token&);
+  void operator()(const json::Assets &);
+  void operator()(const json::AssetPairs &);
+  void operator()(const json::Positions &);
+  void operator()(const json::Token &);
 
   using WebSocketDownload = server::Download<PublicState>;
 
@@ -138,7 +129,7 @@ class Gateway final
   void subscribe_private();
 
  private:
-  server::Dispatcher& _dispatcher;
+  server::Dispatcher &_dispatcher;
   // config
   const std::string _account;
   const std::string _access_key;

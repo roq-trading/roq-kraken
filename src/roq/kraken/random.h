@@ -16,19 +16,19 @@ namespace kraken {
 class Random final {
  public:
   explicit Random(
-      const std::string_view& key,
-      const std::string_view& secret,
-      const std::string_view& password);
+      const std::string_view &key,
+      const std::string_view &secret,
+      const std::string_view &password);
 
-  Random(Random&&) = delete;
-  Random(const Random&) = delete;
+  Random(Random &&) = delete;
+  Random(const Random &) = delete;
 
   std::string create_body();
 
   std::string create_headers(
-      const core::http::Method& method,
-      const std::string_view& path,
-      const std::string_view& body);
+      const core::http::Method &method,
+      const std::string_view &path,
+      const std::string_view &body);
 
  private:
   const std::string _key;

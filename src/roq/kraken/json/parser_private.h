@@ -26,57 +26,43 @@ namespace json {
 
 struct ParserPrivate final {
   struct Handler {
+    virtual void operator()(const Error &, const server::TraceInfo &) = 0;
     virtual void operator()(
-        const Error&,
-        const server::TraceInfo&) = 0;
+        const SystemStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Pong &, const server::TraceInfo &) = 0;
+    virtual void operator()(const Heartbeat &, const server::TraceInfo &) = 0;
     virtual void operator()(
-        const SystemStatus&,
-        const server::TraceInfo&) = 0;
-    virtual void operator()(
-        const Pong&,
-        const server::TraceInfo&) = 0;
-    virtual void operator()(
-        const Heartbeat&,
-        const server::TraceInfo&) = 0;
-    virtual void operator()(
-        const SubscriptionStatus&,
-        const server::TraceInfo&) = 0;
+        const SubscriptionStatus &, const server::TraceInfo &) = 0;
 
     virtual void operator()(
-        const AddOrderStatus&,
-        const server::TraceInfo&) = 0;
+        const AddOrderStatus &, const server::TraceInfo &) = 0;
     virtual void operator()(
-        const CancelOrderStatus&,
-        const server::TraceInfo&) = 0;
+        const CancelOrderStatus &, const server::TraceInfo &) = 0;
 
-    virtual void operator()(
-        const OpenOrders&,
-        const server::TraceInfo&) = 0;
-    virtual void operator()(
-        const OwnTrades&,
-        const server::TraceInfo&) = 0;
+    virtual void operator()(const OpenOrders &, const server::TraceInfo &) = 0;
+    virtual void operator()(const OwnTrades &, const server::TraceInfo &) = 0;
   };
 
   static bool dispatch(
-      Handler& handler,
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      const server::TraceInfo& trace_info);
+      Handler &handler,
+      const std::string_view &message,
+      core::json::Buffer &buffer,
+      const server::TraceInfo &trace_info);
 
  protected:
   static bool dispatch(
-      Handler& handler,
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      core::json::object_t& root,
-      const server::TraceInfo& trace_info);
+      Handler &handler,
+      const std::string_view &message,
+      core::json::Buffer &buffer,
+      core::json::object_t &root,
+      const server::TraceInfo &trace_info);
 
   static bool dispatch(
-      Handler& handler,
-      const std::string_view& message,
-      core::json::Buffer& buffer,
-      core::json::array_t& root,
-      const server::TraceInfo& trace_info);
+      Handler &handler,
+      const std::string_view &message,
+      core::json::Buffer &buffer,
+      core::json::array_t &root,
+      const server::TraceInfo &trace_info);
 };
 
 }  // namespace json

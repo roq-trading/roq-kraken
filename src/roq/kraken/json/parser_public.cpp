@@ -13,56 +13,36 @@ namespace kraken {
 namespace json {
 
 bool ParserPublic::dispatch(
-    Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer,
-    const server::TraceInfo& trace_info) {
+    Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
   return std::visit(
       overloaded {
-        [](const core::json::null_t&) -> bool {
-          throw std::bad_cast();
-        },
-        [](bool) -> bool {
-          throw std::bad_cast();
-        },
-        [](int64_t) -> bool {
-          throw std::bad_cast();
-        },
-        [](double) -> bool {
-          throw std::bad_cast();
-        },
-        [](const std::string_view&) -> bool {
-          throw std::bad_cast();
-        },
-        [&](core::json::object_t& value) -> bool {
-          return dispatch(
-              handler,
-              message,
-              buffer,
-              value,
-              trace_info);
-        },
-        [&](core::json::array_t& value) -> bool {
-          return dispatch(
-              handler,
-              message,
-              buffer,
-              value,
-              trace_info);
-        },
+          [](const core::json::null_t &) -> bool { throw std::bad_cast(); },
+          [](bool) -> bool { throw std::bad_cast(); },
+          [](int64_t) -> bool { throw std::bad_cast(); },
+          [](double) -> bool { throw std::bad_cast(); },
+          [](const std::string_view &) -> bool { throw std::bad_cast(); },
+          [&](core::json::object_t &value) -> bool {
+            return dispatch(handler, message, buffer, value, trace_info);
+          },
+          [&](core::json::array_t &value) -> bool {
+            return dispatch(handler, message, buffer, value, trace_info);
+          },
       },
       root);
 }
 
 bool ParserPublic::dispatch(
-    Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer&,
-    core::json::object_t& root,
-    const server::TraceInfo& trace_info) {
+    Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &,
+    core::json::object_t &root,
+    const server::TraceInfo &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -77,50 +57,37 @@ bool ParserPublic::dispatch(
             LOG(FATAL)("Unexpected");
             break;
           case Event::UNKNOWN:
-            DLOG(FATAL)(
-                R"(Unknown key="{}")",
-                key);
+            DLOG(FATAL)(R"(Unknown key="{}")", key);
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
-            handler(
-                error,
-                trace_info);
+            handler(error, trace_info);
             dispatched = true;
             break;
           }
           case Event::SYSTEM_STATUS: {
             auto system_status =
-              core::json::Parser::create<SystemStatus>(message);
-            handler(
-                system_status,
-                trace_info);
+                core::json::Parser::create<SystemStatus>(message);
+            handler(system_status, trace_info);
             dispatched = true;
             break;
           }
           case Event::PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
-            handler(
-                pong,
-                trace_info);
+            handler(pong, trace_info);
             dispatched = true;
             break;
           }
           case Event::HEARTBEAT: {
-            auto heartbeat =
-              core::json::Parser::create<Heartbeat>(message);
-            handler(
-                heartbeat,
-                trace_info);
+            auto heartbeat = core::json::Parser::create<Heartbeat>(message);
+            handler(heartbeat, trace_info);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status =
-              core::json::Parser::create<SubscriptionStatus>(message);
-            handler(
-                subscription_status,
-                trace_info);
+                core::json::Parser::create<SubscriptionStatus>(message);
+            handler(subscription_status, trace_info);
             dispatched = true;
             break;
           }
@@ -141,13 +108,13 @@ bool ParserPublic::dispatch(
 
 namespace {
 static bool dispatch2(
-    ParserPublic::Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer,
-    const server::TraceInfo& trace_info,
-    [[ maybe_unused ]] int64_t channel_id,
+    ParserPublic::Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    const server::TraceInfo &trace_info,
+    [[maybe_unused]] int64_t channel_id,
     Channel channel,
-    const std::string_view& pair,
+    const std::string_view &pair,
     size_t data_count) {
   /*
   DLOG(INFO)(
@@ -163,10 +130,8 @@ static bool dispatch2(
   size_t offset = 0;
   Book book_1, book_2;
   for (auto value : std::get<core::json::array_t>(root)) {
-    if (++offset == 1)
-      continue;
-    if (offset > (1 + data_count))
-      break;
+    if (++offset == 1) continue;
+    if (offset > (1 + data_count)) break;
     switch (channel) {
       case Channel::UNDEFINED:
       case Channel::UNKNOWN:
@@ -182,23 +147,15 @@ static bool dispatch2(
       }
       case Channel::TRADE: {
         LOG_IF(FATAL, data_count != 1)("Unexpected");
-        Trade trade(
-            value,
-            buffer);
-        handler(
-            trade,
-            pair,
-            trace_info);
+        Trade trade(value, buffer);
+        handler(trade, pair, trace_info);
         dispatched = true;
         break;
       }
       case Channel::SPREAD: {
         LOG_IF(FATAL, data_count != 1)("Unexpected");
         Spread spread(value);
-        handler(
-            spread,
-            pair,
-            trace_info);
+        handler(spread, pair, trace_info);
         dispatched = true;
         break;
       }
@@ -238,10 +195,7 @@ static bool dispatch2(
         LOG(FATAL)("Unexpected");
       }
     }
-    handler(
-        book_1,
-        pair,
-        trace_info);
+    handler(book_1, pair, trace_info);
     dispatched = true;
   }
   return dispatched;
@@ -249,11 +203,11 @@ static bool dispatch2(
 }  // namespace
 
 bool ParserPublic::dispatch(
-    Handler& handler,
-    const std::string_view& message,
-    core::json::Buffer& buffer,
-    core::json::array_t& root,
-    const server::TraceInfo& trace_info) {
+    Handler &handler,
+    const std::string_view &message,
+    core::json::Buffer &buffer,
+    core::json::array_t &root,
+    const server::TraceInfo &trace_info) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;
   std::string_view pair;
@@ -261,8 +215,8 @@ bool ParserPublic::dispatch(
   size_t data_count = 0;
   for (auto value : root) {
     if (offset == 0) {
-        channel_id = std::get<int64_t>(value);
-        ++offset;
+      channel_id = std::get<int64_t>(value);
+      ++offset;
     } else {
       if (core::json::is_pod(value)) {
         switch (offset) {
@@ -270,12 +224,10 @@ bool ParserPublic::dispatch(
             auto name = std::get<std::string_view>(value);
             // for example "book-10" --> "book"
             auto pos = name.find_first_of('-');
-            if (pos != name.npos)
-              name.remove_suffix(name.size() - pos);
+            if (pos != name.npos) name.remove_suffix(name.size() - pos);
             channel = Channel(name);
-            DLOG_IF(FATAL, channel == Channel::UNKNOWN)(
-                R"(Unknown channel="{}")",
-                name);
+            DLOG_IF(FATAL, channel == Channel::UNKNOWN)
+            (R"(Unknown channel="{}")", name);
             break;
           }
           case 2:
@@ -288,9 +240,7 @@ bool ParserPublic::dispatch(
       }
     }
   }
-  LOG_IF(FATAL, offset != 3)(
-      R"(message={})",
-      message);
+  LOG_IF(FATAL, offset != 3)(R"(message={})", message);
   return dispatch2(
       handler,
       message,
