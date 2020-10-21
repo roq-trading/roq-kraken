@@ -21,7 +21,7 @@ bool ParserPrivate::dispatch(
   core::json::Parser parser(message);
   auto root = parser.root();
   return std::visit(
-      overloaded {
+      overloaded{
           [](const core::json::null_t &) -> bool { throw std::bad_cast(); },
           [](bool) -> bool { throw std::bad_cast(); },
           [](int64_t) -> bool { throw std::bad_cast(); },
