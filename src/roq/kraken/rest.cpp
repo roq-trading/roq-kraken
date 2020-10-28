@@ -43,8 +43,8 @@ Rest::Rest(
     core::event::Base &base,
     core::event::DNSBase &dns_base,
     core::ssl::Context &ssl_context)
-    : _handler(handler), _random(random),
-      _connection(
+    : handler_(handler), random_(random),
+      connection_(
           *this,
           base,
           dns_base,
@@ -60,50 +60,50 @@ Rest::Rest(
           FLAGS_decode_buffer_size,
           FLAGS_encode_buffer_size,
           FLAGS_rest_ping_path),
-      _decode_buffer(FLAGS_decode_buffer_size),
-      _counter{
+      decode_buffer_(FLAGS_decode_buffer_size),
+      counter_{
           .disconnect = create_counter("disconnect"),
       },
-      _profile{
+      profile_{
           .assets = create_profile("assets"),
           .asset_pairs = create_profile("asset_pairs"),
           .balance = create_profile("balance"),
           .open_positions = create_profile("open_positions"),
           .get_web_sockets_token = create_profile("get_web_sockets_token"),
       },
-      _latency{
+      latency_{
           .ping = create_latency("ping"),
       } {
 }
 
 bool Rest::ready() const {
-  return _connection.ready();
+  return connection_.ready();
 }
 
 void Rest::operator()(const Event<Start> &) {
-  _connection.start();
+  connection_.start();
 }
 
 void Rest::operator()(const Event<Stop> &) {
-  _connection.stop();
+  connection_.stop();
 }
 
 void Rest::operator()(const Event<Timer> &event) {
-  _connection.refresh(event.value.now);
+  connection_.refresh(event.value.now);
 }
 
 void Rest::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(_counter.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(_profile.assets, metrics::PROFILE)
-      .write(_profile.asset_pairs, metrics::PROFILE)
-      .write(_profile.balance, metrics::PROFILE)
-      .write(_profile.open_positions, metrics::PROFILE)
-      .write(_profile.get_web_sockets_token, metrics::PROFILE)
+      .write(profile_.assets, metrics::PROFILE)
+      .write(profile_.asset_pairs, metrics::PROFILE)
+      .write(profile_.balance, metrics::PROFILE)
+      .write(profile_.open_positions, metrics::PROFILE)
+      .write(profile_.get_web_sockets_token, metrics::PROFILE)
       // latency
-      .write(_latency.ping, metrics::LATENCY);
+      .write(latency_.ping, metrics::LATENCY);
 }
 
 template <>
@@ -111,17 +111,17 @@ void Rest::get(
     std::function<void(const core::Promise<json::Assets> &)> &&callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/0/public/Assets";
-  _connection.request(
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto &response) {
-        _profile.assets([&]() {
+        profile_.assets([&]() {
           try {
             response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(_decode_buffer);
+            core::json::Buffer buffer(decode_buffer_);
             auto assets = core::json::Parser::create<json::Assets>(
                 response.body(), buffer);
             if (assets.error.empty()) {
@@ -147,17 +147,17 @@ void Rest::get(
     std::function<void(const core::Promise<json::AssetPairs> &)> &&callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/0/public/AssetPairs";
-  _connection.request(
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       std::string_view(),  // headers
       std::string_view(),  // body
       [this, callback](auto &response) {
-        _profile.asset_pairs([&]() {
+        profile_.asset_pairs([&]() {
           try {
             response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(_decode_buffer);
+            core::json::Buffer buffer(decode_buffer_);
             auto asset_pairs = core::json::Parser::create<json::AssetPairs>(
                 response.body(), buffer);
             if (asset_pairs.error.empty()) {
@@ -184,23 +184,23 @@ void Rest::get(
     std::function<void(const core::Promise<json::Balance>&)>&& callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/Balance";
-  auto body = _random.create_body();
-  auto headers = _random.create_headers(
+  auto body = random_.create_body();
+  auto headers = random_.create_headers(
       method,
       path,
       body);
-  _connection.request(
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       headers,
       body,
       [this, callback](auto& response) {
-    _profile.balance(
+    profile_.balance(
         [&]() {
       try {
         response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(_decode_buffer);
+        core::json::Buffer buffer(decode_buffer_);
         auto balance =
           core::json::Parser::create<json::Balance>(
               response.body(),
@@ -209,7 +209,7 @@ void Rest::get(
           VLOG(1)(
               R"(balance={})",
               balance);
-          _handler(balance);
+          handler_(balance);
         } else {
           LOG(WARNING)(
               R"(balance={})",
@@ -234,19 +234,19 @@ void Rest::get(
     std::function<void(const core::Promise<json::Positions> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/OpenPositions";
-  auto body = _random.create_body();
-  auto headers = _random.create_headers(method, path, body);
-  _connection.request(
+  auto body = random_.create_body();
+  auto headers = random_.create_headers(method, path, body);
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       headers,
       body,
       [this, callback](auto &response) {
-        _profile.open_positions([&]() {
+        profile_.open_positions([&]() {
           try {
             response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(_decode_buffer);
+            core::json::Buffer buffer(decode_buffer_);
             auto positions = core::json::Parser::create<json::Positions>(
                 response.body(), buffer);
             if (positions.error.empty()) {
@@ -272,19 +272,19 @@ void Rest::get(
     std::function<void(const core::Promise<json::Token> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/GetWebSocketsToken";
-  auto body = _random.create_body();
-  auto headers = _random.create_headers(method, path, body);
-  _connection.request(
+  auto body = random_.create_body();
+  auto headers = random_.create_headers(method, path, body);
+  connection_.request(
       method,
       path,
       std::string_view(),  // query
       headers,
       body,
       [this, callback](auto &response) {
-        _profile.get_web_sockets_token([&]() {
+        profile_.get_web_sockets_token([&]() {
           try {
             response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(_decode_buffer);
+            core::json::Buffer buffer(decode_buffer_);
             json::Result::dispatch<json::Token>(
                 response.body(),
                 buffer,
@@ -308,16 +308,16 @@ void Rest::get(
 }
 
 void Rest::operator()(const core::web::Client::Connected &) {
-  _handler(*this);
+  handler_(*this);
 }
 
 void Rest::operator()(const core::web::Client::Disconnected &) {
-  ++_counter.disconnect;
-  _handler(*this);
+  ++counter_.disconnect;
+  handler_(*this);
 }
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
-  _latency.ping.update(
+  latency_.ping.update(
       std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
           .count());
 }

@@ -34,8 +34,8 @@ WebSocketPublic::WebSocketPublic(
     core::event::Base &base,
     core::event::DNSBase &dns_base,
     core::ssl::Context &ssl_context)
-    : _handler(handler), _access_key(config.get_access_key()), _random(random),
-      _connection(
+    : handler_(handler), access_key_(config.get_access_key()), random_(random),
+      connection_(
           *this,
           base,
           dns_base,
@@ -46,48 +46,48 @@ WebSocketPublic::WebSocketPublic(
           FLAGS_decode_buffer_size,  // XXX need read buffer size
           FLAGS_encode_buffer_size,
           []() { return std::string(); }),
-      _decode_buffer(FLAGS_decode_buffer_size),
-      _counter{
+      decode_buffer_(FLAGS_decode_buffer_size),
+      counter_{
           .disconnect = create_counter("disconnect"),
       },
-      _profile{
+      profile_{
           .parse = create_profile("parse"),
       },
-      _latency{
+      latency_{
           .ping = create_latency("ping"),
           .heartbeat = create_latency("heartbeat"),
       } {
 }
 
 bool WebSocketPublic::ready() const {
-  return _connection.ready();
+  return connection_.ready();
 }
 
 void WebSocketPublic::close() {
-  _connection.close();
+  connection_.close();
 }
 
 void WebSocketPublic::operator()(const Event<Start> &) {
-  _connection.start();
+  connection_.start();
 }
 
 void WebSocketPublic::operator()(const Event<Stop> &) {
-  _connection.stop();
+  connection_.stop();
 }
 
 void WebSocketPublic::operator()(const Event<Timer> &event) {
-  _connection.refresh(event.value.now);
+  connection_.refresh(event.value.now);
 }
 
 void WebSocketPublic::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(_counter.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(_profile.parse, metrics::PROFILE)
+      .write(profile_.parse, metrics::PROFILE)
       // latency
-      .write(_latency.ping, metrics::LATENCY)
-      .write(_latency.heartbeat, metrics::LATENCY);
+      .write(latency_.ping, metrics::LATENCY)
+      .write(latency_.heartbeat, metrics::LATENCY);
 }
 
 template <>
@@ -108,7 +108,7 @@ void WebSocketPublic::subscribe(
         name,
         FLAGS_ws_public_book_depth);
     DLOG(INFO)(R"(request="{}")", message);
-    _connection.send_text(message);
+    connection_.send_text(message);
   } else {
     auto message = fmt::format(
         R"({{)"
@@ -121,7 +121,7 @@ void WebSocketPublic::subscribe(
         fmt::join(pairs, R"(",")"),
         name);
     VLOG(3)(R"(request="{}")", message);
-    _connection.send_text(message);
+    connection_.send_text(message);
   }
 }
 
@@ -130,20 +130,20 @@ void WebSocketPublic::operator()(const core::web::Socket::Connected &) {
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Disconnected &) {
-  ++_counter.disconnect;
-  _handler(*this);
+  ++counter_.disconnect;
+  handler_(*this);
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Ready &) {
   LOG(INFO)("Ready");
-  _handler(*this);
+  handler_(*this);
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Close &) {
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Latency &latency) {
-  _latency.ping.update(
+  latency_.ping.update(
       std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
           .count());
 }
@@ -153,9 +153,9 @@ void WebSocketPublic::operator()(const core::web::Socket::Text &text) {
 }
 
 void WebSocketPublic::parse(const std::string_view &message) {
-  _profile.parse([&]() {
+  profile_.parse([&]() {
     server::TraceInfo trace_info;
-    core::json::Buffer buffer(_decode_buffer);
+    core::json::Buffer buffer(decode_buffer_);
     auto result =
         json::ParserPublic::dispatch(*this, message, buffer, trace_info);
   });
@@ -192,7 +192,7 @@ void WebSocketPublic::operator()(
     const std::string_view &pair,
     const server::TraceInfo &trace_info) {
   VLOG(3)(R"(trade={}, pair="{}")", trade, pair);
-  _handler(trade, pair, trace_info);
+  handler_(trade, pair, trace_info);
 }
 
 void WebSocketPublic::operator()(
@@ -200,7 +200,7 @@ void WebSocketPublic::operator()(
     const std::string_view &pair,
     const server::TraceInfo &trace_info) {
   VLOG(3)(R"(spread={}, pair="{}")", spread, pair);
-  _handler(spread, pair, trace_info);
+  handler_(spread, pair, trace_info);
 }
 
 void WebSocketPublic::operator()(
@@ -208,7 +208,7 @@ void WebSocketPublic::operator()(
     const std::string_view &pair,
     const server::TraceInfo &trace_info) {
   VLOG(3)(R"(book={}, pair="{}")", book, pair);
-  _handler(book, pair, trace_info);
+  handler_(book, pair, trace_info);
 }
 
 }  // namespace kraken

@@ -102,26 +102,26 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
   void parse(const std::string_view &message);
 
  private:
-  Handler &_handler;
+  Handler &handler_;
   // config
-  const std::string _access_key;
+  const std::string access_key_;
   // authentication
-  Random &_random;
+  Random &random_;
   // web socket
-  core::web::Socket _connection;
+  core::web::Socket connection_;
   // buffers
-  core::utils::Buffer _decode_buffer;
-  core::stack::Buffer<char, 32> _stack_buffer;
+  core::utils::Buffer decode_buffer_;
+  // core::stack::Buffer<char, 32> stack_buffer_;
   // metrics
   struct {
     core::metrics::Counter disconnect;
-  } _counter;
+  } counter_;
   struct {
     core::metrics::Profile parse;
-  } _profile;
+  } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
-  } _latency;
+  } latency_;
 };
 
 }  // namespace kraken

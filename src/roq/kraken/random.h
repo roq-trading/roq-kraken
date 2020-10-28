@@ -31,12 +31,12 @@ class Random final {
       const std::string_view &body);
 
  private:
-  const std::string _key;
-  const std::string _password;
-  core::crypto::SHA256 _sha;
-  core::crypto::HMAC_SHA512 _hmac;
+  const std::string key_;
+  const std::string password_;
+  core::crypto::SHA256 sha_;
+  core::crypto::HMAC_SHA512 hmac_;
   // experimental
-  std::chrono::milliseconds _nonce = {};
+  std::chrono::milliseconds nonce_ = {};
 };
 
 }  // namespace kraken

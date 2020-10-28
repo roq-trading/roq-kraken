@@ -34,8 +34,8 @@ WebSocketPrivate::WebSocketPrivate(
     core::event::Base &base,
     core::event::DNSBase &dns_base,
     core::ssl::Context &ssl_context)
-    : _handler(handler), _access_key(config.get_access_key()), _random(random),
-      _connection(
+    : handler_(handler), access_key_(config.get_access_key()), random_(random),
+      connection_(
           *this,
           base,
           dns_base,
@@ -46,48 +46,48 @@ WebSocketPrivate::WebSocketPrivate(
           FLAGS_decode_buffer_size,  // XXX need read buffer size
           FLAGS_encode_buffer_size,
           []() { return std::string(); }),
-      _decode_buffer(FLAGS_decode_buffer_size),
-      _counter{
+      decode_buffer_(FLAGS_decode_buffer_size),
+      counter_{
           .disconnect = create_counter("disconnect"),
       },
-      _profile{
+      profile_{
           .parse = create_profile("parse"),
       },
-      _latency{
+      latency_{
           .ping = create_latency("ping"),
           .heartbeat = create_latency("heartbeat"),
       } {
 }
 
 bool WebSocketPrivate::ready() const {
-  return _connection.ready();
+  return connection_.ready();
 }
 
 void WebSocketPrivate::close() {
-  _connection.close();
+  connection_.close();
 }
 
 void WebSocketPrivate::operator()(const Event<Start> &) {
-  _connection.start();
+  connection_.start();
 }
 
 void WebSocketPrivate::operator()(const Event<Stop> &) {
-  _connection.stop();
+  connection_.stop();
 }
 
 void WebSocketPrivate::operator()(const Event<Timer> &event) {
-  _connection.refresh(event.value.now);
+  connection_.refresh(event.value.now);
 }
 
 void WebSocketPrivate::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(_counter.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(_profile.parse, metrics::PROFILE)
+      .write(profile_.parse, metrics::PROFILE)
       // latency
-      .write(_latency.ping, metrics::LATENCY)
-      .write(_latency.heartbeat, metrics::LATENCY);
+      .write(latency_.ping, metrics::LATENCY)
+      .write(latency_.heartbeat, metrics::LATENCY);
 }
 
 void WebSocketPrivate::subscribe(
@@ -104,7 +104,7 @@ void WebSocketPrivate::subscribe(
       name,
       token);
   VLOG(3)(R"(request="{}")", message);
-  _connection.send_text(message);
+  connection_.send_text(message);
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Connected &) {
@@ -112,20 +112,20 @@ void WebSocketPrivate::operator()(const core::web::Socket::Connected &) {
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Disconnected &) {
-  ++_counter.disconnect;
-  _handler(*this);
+  ++counter_.disconnect;
+  handler_(*this);
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Ready &) {
   LOG(INFO)("Ready");
-  _handler(*this);
+  handler_(*this);
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Close &) {
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Latency &latency) {
-  _latency.ping.update(
+  latency_.ping.update(
       std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
           .count());
 }
@@ -135,9 +135,9 @@ void WebSocketPrivate::operator()(const core::web::Socket::Text &text) {
 }
 
 void WebSocketPrivate::parse(const std::string_view &message) {
-  _profile.parse([&]() {
+  profile_.parse([&]() {
     server::TraceInfo trace_info;
-    core::json::Buffer buffer(_decode_buffer);
+    core::json::Buffer buffer(decode_buffer_);
     auto result =
         json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
   });
@@ -173,24 +173,24 @@ void WebSocketPrivate::operator()(
     const json::AddOrderStatus &add_order_status,
     const server::TraceInfo &trace_info) {
   LOG(INFO)("add_order_status={}", add_order_status);
-  _handler(add_order_status, trace_info);
+  handler_(add_order_status, trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::CancelOrderStatus &cancel_order_status,
     const server::TraceInfo &trace_info) {
   LOG(INFO)("cancel_order_status={}", cancel_order_status);
-  _handler(cancel_order_status, trace_info);
+  handler_(cancel_order_status, trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::OpenOrders &open_orders, const server::TraceInfo &trace_info) {
-  _handler(open_orders, trace_info);
+  handler_(open_orders, trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::OwnTrades &own_trades, const server::TraceInfo &trace_info) {
-  _handler(own_trades, trace_info);
+  handler_(own_trades, trace_info);
 }
 
 }  // namespace kraken

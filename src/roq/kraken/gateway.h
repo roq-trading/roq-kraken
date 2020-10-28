@@ -129,39 +129,39 @@ class Gateway final : public server::Handler,
   void subscribe_private();
 
  private:
-  server::Dispatcher &_dispatcher;
+  server::Dispatcher &dispatcher_;
   // config
-  const std::string _account;
-  const std::string _access_key;
+  const std::string account_;
+  const std::string access_key_;
   // authentication
-  Random _random;
+  Random random_;
   // async
-  core::event::Base _base;
-  core::event::DNSBase _dns_base;
+  core::event::Base base_;
+  core::event::DNSBase dns_base_;
   // crypto
-  core::ssl::Context _ssl_context;
+  core::ssl::Context ssl_context_;
   // connections
   struct {
     WebSocketPublic connection;
     WebSocketDownload download;
-  } _web_socket_public;
+  } web_socket_public_;
   struct {
     WebSocketPrivate connection;
     WebSocketPrivateDownload download;
-  } _web_socket_private;
+  } web_socket_private_;
   struct {
     Rest connection;
-  } _rest;
+  } rest_;
   // download (web socket)
-  std::vector<std::string> _symbols;
+  std::vector<std::string> symbols_;
   // market data + order manager
-  GatewayStatus _gateway_status = GatewayStatus::DISCONNECTED;
+  GatewayStatus gateway_status_ = GatewayStatus::DISCONNECTED;
   // market data
-  core::page_aligned_vector<MBPUpdate> _bid, _ask;
-  core::page_aligned_vector<Trade> _trade;
+  core::page_aligned_vector<MBPUpdate> bid_, ask_;
+  core::page_aligned_vector<Trade> trade_;
 
   // experimental
-  std::string _token;
+  std::string token_;
 };
 
 }  // namespace kraken
