@@ -50,36 +50,24 @@ inline void update(UpdateType &result, const core::json::value_t &value) {
 
 inline roq::OrderType map(json::OrderType order_type) {
   switch (order_type) {
-    case json::OrderType::UNDEFINED:
-      break;
-    case json::OrderType::UNKNOWN:
-      break;
-    case json::OrderType::L:
-      return roq::OrderType::LIMIT;
-    case json::OrderType::LIMIT:
-      return roq::OrderType::LIMIT;
-    case json::OrderType::M:
-      return roq::OrderType::MARKET;
-    case json::OrderType::MARKET:
-      return roq::OrderType::MARKET;
+    case json::OrderType::UNDEFINED: break;
+    case json::OrderType::UNKNOWN: break;
+    case json::OrderType::L: return roq::OrderType::LIMIT;
+    case json::OrderType::LIMIT: return roq::OrderType::LIMIT;
+    case json::OrderType::M: return roq::OrderType::MARKET;
+    case json::OrderType::MARKET: return roq::OrderType::MARKET;
   }
   return roq::OrderType::UNDEFINED;
 }
 
 inline roq::Side map(json::Side side) {
   switch (side) {
-    case json::Side::UNDEFINED:
-      break;
-    case json::Side::UNKNOWN:
-      break;
-    case json::Side::B:
-      return roq::Side::BUY;
-    case json::Side::BUY:
-      return roq::Side::BUY;
-    case json::Side::S:
-      return roq::Side::SELL;
-    case json::Side::SELL:
-      return roq::Side::SELL;
+    case json::Side::UNDEFINED: break;
+    case json::Side::UNKNOWN: break;
+    case json::Side::B: return roq::Side::BUY;
+    case json::Side::BUY: return roq::Side::BUY;
+    case json::Side::S: return roq::Side::SELL;
+    case json::Side::SELL: return roq::Side::SELL;
   }
   return roq::Side::UNDEFINED;
 }

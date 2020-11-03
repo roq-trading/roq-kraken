@@ -48,17 +48,12 @@ bool ParserPrivate::dispatch(
     auto field = ResultField(key);
     switch (field) {
       case ResultField::UNDEFINED:
-      case ResultField::UNKNOWN:
-        break;
+      case ResultField::UNKNOWN: break;
       case ResultField::EVENT: {
         auto event = Event(value);
         switch (event) {
-          case Event::UNDEFINED:
-            LOG(FATAL)("Unexpected");
-            break;
-          case Event::UNKNOWN:
-            DLOG(FATAL)(R"(Unknown key="{}")", key);
-            break;
+          case Event::UNDEFINED: LOG(FATAL)("Unexpected"); break;
+          case Event::UNKNOWN: DLOG(FATAL)(R"(Unknown key="{}")", key); break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
             handler(error, trace_info);
@@ -222,8 +217,7 @@ bool ParserPrivate::dispatch(
         (R"(Unknown channel="{}")", name);
         break;
       }
-      default:
-        break;
+      default: break;
     }
     ++offset;
   }
