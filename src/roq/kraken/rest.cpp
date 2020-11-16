@@ -5,6 +5,8 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 
+#include <utility>
+
 #include "roq/core/json/parser.h"
 
 #include "roq/kraken/options.h"
@@ -123,7 +125,7 @@ void Rest::get(
       std::string_view(),  // content_type
       std::string_view(),  // headers
       std::string_view(),  // body
-      [this, callback](auto &response) {
+      [this, callback{std::move(callback)}](auto &response) {
         profile_.assets([&]() {
           try {
             response.expect(core::http::Status::OK);
@@ -161,7 +163,7 @@ void Rest::get(
       std::string_view(),  // content_type
       std::string_view(),  // headers
       std::string_view(),  // body
-      [this, callback](auto &response) {
+      [this, callback{std::move(callback)}](auto &response) {
         profile_.asset_pairs([&]() {
           try {
             response.expect(core::http::Status::OK);
@@ -203,7 +205,7 @@ void Rest::get(
       std::string_view(),  // query
       headers,
       body,
-      [this, callback](auto& response) {
+      [this, callback{std::move(callback)}](auto& response) {
     profile_.balance(
         [&]() {
       try {
@@ -252,7 +254,7 @@ void Rest::get(
       CONTENT_TYPE_FORM,
       headers,
       body,
-      [this, callback](auto &response) {
+      [this, callback{std::move(callback)}](auto &response) {
         profile_.open_positions([&]() {
           try {
             response.expect(core::http::Status::OK);
@@ -292,7 +294,7 @@ void Rest::get(
       CONTENT_TYPE_FORM,
       headers,
       body,
-      [this, callback](auto &response) {
+      [this, callback{std::move(callback)}](auto &response) {
         profile_.get_web_sockets_token([&]() {
           try {
             response.expect(core::http::Status::OK);
