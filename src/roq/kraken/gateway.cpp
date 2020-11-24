@@ -243,9 +243,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .settlement_currency = item.aclass_base,           // XXX check
         .commission_currency = item.aclass_base,           // XXX check
         .tick_size = std::pow(10.0, -item.pair_decimals),  // XXX check
-        .limit_up = std::numeric_limits<double>::quiet_NaN(),
-        .limit_down = std::numeric_limits<double>::quiet_NaN(),
-        .multiplier = item.lot_multiplier,  // XXX check
+        .multiplier = item.lot_multiplier,                 // XXX check
         .min_trade_vol = item.ordermin,
         .option_type = OptionType::UNDEFINED,
         .strike_currency = std::string_view(),
