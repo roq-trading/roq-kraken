@@ -4,7 +4,7 @@
 "values": [
 	{ "name": "price", "type": "double" },
 	{ "name": "volume", "type": "double"},
-	{ "name": "timestamp", "type": "std::chrono::nanoseconds"},
+	{ "name": "timestamp", "type": "std::chrono::milliseconds"},
 	{ "name": "updateType", "type": "UpdateType", "required": false}
 ]
 }

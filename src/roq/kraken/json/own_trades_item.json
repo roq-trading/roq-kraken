@@ -5,7 +5,7 @@
 	{ "name": "ordertxid", "type": "std::string_view" },
 	{ "name": "postxid", "type": "std::string_view" },
 	{ "name": "pair", "type": "std::string_view" },
-	{ "name": "time", "type": "std::chrono::nanoseconds" },
+	{ "name": "time", "type": "std::chrono::milliseconds" },
 	{ "name": "type", "type": "Side" },
 	{ "name": "ordertype", "type": "OrderType" },
 	{ "name": "price", "type": "double" },
