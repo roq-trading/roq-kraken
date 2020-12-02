@@ -6,7 +6,7 @@ DEFINE_string(config_file, "", "config file (path)");
 
 DEFINE_string(exchange, "kraken", "exchange identifier (string)");
 
-DEFINE_uint32(download_timeout_secs, 15, "download time-out (seconds)");
+// rest
 
 DEFINE_string(rest_uri, "https://api.kraken.com", "REST end-point (URI)");
 
@@ -29,12 +29,19 @@ DEFINE_uint32(
     300,
     "rate limit: max requests (per interval)");
 
+// ws public
+
 DEFINE_string(
     ws_public_uri, "wss://beta-ws.kraken.com", "WebSocket end-point (URI)");
 
 DEFINE_uint32(ws_public_ping_freq_secs, 5, "ping frequency (seconds)");
 
-DEFINE_uint32(ws_public_book_depth, 0, "book depth (0 == exchange default)");
+DEFINE_uint32(ws_public_request_timeout_secs, 15, "request time-out (seconds)");
+
+DEFINE_uint32(
+    ws_public_subscribe_book_depth, 0, "book depth (0 == exchange default)");
+
+// ws private
 
 DEFINE_string(
     ws_private_uri,
@@ -42,6 +49,11 @@ DEFINE_string(
     "WebSocket end-point (URI)");
 
 DEFINE_uint32(ws_private_ping_freq_secs, 5, "ping frequency (seconds)");
+
+DEFINE_uint32(
+    ws_private_request_timeout_secs, 15, "request time-out (seconds)");
+
+// XXX review
 
 DEFINE_uint32(encode_buffer_size, 1048576, "encode buffer size");
 

@@ -56,7 +56,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
           .download = WebSocketDownload(
-              std::chrono::seconds{FLAGS_download_timeout_secs},
+              std::chrono::seconds{FLAGS_ws_public_request_timeout_secs},
               [this](auto state) { return download(state); }),
       },
       web_socket_private_{
@@ -70,7 +70,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
           .download = WebSocketPrivateDownload(
-              std::chrono::seconds{FLAGS_download_timeout_secs},
+              std::chrono::seconds{FLAGS_ws_private_request_timeout_secs},
               [this](auto state) { return download(state); }),
       },
       rest_{

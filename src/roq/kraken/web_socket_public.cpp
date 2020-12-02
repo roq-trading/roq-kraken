@@ -94,7 +94,7 @@ template <>
 void WebSocketPublic::subscribe(
     const std::string_view &name, const roq::span<std::string> &pairs) {
   LOG(INFO)(R"(subscribe name="{}", len(pairs)={})", name, std::size(pairs));
-  if (FLAGS_ws_public_book_depth && name.compare("book") == 0) {
+  if (FLAGS_ws_public_subscribe_book_depth && name.compare("book") == 0) {
     auto message = fmt::format(
         R"({{)"
         R"("event":"subscribe",)"
@@ -106,7 +106,7 @@ void WebSocketPublic::subscribe(
         R"(}})",
         fmt::join(pairs, R"(",")"),
         name,
-        FLAGS_ws_public_book_depth);
+        FLAGS_ws_public_subscribe_book_depth);
     DLOG(INFO)(R"(request="{}")", message);
     connection_.send_text(message);
   } else {
