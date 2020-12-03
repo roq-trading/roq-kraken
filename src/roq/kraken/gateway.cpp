@@ -238,6 +238,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
     ReferenceData reference_data{
         .exchange = FLAGS_exchange,
         .symbol = symbol,
+        .description = item.altname,
         .security_type = SecurityType::UNDEFINED,
         .currency = item.aclass_quote,                     // XXX check
         .settlement_currency = item.aclass_base,           // XXX check
@@ -246,12 +247,14 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .multiplier = item.lot_multiplier,                 // XXX check
         .min_trade_vol = item.ordermin,
         .option_type = OptionType::UNDEFINED,
-        .strike_currency = std::string_view(),
+        .strike_currency = {},
         .strike_price = std::numeric_limits<double>::quiet_NaN(),
-        .underlying = std::string_view(),
-        .issue_date_utc = {},
-        .expiry_time_utc = {},
-        .settlement_date_utc = {},
+        .underlying = {},
+        .time_zone = {},
+        .issue_date = {},
+        .settlement_date = {},
+        .expiry_datetime = {},
+        .expiry_datetime_utc = {},
     };
     VLOG(1)(R"(reference_data={})", reference_data);
     server::create_trace_and_dispatch(
