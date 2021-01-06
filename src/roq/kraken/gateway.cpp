@@ -161,7 +161,8 @@ void Gateway::download_assets() {
   auto sequence = web_socket_public_.download.sequence();
   rest_.connection.get<json::Assets>([this, sequence](auto &promise) {
     try {
-      if (web_socket_public_.download.skip(sequence, state)) return;
+      if (web_socket_public_.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       web_socket_public_.download.check(state);
     } catch (NetworkError &) {
@@ -175,7 +176,8 @@ void Gateway::download_asset_pairs() {
   auto sequence = web_socket_public_.download.sequence();
   rest_.connection.get<json::AssetPairs>([this, sequence](auto &promise) {
     try {
-      if (web_socket_public_.download.skip(sequence, state)) return;
+      if (web_socket_public_.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       web_socket_public_.download.check(state);
     } catch (NetworkError &) {
@@ -208,7 +210,8 @@ void Gateway::download_open_positions() {
   auto sequence = web_socket_public_.download.sequence();
   rest_.connection.get<json::Positions>([this, sequence](auto &promise) {
     try {
-      if (web_socket_public_.download.skip(sequence, state)) return;
+      if (web_socket_public_.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       web_socket_public_.download.check(state);
     } catch (NetworkError &) {
@@ -233,7 +236,8 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
     std::string symbol(item.wsname);
     // XXX remove escape
     symbol.erase(std::remove(symbol.begin(), symbol.end(), '\\'), symbol.end());
-    if (dispatcher_.discard_symbol(symbol)) continue;
+    if (dispatcher_.discard_symbol(symbol))
+      continue;
     symbols_.emplace_back(symbol);
     ReferenceData reference_data{
         .exchange = FLAGS_exchange,
@@ -283,7 +287,8 @@ void Gateway::operator()(const json::Token &token) {
 // web socket
 
 int32_t Gateway::download(WebSocketDownload::State state) {
-  if (web_socket_public_.connection.ready() == false) return -1;
+  if (web_socket_public_.connection.ready() == false)
+    return -1;
   switch (state) {
     case WebSocketDownload::State::UNDEFINED: assert(false); break;
     case WebSocketDownload::State::ASSETS: download_assets(); return 1;
@@ -330,9 +335,11 @@ void Gateway::operator()(
   std::chrono::nanoseconds exchange_time_utc = {};
   size_t trade_length = 0;
   for (auto &item : trade.data) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = trade_update(trade_, trade_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.time;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.time;
   }
   if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)
@@ -390,24 +397,32 @@ void Gateway::operator()(
   std::chrono::nanoseconds exchange_time_utc = {};
   size_t bid_length = 0, ask_length = 0;
   for (auto &item : book.b) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(bid_, bid_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   for (auto &item : book.bs) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(bid_, bid_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   for (auto &item : book.a) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(ask_, ask_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   for (auto &item : book.as) {
-    if (success == false) break;
+    if (success == false)
+      break;
     success = mbp_update(ask_, ask_length, item);
-    if (exchange_time_utc.count() == 0) exchange_time_utc = item.timestamp;
+    if (exchange_time_utc.count() == 0)
+      exchange_time_utc = item.timestamp;
   }
   if (ROQ_UNLIKELY(success == false)) {
     LOG(FATAL)
@@ -444,7 +459,8 @@ void Gateway::operator()(
 // web-socket (private)
 
 int32_t Gateway::download(WebSocketPrivateDownload::State state) {
-  if (web_socket_private_.connection.ready() == false) return -1;
+  if (web_socket_private_.connection.ready() == false)
+    return -1;
   switch (state) {
     case WebSocketPrivateDownload::State::UNDEFINED: assert(false); break;
     case WebSocketPrivateDownload::State::WEB_SOCKETS_TOKEN:
@@ -475,7 +491,8 @@ void Gateway::download_web_sockets_token() {
   auto sequence = web_socket_private_.download.sequence();
   rest_.connection.get<json::Token>([this, sequence](auto &promise) {
     try {
-      if (web_socket_private_.download.skip(sequence, state)) return;
+      if (web_socket_private_.download.skip(sequence, state))
+        return;
       (*this)(promise.get());
       web_socket_private_.download.check(state);
     } catch (NetworkError &) {
@@ -504,7 +521,8 @@ void Gateway::operator()(const json::OwnTrades &, const server::TraceInfo &) {
 }
 
 void Gateway::update(GatewayStatus gateway_status) {
-  if (gateway_status == gateway_status_) return;
+  if (gateway_status == gateway_status_)
+    return;
   gateway_status_ = gateway_status;
   server::TraceInfo trace_info;
   MarketDataStatus market_data_status{

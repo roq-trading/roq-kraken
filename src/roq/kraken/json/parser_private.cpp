@@ -211,7 +211,8 @@ bool ParserPrivate::dispatch(
         auto name = std::get<std::string_view>(value);
         // for example "book-10" --> "book"
         auto pos = name.find_first_of('-');
-        if (pos != name.npos) name.remove_suffix(name.size() - pos);
+        if (pos != name.npos)
+          name.remove_suffix(name.size() - pos);
         channel = Channel(name);
         DLOG_IF(FATAL, channel == Channel::UNKNOWN)
         (R"(Unknown channel="{}")", name);
