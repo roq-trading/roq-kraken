@@ -290,8 +290,12 @@ int32_t Gateway::download(WebSocketDownload::State state) {
   if (web_socket_public_.connection.ready() == false)
     return -1;
   switch (state) {
-    case WebSocketDownload::State::UNDEFINED: assert(false); break;
-    case WebSocketDownload::State::ASSETS: download_assets(); return 1;
+    case WebSocketDownload::State::UNDEFINED:
+      assert(false);
+      break;
+    case WebSocketDownload::State::ASSETS:
+      download_assets();
+      return 1;
     case WebSocketDownload::State::ASSET_PAIRS:
       download_asset_pairs();
       return 1;
@@ -305,7 +309,9 @@ int32_t Gateway::download(WebSocketDownload::State state) {
     case WebSocketDownload::State::SUBSCRIBE_PUBLIC:
       subscribe_public();
       return 0;
-    case WebSocketDownload::State::DONE: update(GatewayStatus::READY); return 0;
+    case WebSocketDownload::State::DONE:
+      update(GatewayStatus::READY);
+      return 0;
   }
   assert(false);
   return 0;
@@ -462,7 +468,9 @@ int32_t Gateway::download(WebSocketPrivateDownload::State state) {
   if (web_socket_private_.connection.ready() == false)
     return -1;
   switch (state) {
-    case WebSocketPrivateDownload::State::UNDEFINED: assert(false); break;
+    case WebSocketPrivateDownload::State::UNDEFINED:
+      assert(false);
+      break;
     case WebSocketPrivateDownload::State::WEB_SOCKETS_TOKEN:
       download_web_sockets_token();
       return 1;

@@ -48,12 +48,17 @@ bool ParserPublic::dispatch(
     auto field = ResultField(key);
     switch (field) {
       case ResultField::UNDEFINED:
-      case ResultField::UNKNOWN: break;
+      case ResultField::UNKNOWN:
+        break;
       case ResultField::EVENT: {
         auto event = Event(value);
         switch (event) {
-          case Event::UNDEFINED: LOG(FATAL)("Unexpected"); break;
-          case Event::UNKNOWN: DLOG(FATAL)(R"(Unknown key="{}")", key); break;
+          case Event::UNDEFINED:
+            LOG(FATAL)("Unexpected");
+            break;
+          case Event::UNKNOWN:
+            DLOG(FATAL)(R"(Unknown key="{}")", key);
+            break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
             handler(error, trace_info);
@@ -129,7 +134,9 @@ static bool dispatch2(
       break;
     switch (channel) {
       case Channel::UNDEFINED:
-      case Channel::UNKNOWN: LOG(FATAL)("Unexpected"); break;
+      case Channel::UNKNOWN:
+        LOG(FATAL)("Unexpected");
+        break;
       case Channel::TICKER: {
         throw std::runtime_error("ticker not supported");
       }
@@ -153,9 +160,14 @@ static bool dispatch2(
       case Channel::BOOK: {
         LOG_IF(FATAL, data_count < 1 || data_count > 2)("Unexpected");
         switch (offset) {
-          case 2: book_1 = Book(value, buffer); break;
-          case 3: book_2 = Book(value, buffer); break;
-          default: LOG(FATAL)("Unexpected");
+          case 2:
+            book_1 = Book(value, buffer);
+            break;
+          case 3:
+            book_2 = Book(value, buffer);
+            break;
+          default:
+            LOG(FATAL)("Unexpected");
         }
         break;
       }
@@ -215,7 +227,9 @@ bool ParserPublic::dispatch(
             (R"(Unknown channel="{}")", name);
             break;
           }
-          case 2: pair = std::get<std::string_view>(value); break;
+          case 2:
+            pair = std::get<std::string_view>(value);
+            break;
         }
         ++offset;
       } else {
