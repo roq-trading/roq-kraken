@@ -2,6 +2,8 @@
 
 #include "roq/kraken/gateway.h"
 
+#include <absl/flags/flag.h>
+
 #include <limits>
 #include <utility>
 
@@ -56,7 +58,8 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
           .download = WebSocketDownload(
-              std::chrono::seconds{FLAGS_ws_public_request_timeout_secs},
+              std::chrono::seconds{
+                  absl::GetFlag(FLAGS_ws_public_request_timeout_secs)},
               [this](auto state) { return download(state); }),
       },
       web_socket_private_{
@@ -70,7 +73,8 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
           .download = WebSocketPrivateDownload(
-              std::chrono::seconds{FLAGS_ws_private_request_timeout_secs},
+              std::chrono::seconds{
+                  absl::GetFlag(FLAGS_ws_private_request_timeout_secs)},
               [this](auto state) { return download(state); }),
       },
       rest_{
@@ -84,8 +88,9 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   ssl_context_,
               },
       },
-      bid_(FLAGS_cache_mbp_max_depth), ask_(FLAGS_cache_mbp_max_depth),
-      trade_(FLAGS_cache_trades_max_depth) {
+      bid_(absl::GetFlag(FLAGS_cache_mbp_max_depth)),
+      ask_(absl::GetFlag(FLAGS_cache_mbp_max_depth)),
+      trade_(absl::GetFlag(FLAGS_cache_trades_max_depth)) {
 }
 
 void Gateway::operator()(const Event<Start> &event) {
@@ -240,7 +245,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
       continue;
     symbols_.emplace_back(symbol);
     ReferenceData reference_data{
-        .exchange = FLAGS_exchange,
+        .exchange = absl::GetFlag(FLAGS_exchange),
         .symbol = symbol,
         .description = item.altname,
         .security_type = SecurityType::UNDEFINED,
@@ -264,7 +269,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
     server::create_trace_and_dispatch(
         trace_info, reference_data, dispatcher_, true);
     MarketStatus market_status{
-        .exchange = FLAGS_exchange,
+        .exchange = absl::GetFlag(FLAGS_exchange),
         .symbol = symbol,
         .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
     };
@@ -356,7 +361,7 @@ void Gateway::operator()(
   }
   if (trade_length > 0) {
     TradeSummary trade_summary{
-        .exchange = FLAGS_exchange,
+        .exchange = absl::GetFlag(FLAGS_exchange),
         .symbol = pair,
         .trades =
             {
@@ -376,7 +381,7 @@ void Gateway::operator()(
     const std::string_view &pair,
     const server::TraceInfo &trace_info) {
   TopOfBook top_of_book{
-      .exchange = FLAGS_exchange,
+      .exchange = absl::GetFlag(FLAGS_exchange),
       .symbol = pair,
       .layer =
           {
@@ -441,7 +446,7 @@ void Gateway::operator()(
   }
   if (bid_length > 0 || ask_length > 0) {
     MarketByPriceUpdate market_by_price_update{
-        .exchange = FLAGS_exchange,
+        .exchange = absl::GetFlag(FLAGS_exchange),
         .symbol = pair,
         .bids =
             {
