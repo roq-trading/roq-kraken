@@ -2,18 +2,16 @@
 
 #include "roq/kraken/application.h"
 
-#include <absl/flags/flag.h>
-
 #include "roq/kraken/config.h"
+#include "roq/kraken/flags.h"
 #include "roq/kraken/gateway.h"
-#include "roq/kraken/options.h"
 
 namespace roq {
 namespace kraken {
 
 int Application::main(int, char **) {
   LOG(INFO)("Parse configuration");
-  Config config(absl::GetFlag(FLAGS_config_file));
+  Config config(Flags::config_file());
   VLOG(1)("config={}", config);
   LOG(INFO)("Starting the gateway");
   roq::server::Trading<Gateway>(
