@@ -86,12 +86,10 @@ class WebSocketPublic final : public core::web::Socket::Handler,
   // json::ParserPublic::Handler
 
   void operator()(const json::Error &, const server::TraceInfo &) override;
-  void operator()(
-      const json::SystemStatus &, const server::TraceInfo &) override;
+  void operator()(const json::SystemStatus &, const server::TraceInfo &) override;
   void operator()(const json::Pong &, const server::TraceInfo &) override;
   void operator()(const json::Heartbeat &, const server::TraceInfo &) override;
-  void operator()(
-      const json::SubscriptionStatus &, const server::TraceInfo &) override;
+  void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override;
 
   void operator()(
       const json::Trade &trade,

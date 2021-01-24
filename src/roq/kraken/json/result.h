@@ -26,9 +26,8 @@ struct Result final {
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::object_t>(root)) {
       if (key.compare("error") == 0) {
-        auto error = core::json::
-            Array<roq::span<std::string_view>, core::json::array_t>::parse(
-                buffer, std::get<core::json::array_t>(value));
+        auto error = core::json::Array<roq::span<std::string_view>, core::json::array_t>::parse(
+            buffer, std::get<core::json::array_t>(value));
         if (std::size(error) > 0) {
           error_handler(error);
           return;

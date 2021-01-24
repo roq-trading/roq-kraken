@@ -21,22 +21,18 @@ namespace kraken {
 namespace {
 constexpr int64_t THRESHOLD = -1000;
 static auto create_hmac(const std::string_view &secret) {
-  auto raw_secret =
-      core::binascii::Base64::decode(secret.data(), secret.length(), true);
+  auto raw_secret = core::binascii::Base64::decode(secret.data(), secret.length(), true);
   return core::crypto::HMAC_SHA512(raw_secret.data(), raw_secret.size());
 }
 }  // namespace
 
 Random::Random(
-    const std::string_view &key,
-    const std::string_view &secret,
-    const std::string_view &password)
+    const std::string_view &key, const std::string_view &secret, const std::string_view &password)
     : key_(key), password_(password), hmac_(create_hmac(secret)) {
 }
 
 std::string Random::create_body() {
-  auto now =
-      std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
+  auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = (now - nonce_).count();
   LOG_IF(FATAL, diff < THRESHOLD)
   (R"(Probably something wrong... diff={})", diff);
@@ -56,9 +52,7 @@ std::string Random::create_body() {
 }
 
 std::string Random::create_headers(
-    const core::http::Method &method,
-    const std::string_view &path,
-    const std::string_view &body) {
+    const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
   assert(body.empty() == false);
   auto nonce = fmt::format("{}", nonce_.count());

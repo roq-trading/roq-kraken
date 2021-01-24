@@ -90,8 +90,7 @@ void WebSocketPrivate::operator()(metrics::Writer &writer) {
       .write(latency_.heartbeat, metrics::LATENCY);
 }
 
-void WebSocketPrivate::subscribe(
-    const std::string_view &name, const std::string_view &token) {
+void WebSocketPrivate::subscribe(const std::string_view &name, const std::string_view &token) {
   LOG(INFO)(R"(subscribe name="{}", token="{}")", name, token);
   auto message = fmt::format(
       R"({{)"
@@ -126,8 +125,7 @@ void WebSocketPrivate::operator()(const core::web::Socket::Close &) {
 
 void WebSocketPrivate::operator()(const core::web::Socket::Latency &latency) {
   latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
-          .count());
+      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Text &text) {
@@ -138,13 +136,11 @@ void WebSocketPrivate::parse(const std::string_view &message) {
   profile_.parse([&]() {
     server::TraceInfo trace_info;
     core::json::Buffer buffer(decode_buffer_);
-    auto result =
-        json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
+    auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
   });
 }
 
-void WebSocketPrivate::operator()(
-    const json::Error &error, const server::TraceInfo &) {
+void WebSocketPrivate::operator()(const json::Error &error, const server::TraceInfo &) {
   LOG(FATAL)("error={}", error);
 }
 
@@ -153,32 +149,27 @@ void WebSocketPrivate::operator()(
   LOG(INFO)("system_status={}", system_status);
 }
 
-void WebSocketPrivate::operator()(
-    const json::Pong &pong, const server::TraceInfo &) {
+void WebSocketPrivate::operator()(const json::Pong &pong, const server::TraceInfo &) {
   VLOG(1)("pong={}", pong);
 }
 
-void WebSocketPrivate::operator()(
-    const json::Heartbeat &heartbeat, const server::TraceInfo &) {
+void WebSocketPrivate::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
   VLOG(1)("heartbeat={}", heartbeat);
 }
 
 void WebSocketPrivate::operator()(
-    const json::SubscriptionStatus &subscription_status,
-    const server::TraceInfo &) {
+    const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
   LOG(INFO)("subscription_status={}", subscription_status);
 }
 
 void WebSocketPrivate::operator()(
-    const json::AddOrderStatus &add_order_status,
-    const server::TraceInfo &trace_info) {
+    const json::AddOrderStatus &add_order_status, const server::TraceInfo &trace_info) {
   LOG(INFO)("add_order_status={}", add_order_status);
   handler_(add_order_status, trace_info);
 }
 
 void WebSocketPrivate::operator()(
-    const json::CancelOrderStatus &cancel_order_status,
-    const server::TraceInfo &trace_info) {
+    const json::CancelOrderStatus &cancel_order_status, const server::TraceInfo &trace_info) {
   LOG(INFO)("cancel_order_status={}", cancel_order_status);
   handler_(cancel_order_status, trace_info);
 }

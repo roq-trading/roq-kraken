@@ -73,8 +73,7 @@ class Rest final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile assets, asset_pairs, balance, open_positions,
-        get_web_sockets_token;
+    core::metrics::Profile assets, asset_pairs, balance, open_positions, get_web_sockets_token;
   } profile_;
   struct {
     core::metrics::Latency ping;

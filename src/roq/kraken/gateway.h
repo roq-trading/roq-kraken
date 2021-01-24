@@ -85,10 +85,8 @@ class Gateway final : public server::Handler,
 
   void operator()(const WebSocketPrivate &) override;
 
-  void operator()(
-      const json::AddOrderStatus &, const server::TraceInfo &) override;
-  void operator()(
-      const json::CancelOrderStatus &, const server::TraceInfo &) override;
+  void operator()(const json::AddOrderStatus &, const server::TraceInfo &) override;
+  void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) override;
 
   void operator()(const json::OpenOrders &, const server::TraceInfo &) override;
   void operator()(const json::OwnTrades &, const server::TraceInfo &) override;

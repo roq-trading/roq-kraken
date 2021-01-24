@@ -26,9 +26,7 @@ class Random final {
   std::string create_body();
 
   std::string create_headers(
-      const core::http::Method &method,
-      const std::string_view &path,
-      const std::string_view &body);
+      const core::http::Method &method, const std::string_view &path, const std::string_view &body);
 
  private:
   const std::string key_;

@@ -26,8 +26,7 @@ namespace {
 constexpr std::string_view CONNECTION = "rest";
 
 static const std::string_view ACCEPT_JSON{"application/json"};
-static const std::string_view CONTENT_TYPE_FORM{
-    "application/x-www-form-urlencoded"};
+static const std::string_view CONTENT_TYPE_FORM{"application/x-www-form-urlencoded"};
 
 static auto create_counter(const std::string_view &function) {
   return core::metrics::Counter(Flags::name(), CONNECTION, function);
@@ -113,8 +112,7 @@ void Rest::operator()(metrics::Writer &writer) {
 }
 
 template <>
-void Rest::get(
-    std::function<void(const core::Promise<json::Assets> &)> &&callback) {
+void Rest::get(std::function<void(const core::Promise<json::Assets> &)> &&callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/0/public/Assets";
   connection_.request(
@@ -130,8 +128,7 @@ void Rest::get(
           try {
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
-            auto assets = core::json::Parser::create<json::Assets>(
-                response.body(), buffer);
+            auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
             if (assets.error.empty()) {
               VLOG(1)(R"(assets={})", assets);
               core::Promise<json::Assets> promise(assets);
@@ -151,8 +148,7 @@ void Rest::get(
 }
 
 template <>
-void Rest::get(
-    std::function<void(const core::Promise<json::AssetPairs> &)> &&callback) {
+void Rest::get(std::function<void(const core::Promise<json::AssetPairs> &)> &&callback) {
   constexpr auto method = core::http::Method::GET;
   constexpr std::string_view path = "/0/public/AssetPairs";
   connection_.request(
@@ -168,8 +164,8 @@ void Rest::get(
           try {
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
-            auto asset_pairs = core::json::Parser::create<json::AssetPairs>(
-                response.body(), buffer);
+            auto asset_pairs =
+                core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
             if (asset_pairs.error.empty()) {
               VLOG(1)(R"(asset_pairs={})", asset_pairs);
               core::Promise<json::AssetPairs> promise(asset_pairs);
@@ -240,8 +236,7 @@ void Rest::get(
 */
 
 template <>
-void Rest::get(
-    std::function<void(const core::Promise<json::Positions> &)> &&callback) {
+void Rest::get(std::function<void(const core::Promise<json::Positions> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/OpenPositions";
   auto body = random_.create_body();
@@ -259,8 +254,7 @@ void Rest::get(
           try {
             response.expect(core::http::Status::OK);
             core::json::Buffer buffer(decode_buffer_);
-            auto positions = core::json::Parser::create<json::Positions>(
-                response.body(), buffer);
+            auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
             if (positions.error.empty()) {
               VLOG(1)(R"(positions={})", positions);
               core::Promise<json::Positions> promise(positions);
@@ -280,8 +274,7 @@ void Rest::get(
 }
 
 template <>
-void Rest::get(
-    std::function<void(const core::Promise<json::Token> &)> &&callback) {
+void Rest::get(std::function<void(const core::Promise<json::Token> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/GetWebSocketsToken";
   auto body = random_.create_body();
@@ -332,8 +325,7 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
   latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
-          .count());
+      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
 }
 
 }  // namespace kraken

@@ -66,8 +66,7 @@ bool ParserPrivate::dispatch(
             break;
           }
           case Event::SYSTEM_STATUS: {
-            auto system_status =
-                core::json::Parser::create<SystemStatus>(message);
+            auto system_status = core::json::Parser::create<SystemStatus>(message);
             handler(system_status, trace_info);
             dispatched = true;
             break;
@@ -85,22 +84,19 @@ bool ParserPrivate::dispatch(
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
-            auto subscription_status =
-                core::json::Parser::create<SubscriptionStatus>(message);
+            auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
             handler(subscription_status, trace_info);
             dispatched = true;
             break;
           }
           case Event::ADD_ORDER_STATUS: {
-            auto add_order_status =
-                core::json::Parser::create<AddOrderStatus>(message);
+            auto add_order_status = core::json::Parser::create<AddOrderStatus>(message);
             handler(add_order_status, trace_info);
             dispatched = true;
             break;
           }
           case Event::CANCEL_ORDER_STATUS:
-            auto cancel_order_status =
-                core::json::Parser::create<CancelOrderStatus>(message);
+            auto cancel_order_status = core::json::Parser::create<CancelOrderStatus>(message);
             handler(cancel_order_status, trace_info);
             dispatched = true;
             break;

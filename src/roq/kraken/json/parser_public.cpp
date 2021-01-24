@@ -66,8 +66,7 @@ bool ParserPublic::dispatch(
             break;
           }
           case Event::SYSTEM_STATUS: {
-            auto system_status =
-                core::json::Parser::create<SystemStatus>(message);
+            auto system_status = core::json::Parser::create<SystemStatus>(message);
             handler(system_status, trace_info);
             dispatched = true;
             break;
@@ -85,8 +84,7 @@ bool ParserPublic::dispatch(
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
-            auto subscription_status =
-                core::json::Parser::create<SubscriptionStatus>(message);
+            auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
             handler(subscription_status, trace_info);
             dispatched = true;
             break;
@@ -238,15 +236,7 @@ bool ParserPublic::dispatch(
     }
   }
   LOG_IF(FATAL, offset != 3)(R"(message={})", message);
-  return dispatch2(
-      handler,
-      message,
-      buffer,
-      trace_info,
-      channel_id,
-      channel,
-      pair,
-      data_count);
+  return dispatch2(handler, message, buffer, trace_info, channel_id, channel, pair, data_count);
 }
 
 }  // namespace json

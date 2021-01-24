@@ -13,8 +13,7 @@ ABSL_FLAG(std::string, exchange, "kraken", "exchange identifier (string)");
 
 // rest
 
-ABSL_FLAG(
-    std::string, rest_uri, "https://api.kraken.com", "REST end-point (URI)");
+ABSL_FLAG(std::string, rest_uri, "https://api.kraken.com", "REST end-point (URI)");
 
 ABSL_FLAG(uint32_t, rest_ping_freq_secs, 5, "ping frequency (seconds)");
 
@@ -26,55 +25,30 @@ ABSL_FLAG(
 
 ABSL_FLAG(uint32_t, rest_request_queue_depth, 5, "request: max queue depth");
 
-ABSL_FLAG(
-    uint32_t, rest_request_timeout_secs, 30, "request: timeout (seconds)");
+ABSL_FLAG(uint32_t, rest_request_timeout_secs, 30, "request: timeout (seconds)");
 
-ABSL_FLAG(
-    uint32_t,
-    rest_rate_limit_interval_secs,
-    1,
-    "rate limit: monitor interval (seconds)");
+ABSL_FLAG(uint32_t, rest_rate_limit_interval_secs, 1, "rate limit: monitor interval (seconds)");
 
-ABSL_FLAG(
-    uint32_t,
-    rest_rate_limit_max_requests,
-    300,
-    "rate limit: max requests (per interval)");
+ABSL_FLAG(uint32_t, rest_rate_limit_max_requests, 300, "rate limit: max requests (per interval)");
 
 // ws public
 
-ABSL_FLAG(
-    std::string,
-    ws_public_uri,
-    "wss://beta-ws.kraken.com",
-    "WebSocket end-point (URI)");
+ABSL_FLAG(std::string, ws_public_uri, "wss://beta-ws.kraken.com", "WebSocket end-point (URI)");
 
 ABSL_FLAG(uint32_t, ws_public_ping_freq_secs, 5, "ping frequency (seconds)");
 
-ABSL_FLAG(
-    uint32_t, ws_public_request_timeout_secs, 15, "request time-out (seconds)");
+ABSL_FLAG(uint32_t, ws_public_request_timeout_secs, 15, "request time-out (seconds)");
 
-ABSL_FLAG(
-    uint32_t,
-    ws_public_subscribe_book_depth,
-    0,
-    "book depth (0 == exchange default)");
+ABSL_FLAG(uint32_t, ws_public_subscribe_book_depth, 0, "book depth (0 == exchange default)");
 
 // ws private
 
 ABSL_FLAG(
-    std::string,
-    ws_private_uri,
-    "wss://beta-ws-auth.kraken.com",
-    "WebSocket end-point (URI)");
+    std::string, ws_private_uri, "wss://beta-ws-auth.kraken.com", "WebSocket end-point (URI)");
 
 ABSL_FLAG(uint32_t, ws_private_ping_freq_secs, 5, "ping frequency (seconds)");
 
-ABSL_FLAG(
-    uint32_t,
-    ws_private_request_timeout_secs,
-    15,
-    "request time-out (seconds)");
+ABSL_FLAG(uint32_t, ws_private_request_timeout_secs, 15, "request time-out (seconds)");
 
 // XXX review
 
@@ -127,14 +101,12 @@ uint32_t Flags::rest_request_timeout_secs() {
 }
 
 uint32_t Flags::rest_rate_limit_interval_secs() {
-  static const uint32_t result =
-      absl::GetFlag(FLAGS_rest_rate_limit_interval_secs);
+  static const uint32_t result = absl::GetFlag(FLAGS_rest_rate_limit_interval_secs);
   return result;
 }
 
 uint32_t Flags::rest_rate_limit_max_requests() {
-  static const uint32_t result =
-      absl::GetFlag(FLAGS_rest_rate_limit_max_requests);
+  static const uint32_t result = absl::GetFlag(FLAGS_rest_rate_limit_max_requests);
   return result;
 }
 
@@ -149,14 +121,12 @@ uint32_t Flags::ws_public_ping_freq_secs() {
 }
 
 uint32_t Flags::ws_public_request_timeout_secs() {
-  static const uint32_t result =
-      absl::GetFlag(FLAGS_ws_public_request_timeout_secs);
+  static const uint32_t result = absl::GetFlag(FLAGS_ws_public_request_timeout_secs);
   return result;
 }
 
 uint32_t Flags::ws_public_subscribe_book_depth() {
-  static const uint32_t result =
-      absl::GetFlag(FLAGS_ws_public_subscribe_book_depth);
+  static const uint32_t result = absl::GetFlag(FLAGS_ws_public_subscribe_book_depth);
   return result;
 }
 
@@ -171,8 +141,7 @@ uint32_t Flags::ws_private_ping_freq_secs() {
 }
 
 uint32_t Flags::ws_private_request_timeout_secs() {
-  static const uint32_t result =
-      absl::GetFlag(FLAGS_ws_private_request_timeout_secs);
+  static const uint32_t result = absl::GetFlag(FLAGS_ws_private_request_timeout_secs);
   return result;
 }
 

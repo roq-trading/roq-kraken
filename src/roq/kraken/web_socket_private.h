@@ -35,14 +35,10 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
   struct Handler {
     virtual void operator()(const WebSocketPrivate &) = 0;
 
-    virtual void operator()(
-        const json::AddOrderStatus &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::CancelOrderStatus &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::OpenOrders &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::OwnTrades &, const server::TraceInfo &) = 0;
+    virtual void operator()(const json::AddOrderStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const json::OpenOrders &, const server::TraceInfo &) = 0;
+    virtual void operator()(const json::OwnTrades &, const server::TraceInfo &) = 0;
   };
 
   WebSocketPrivate(
@@ -81,17 +77,13 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
   // json::ParserPrivate::Handler
 
   void operator()(const json::Error &, const server::TraceInfo &) override;
-  void operator()(
-      const json::SystemStatus &, const server::TraceInfo &) override;
+  void operator()(const json::SystemStatus &, const server::TraceInfo &) override;
   void operator()(const json::Pong &, const server::TraceInfo &) override;
   void operator()(const json::Heartbeat &, const server::TraceInfo &) override;
-  void operator()(
-      const json::SubscriptionStatus &, const server::TraceInfo &) override;
+  void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override;
 
-  void operator()(
-      const json::AddOrderStatus &, const server::TraceInfo &) override;
-  void operator()(
-      const json::CancelOrderStatus &, const server::TraceInfo &) override;
+  void operator()(const json::AddOrderStatus &, const server::TraceInfo &) override;
+  void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) override;
 
   void operator()(const json::OpenOrders &, const server::TraceInfo &) override;
   void operator()(const json::OwnTrades &, const server::TraceInfo &) override;

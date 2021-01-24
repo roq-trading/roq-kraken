@@ -91,8 +91,7 @@ void WebSocketPublic::operator()(metrics::Writer &writer) {
 }
 
 template <>
-void WebSocketPublic::subscribe(
-    const std::string_view &name, const roq::span<std::string> &pairs) {
+void WebSocketPublic::subscribe(const std::string_view &name, const roq::span<std::string> &pairs) {
   LOG(INFO)(R"(subscribe name="{}", len(pairs)={})", name, std::size(pairs));
   if (Flags::ws_public_subscribe_book_depth() && name.compare("book") == 0) {
     auto message = fmt::format(
@@ -144,8 +143,7 @@ void WebSocketPublic::operator()(const core::web::Socket::Close &) {
 
 void WebSocketPublic::operator()(const core::web::Socket::Latency &latency) {
   latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample)
-          .count());
+      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Text &text) {
@@ -156,13 +154,11 @@ void WebSocketPublic::parse(const std::string_view &message) {
   profile_.parse([&]() {
     server::TraceInfo trace_info;
     core::json::Buffer buffer(decode_buffer_);
-    auto result =
-        json::ParserPublic::dispatch(*this, message, buffer, trace_info);
+    auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
   });
 }
 
-void WebSocketPublic::operator()(
-    const json::Error &error, const server::TraceInfo &) {
+void WebSocketPublic::operator()(const json::Error &error, const server::TraceInfo &) {
   LOG(FATAL)("error={}", error);
 }
 
@@ -171,42 +167,33 @@ void WebSocketPublic::operator()(
   LOG(INFO)("system_status={}", system_status);
 }
 
-void WebSocketPublic::operator()(
-    const json::Pong &pong, const server::TraceInfo &) {
+void WebSocketPublic::operator()(const json::Pong &pong, const server::TraceInfo &) {
   VLOG(1)("pong={}", pong);
 }
 
-void WebSocketPublic::operator()(
-    const json::Heartbeat &heartbeat, const server::TraceInfo &) {
+void WebSocketPublic::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
   VLOG(1)("heartbeat={}", heartbeat);
 }
 
 void WebSocketPublic::operator()(
-    const json::SubscriptionStatus &subscription_status,
-    const server::TraceInfo &) {
+    const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
   VLOG(1)("subscription_status={}", subscription_status);
 }
 
 void WebSocketPublic::operator()(
-    const json::Trade &trade,
-    const std::string_view &pair,
-    const server::TraceInfo &trace_info) {
+    const json::Trade &trade, const std::string_view &pair, const server::TraceInfo &trace_info) {
   VLOG(3)(R"(trade={}, pair="{}")", trade, pair);
   handler_(trade, pair, trace_info);
 }
 
 void WebSocketPublic::operator()(
-    const json::Spread &spread,
-    const std::string_view &pair,
-    const server::TraceInfo &trace_info) {
+    const json::Spread &spread, const std::string_view &pair, const server::TraceInfo &trace_info) {
   VLOG(3)(R"(spread={}, pair="{}")", spread, pair);
   handler_(spread, pair, trace_info);
 }
 
 void WebSocketPublic::operator()(
-    const json::Book &book,
-    const std::string_view &pair,
-    const server::TraceInfo &trace_info) {
+    const json::Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) {
   VLOG(3)(R"(book={}, pair="{}")", book, pair);
   handler_(book, pair, trace_info);
 }

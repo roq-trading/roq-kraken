@@ -27,17 +27,13 @@ namespace json {
 struct ParserPrivate final {
   struct Handler {
     virtual void operator()(const Error &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const SystemStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const SystemStatus &, const server::TraceInfo &) = 0;
     virtual void operator()(const Pong &, const server::TraceInfo &) = 0;
     virtual void operator()(const Heartbeat &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const SubscriptionStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const SubscriptionStatus &, const server::TraceInfo &) = 0;
 
-    virtual void operator()(
-        const AddOrderStatus &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const CancelOrderStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const AddOrderStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const CancelOrderStatus &, const server::TraceInfo &) = 0;
 
     virtual void operator()(const OpenOrders &, const server::TraceInfo &) = 0;
     virtual void operator()(const OwnTrades &, const server::TraceInfo &) = 0;
