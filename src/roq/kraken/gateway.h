@@ -60,6 +60,9 @@ class Gateway final : public server::Handler,
 
   void operator()(metrics::Writer &writer) override;
 
+  // all
+  void operator()(const ExternalLatency &, const server::TraceInfo &) override;
+
   // Rest::Handler
 
   void operator()(const Rest &) override;

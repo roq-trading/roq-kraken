@@ -34,7 +34,7 @@ class WebSocketPublic final : public core::web::Socket::Handler,
  public:
   struct Handler {
     virtual void operator()(const WebSocketPublic &) = 0;
-
+    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
     virtual void operator()(
         const json::Trade &trade,
         const std::string_view &pair,

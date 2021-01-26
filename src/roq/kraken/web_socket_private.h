@@ -34,7 +34,7 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
  public:
   struct Handler {
     virtual void operator()(const WebSocketPrivate &) = 0;
-
+    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
     virtual void operator()(const json::AddOrderStatus &, const server::TraceInfo &) = 0;
     virtual void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) = 0;
     virtual void operator()(const json::OpenOrders &, const server::TraceInfo &) = 0;
