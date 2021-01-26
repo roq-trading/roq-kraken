@@ -142,8 +142,7 @@ void WebSocketPublic::operator()(const core::web::Socket::Close &) {
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Latency &latency) {
-  latency_.ping.update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(latency.sample).count());
+  latency_.ping.update(latency.sample);
 }
 
 void WebSocketPublic::operator()(const core::web::Socket::Text &text) {
