@@ -16,17 +16,21 @@ namespace kraken {
 
 template <typename C, typename T>
 static bool mbp_update(C &data, size_t &offset, const T &item) {
+  if (offset >= data.size())
+    return false;
   auto &obj = data[offset];
   new (&obj) MBPUpdate{
       .price = item.price,
       .quantity = item.volume,
   };
   ++offset;
-  return offset < data.size();
+  return offset <= data.size();
 }
 
 template <typename C, typename T>
 static bool trade_update(C &data, size_t &offset, const T &item) {
+  if (offset >= data.size())
+    return false;
   auto &obj = data[offset];
   new (&obj) Trade{
       .side = json::map(item.side),
@@ -35,7 +39,7 @@ static bool trade_update(C &data, size_t &offset, const T &item) {
       .trade_id = {},
   };
   ++offset;
-  return offset < data.size();
+  return offset <= data.size();
 }
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
@@ -233,6 +237,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
   server::TraceInfo trace_info;  // XXX not correct (*parsing* already done)
   symbols_.reserve(asset_pairs.result.size());
   for (auto &item : asset_pairs.result) {
+    VLOG(1)(R"(item={})", item);
     if (item.wsname.empty()) {
       VLOG(1)(R"(Skipping altname={}, reason: wsname is empty)", item.altname);
       continue;
@@ -248,12 +253,12 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .symbol = symbol,
         .description = item.altname,
         .security_type = SecurityType::UNDEFINED,
-        .currency = item.aclass_quote,                     // XXX check
-        .settlement_currency = item.aclass_base,           // XXX check
-        .commission_currency = item.aclass_base,           // XXX check
-        .tick_size = std::pow(10.0, -item.pair_decimals),  // XXX check
-        .multiplier = item.lot_multiplier,                 // XXX check
-        .min_trade_vol = item.ordermin,
+        .currency = item.aclass_quote,            // XXX check
+        .settlement_currency = item.aclass_base,  // XXX check
+        .commission_currency = item.aclass_base,  // XXX check
+        .tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals)),
+        .multiplier = item.lot_multiplier,  // XXX check
+        .min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals)),
         .option_type = OptionType::UNDEFINED,
         .strike_currency = {},
         .strike_price = std::numeric_limits<double>::quiet_NaN(),
@@ -347,13 +352,11 @@ void Gateway::operator()(
     if (exchange_time_utc.count() == 0)
       exchange_time_utc = item.time;
   }
-  if (ROQ_UNLIKELY(success == false)) {
-    LOG(FATAL)
-    (R"(Insufficient trade array size: )"
-     R"(len(trade)={}/{})",
-     trade_length,
-     trade_.size());
-  }
+  LOG_IF(WARNING, !success)
+  (R"(Insufficient trade array size: symbol="{}", len(trade)={}/{})",
+   pair,
+   trade.data.size(),
+   trade_.size());
   if (trade_length > 0) {
     TradeSummary trade_summary{
         .exchange = Flags::exchange(),
@@ -425,15 +428,15 @@ void Gateway::operator()(
     if (exchange_time_utc.count() == 0)
       exchange_time_utc = item.timestamp;
   }
-  if (ROQ_UNLIKELY(success == false)) {
-    LOG(FATAL)
-    (R"(Insufficient bid/ask array size(s): )"
-     R"(len(bid={}/{}, len(ask)={}/{})",
-     bid_length,
-     bid_.size(),
-     ask_length,
-     ask_.size());
-  }
+  LOG_IF(WARNING, !success)
+  (R"(Insufficient bid/ask array size(s): symbol="{}", len(bid)={}+{}/{}, len(ask)={}+{}/{})",
+   pair,
+   book.b.size(),
+   book.bs.size(),
+   bid_.size(),
+   book.a.size(),
+   book.as.size(),
+   ask_.size());
   if (bid_length > 0 || ask_length > 0) {
     MarketByPriceUpdate market_by_price_update{
         .exchange = Flags::exchange(),

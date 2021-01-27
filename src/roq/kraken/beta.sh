@@ -3,7 +3,7 @@
 CWD="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 if [ "$1" == "debug" ]; then
-	PREFIX="libtool --mode=execute gdb --args"
+	PREFIX="gdb --args"
 else
 	PREFIX=
 fi
@@ -23,10 +23,10 @@ WS_PRIVATE_URI="wss://${ENV}ws-auth.$URI"
 
 $PREFIX ./roq-kraken \
 	--name "$NAME" \
-	--config-file "$CONFIG_FILE" \
-	--client-listen-address "$CWD/$NAME.sock" \
-	--metrics-listen-address "$CWD/${NAME}_metrics.sock" \
-	--rest-uri "$REST_URI" \
-	--ws-public-uri "$WS_PUBLIC_URI" \
-	--ws-private-uri "$WS_PRIVATE_URI" \
+	--config_file "$CONFIG_FILE" \
+	--client_listen_address "$CWD/$NAME.sock" \
+	--metrics_listen_address "$CWD/${NAME}_metrics.sock" \
+	--rest_uri "$REST_URI" \
+	--ws_public_uri "$WS_PUBLIC_URI" \
+	--ws_private_uri "$WS_PRIVATE_URI" \
 	$@
