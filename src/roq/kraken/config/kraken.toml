@@ -1,4 +1,4 @@
-symbols = ".*"
+symbols = [".*"]
 
 [accounts]
 
@@ -6,7 +6,7 @@ symbols = ".*"
   master = true
   login = "tNShm3cu+MS4Hx2D+Q3U4CiqDFxu0kEoOK36BiAmU73AjfN/dYy+MZax"
   secret = "1W5Zar/uyMoOilIDVki6Lzl/eGfRCvaN8vXbNmiDOitwXfrtoAdhxDcQqt0KQjpsEVGfW07IoSSmHb0RguYmKA=="
-  symbols = ".*"
+  symbols = [".*"]
 
 [users]
 

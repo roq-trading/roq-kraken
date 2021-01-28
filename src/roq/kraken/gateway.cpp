@@ -5,6 +5,7 @@
 #include <limits>
 #include <utility>
 
+#include "roq/core/update.h"
 #include "roq/core/utils.h"
 
 #include "roq/kraken/flags.h"
@@ -349,8 +350,7 @@ void Gateway::operator()(
     if (success == false)
       break;
     success = trade_update(trade_, trade_length, item);
-    if (exchange_time_utc.count() == 0)
-      exchange_time_utc = item.time;
+    core::update_first(exchange_time_utc, item.time);
   }
   LOG_IF(WARNING, !success)
   (R"(Insufficient trade array size: symbol="{}", len(trade)={}/{})",
@@ -404,29 +404,25 @@ void Gateway::operator()(
     if (success == false)
       break;
     success = mbp_update(bid_, bid_length, item);
-    if (exchange_time_utc.count() == 0)
-      exchange_time_utc = item.timestamp;
+    core::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.bs) {
     if (success == false)
       break;
     success = mbp_update(bid_, bid_length, item);
-    if (exchange_time_utc.count() == 0)
-      exchange_time_utc = item.timestamp;
+    core::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.a) {
     if (success == false)
       break;
     success = mbp_update(ask_, ask_length, item);
-    if (exchange_time_utc.count() == 0)
-      exchange_time_utc = item.timestamp;
+    core::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.as) {
     if (success == false)
       break;
     success = mbp_update(ask_, ask_length, item);
-    if (exchange_time_utc.count() == 0)
-      exchange_time_utc = item.timestamp;
+    core::update_first(exchange_time_utc, item.timestamp);
   }
   LOG_IF(WARNING, !success)
   (R"(Insufficient bid/ask array size(s): symbol="{}", len(bid)={}+{}/{}, len(ask)={}+{}/{})",
