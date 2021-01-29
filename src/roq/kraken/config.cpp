@@ -11,12 +11,6 @@
 namespace roq {
 namespace kraken {
 
-namespace {
-server::Settings SETTINGS{
-    .cache_clear_other_side = true,
-};
-}  // namespace
-
 Config::Config(const std::string_view &path) {
   server::ConfigReader::parse(*this, path);
 }
@@ -34,7 +28,11 @@ void Config::dispatch(server::Config::Handler &handler) const {
     handler(iter.second);
   for (auto &user : users)
     handler(user);
-  handler(SETTINGS);
+  server::Settings settings{
+      .mbp_depth = Flags::ws_public_subscribe_book_depth(),
+      .cache_clear_other_side = false,
+  };
+  handler(settings);
 }
 
 void Config::operator()(server::Symbols &&symbols) {

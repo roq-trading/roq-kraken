@@ -39,7 +39,7 @@ ABSL_FLAG(uint32_t, ws_public_ping_freq_secs, 5, "ping frequency (seconds)");
 
 ABSL_FLAG(uint32_t, ws_public_request_timeout_secs, 15, "request time-out (seconds)");
 
-ABSL_FLAG(uint32_t, ws_public_subscribe_book_depth, 0, "book depth (0 == exchange default)");
+ABSL_FLAG(uint32_t, ws_public_subscribe_book_depth, 10, "book depth");
 
 // ws private
 
