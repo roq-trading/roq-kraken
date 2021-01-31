@@ -249,17 +249,19 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
     if (dispatcher_.discard_symbol(symbol))
       continue;
     symbols_.emplace_back(symbol);
+    auto tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals));
+    auto min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals));
     ReferenceData reference_data{
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .description = item.altname,
         .security_type = SecurityType::UNDEFINED,
-        .currency = item.aclass_quote,            // XXX check
-        .settlement_currency = item.aclass_base,  // XXX check
-        .commission_currency = item.aclass_base,  // XXX check
-        .tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals)),
+        .currency = item.aclass_quote,
+        .settlement_currency = item.aclass_base,
+        .commission_currency = item.aclass_base,
+        .tick_size = tick_size,
         .multiplier = item.lot_multiplier,  // XXX check
-        .min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals)),
+        .min_trade_vol = min_trade_vol,
         .option_type = OptionType::UNDEFINED,
         .strike_currency = {},
         .strike_price = std::numeric_limits<double>::quiet_NaN(),
