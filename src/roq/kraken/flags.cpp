@@ -12,107 +12,109 @@
 #include "roq/core/flags/path.h"
 #include "roq/core/flags/uri.h"
 
+using namespace std::literals;  // NOLINT
+
 ABSL_FLAG(  //
     roq::core::flags::Path<std::string>,
     config_file,
     {},
-    "config file (path)");
+    "config file (path)"sv);
 
 ABSL_FLAG(  //
     roq::core::flags::NonEmpty<std::string>,
     exchange,
-    {"kraken"},
-    "exchange identifier (string)");
+    "kraken"s,
+    "exchange identifier (string)"sv);
 
 // rest
 
 ABSL_FLAG(  //
     roq::core::flags::URI<std::string>,
     rest_uri,
-    {"https://api.kraken.com"},
-    "REST end-point (URI)");
+    "https://api.kraken.com"s,
+    "REST end-point (URI)"sv);
 
 ABSL_FLAG(  //
     roq::core::flags::NonZero<uint32_t>,
     rest_ping_freq_secs,
     uint32_t{5},
-    "ping frequency (seconds)");
+    "ping frequency (seconds)"sv);
 
 ABSL_FLAG(  //
     roq::core::flags::Path<std::string>,
     rest_ping_path,
-    {"/0/public/Time"},
-    "URI path used for REST connection keep-alive messages");
+    "/0/public/Time"s,
+    "URI path used for REST connection keep-alive messages"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_request_queue_depth,
     uint32_t{5},
-    "request: max queue depth");
+    "request: max queue depth"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_request_timeout_secs,
     uint32_t{30},
-    "request: timeout (seconds)");
+    "request: timeout (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_rate_limit_interval_secs,
     uint32_t{1},
-    "rate limit: monitor interval (seconds)");
+    "rate limit: monitor interval (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     rest_rate_limit_max_requests,
     uint32_t{300},
-    "rate limit: max requests (per interval)");
+    "rate limit: max requests (per interval)"sv);
 
 // ws public
 
 ABSL_FLAG(  //
     roq::core::flags::URI<std::string>,
     ws_public_uri,
-    {"wss://beta-ws.kraken.com"},
-    "WebSocket end-point (URI)");
+    "wss://beta-ws.kraken.com"s,
+    "WebSocket end-point (URI)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_public_ping_freq_secs,
     uint32_t{5},
-    "ping frequency (seconds)");
+    "ping frequency (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_public_request_timeout_secs,
     uint32_t{15},
-    "request time-out (seconds)");
+    "request time-out (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_public_subscribe_book_depth,
     uint32_t{10},
-    "book depth");
+    "book depth"sv);
 
 // ws private
 
 ABSL_FLAG(  //
     roq::core::flags::URI<std::string>,
     ws_private_uri,
-    {"wss://beta-ws-auth.kraken.com"},
-    "WebSocket end-point (URI)");
+    "wss://beta-ws-auth.kraken.com"s,
+    "WebSocket end-point (URI)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_private_ping_freq_secs,
     uint32_t{5},
-    "ping frequency (seconds)");
+    "ping frequency (seconds)"sv);
 
 ABSL_FLAG(  //
     uint32_t,
     ws_private_request_timeout_secs,
     uint32_t{15},
-    "request time-out (seconds)");
+    "request time-out (seconds)"sv);
 
 // XXX review
 
@@ -120,13 +122,13 @@ ABSL_FLAG(  //
     roq::core::flags::NonZero<uint32_t>,
     encode_buffer_size,
     uint32_t{1048576},
-    "encode buffer size");
+    "encode buffer size"sv);
 
 ABSL_FLAG(  //
     roq::core::flags::NonZero<uint32_t>,
     decode_buffer_size,
     uint32_t{10485760},
-    "decode buffer size");
+    "decode buffer size"sv);
 
 // external
 

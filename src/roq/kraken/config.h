@@ -22,18 +22,21 @@ class Config final : public server::Config, public server::ConfigReader::Handler
   std::string get_account() const;
 
   auto get_access_key() const {
+    using namespace std::literals;  // NOLINT
     if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported");
+      throw std::runtime_error("More accounts not yet supported"s);
     return (*accounts.begin()).second.login;
   }
   auto get_access_secret() const {
+    using namespace std::literals;  // NOLINT
     if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported");
+      throw std::runtime_error("More accounts not yet supported"s);
     return (*accounts.begin()).second.secret;
   }
   auto get_access_password() const {
+    using namespace std::literals;  // NOLINT
     if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported");
+      throw std::runtime_error("More accounts not yet supported"s);
     return (*accounts.begin()).second.password;
   }
 
@@ -64,13 +67,14 @@ struct fmt::formatter<roq::kraken::Config> {
   }
   template <typename C>
   auto format(const roq::kraken::Config &value, C &ctx) {
+    using namespace std::literals;  // NOLINT
     // FIXME(thraneh): proper
     return format_to(
         ctx.out(),
         "{{"
         "users=[{}], "
         "accounts=..."
-        "}}",
-        fmt::join(value.users, ", "));
+        "}}"sv,
+        fmt::join(value.users, ", "sv));
   }
 };

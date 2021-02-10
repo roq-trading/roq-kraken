@@ -8,6 +8,8 @@
 #include "roq/kraken/json/event.h"
 #include "roq/kraken/json/result_field.h"
 
+using namespace std::literals;  // NOLINT
+
 namespace roq {
 namespace kraken {
 namespace json {
@@ -54,10 +56,10 @@ bool ParserPublic::dispatch(
         auto event = Event(value);
         switch (event) {
           case Event::UNDEFINED:
-            LOG(FATAL)("Unexpected");
+            LOG(FATAL)("Unexpected"sv);
             break;
           case Event::UNKNOWN:
-            DLOG(FATAL)(R"(Unknown key="{}")", key);
+            DLOG(FATAL)(R"(Unknown key="{}")"sv, key);
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
@@ -90,10 +92,10 @@ bool ParserPublic::dispatch(
             break;
           }
           case Event::ADD_ORDER_STATUS: {
-            throw std::runtime_error("addOrderStatus not supported");
+            throw std::runtime_error("addOrderStatus not supported"s);
           }
           case Event::CANCEL_ORDER_STATUS:
-            throw std::runtime_error("cancelOrderStatus not supported");
+            throw std::runtime_error("cancelOrderStatus not supported"s);
         }
         break;
       }
@@ -114,7 +116,7 @@ static bool dispatch2(
     size_t data_count) {
   /*
   DLOG(INFO)(
-      R"(channel_id={} channel={} pair={}, len(data)={})",
+      R"(channel_id={} channel={} pair={}, len(data)={})"sv,
       channel_id,
       channel,
       pair,
@@ -133,30 +135,30 @@ static bool dispatch2(
     switch (channel) {
       case Channel::UNDEFINED:
       case Channel::UNKNOWN:
-        LOG(FATAL)("Unexpected");
+        LOG(FATAL)("Unexpected"sv);
         break;
       case Channel::TICKER: {
-        throw std::runtime_error("ticker not supported");
+        throw std::runtime_error("ticker not supported"s);
       }
       case Channel::OHLC: {
-        throw std::runtime_error("ohlc not supported");
+        throw std::runtime_error("ohlc not supported"s);
       }
       case Channel::TRADE: {
-        LOG_IF(FATAL, data_count != 1)("Unexpected");
+        LOG_IF(FATAL, data_count != 1)("Unexpected"sv);
         Trade trade(value, buffer);
         handler(trade, pair, trace_info);
         dispatched = true;
         break;
       }
       case Channel::SPREAD: {
-        LOG_IF(FATAL, data_count != 1)("Unexpected");
+        LOG_IF(FATAL, data_count != 1)("Unexpected"sv);
         Spread spread(value);
         handler(spread, pair, trace_info);
         dispatched = true;
         break;
       }
       case Channel::BOOK: {
-        LOG_IF(FATAL, data_count < 1 || data_count > 2)("Unexpected");
+        LOG_IF(FATAL, data_count < 1 || data_count > 2)("Unexpected"sv);
         switch (offset) {
           case 2:
             book_1 = Book(value, buffer);
@@ -165,28 +167,28 @@ static bool dispatch2(
             book_2 = Book(value, buffer);
             break;
           default:
-            LOG(FATAL)("Unexpected");
+            LOG(FATAL)("Unexpected"sv);
         }
         break;
       }
       case Channel::OWN_TRADES: {
-        throw std::runtime_error("ownTrades not supported");
+        throw std::runtime_error("ownTrades not supported"s);
       }
       case Channel::OPEN_ORDERS: {
-        throw std::runtime_error("openOrders not supported");
+        throw std::runtime_error("openOrders not supported"s);
       }
     }
   }
   if (dispatched == false && channel == Channel::BOOK) {
     if (data_count == 2) {
       if (book_2.a.empty() == false) {
-        LOG_IF(FATAL, book_1.a.empty() == false)("Unexpected");
+        LOG_IF(FATAL, book_1.a.empty() == false)("Unexpected"sv);
         book_1.a = book_2.a;
       } else if (book_2.b.empty() == false) {
-        LOG_IF(FATAL, book_1.b.empty() == false)("Unexpected");
+        LOG_IF(FATAL, book_1.b.empty() == false)("Unexpected"sv);
         book_1.b = book_2.b;
       } else {
-        LOG(FATAL)("Unexpected");
+        LOG(FATAL)("Unexpected"sv);
       }
     }
     handler(book_1, pair, trace_info);
@@ -222,7 +224,7 @@ bool ParserPublic::dispatch(
               name.remove_suffix(name.size() - pos);
             channel = Channel(name);
             DLOG_IF(FATAL, channel == Channel::UNKNOWN)
-            (R"(Unknown channel="{}")", name);
+            (R"(Unknown channel="{}")"sv, name);
             break;
           }
           case 2:
@@ -235,7 +237,7 @@ bool ParserPublic::dispatch(
       }
     }
   }
-  LOG_IF(FATAL, offset != 3)(R"(message={})", message);
+  LOG_IF(FATAL, offset != 3)(R"(message={})"sv, message);
   return dispatch2(handler, message, buffer, trace_info, channel_id, channel, pair, data_count);
 }
 

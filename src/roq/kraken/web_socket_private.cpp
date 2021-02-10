@@ -8,11 +8,13 @@
 
 #include "roq/kraken/flags.h"
 
+using namespace std::literals;  // NOLINT
+
 namespace roq {
 namespace kraken {
 
 namespace {
-constexpr std::string_view CONNECTION = "ws_private";
+constexpr std::string_view CONNECTION = "ws_private"sv;
 
 static auto create_counter(const std::string_view &function) {
   return core::metrics::Counter(Flags::name(), CONNECTION, function);
@@ -48,14 +50,14 @@ WebSocketPrivate::WebSocketPrivate(
           []() { return std::string(); }),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"),
+          .disconnect = create_counter("disconnect"sv),
       },
       profile_{
-          .parse = create_profile("parse"),
+          .parse = create_profile("parse"sv),
       },
       latency_{
-          .ping = create_latency("ping"),
-          .heartbeat = create_latency("heartbeat"),
+          .ping = create_latency("ping"sv),
+          .heartbeat = create_latency("heartbeat"sv),
       } {
 }
 
@@ -91,7 +93,7 @@ void WebSocketPrivate::operator()(metrics::Writer &writer) {
 }
 
 void WebSocketPrivate::subscribe(const std::string_view &name, const std::string_view &token) {
-  LOG(INFO)(R"(subscribe name="{}", token="{}")", name, token);
+  LOG(INFO)(R"(subscribe name="{}", token="{}")"sv, name, token);
   auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
@@ -99,10 +101,10 @@ void WebSocketPrivate::subscribe(const std::string_view &name, const std::string
       R"("name":"{}",)"
       R"("token":"{}")"
       R"(}})"
-      R"(}})",
+      R"(}})"sv,
       name,
       token);
-  VLOG(3)(R"(request="{}")", message);
+  VLOG(3)(R"(request="{}")"sv, message);
   connection_.send_text(message);
 }
 
@@ -116,7 +118,7 @@ void WebSocketPrivate::operator()(const core::web::Socket::Disconnected &) {
 }
 
 void WebSocketPrivate::operator()(const core::web::Socket::Ready &) {
-  LOG(INFO)("Ready");
+  LOG(INFO)("Ready"sv);
   handler_(*this);
 }
 
@@ -146,36 +148,36 @@ void WebSocketPrivate::parse(const std::string_view &message) {
 }
 
 void WebSocketPrivate::operator()(const json::Error &error, const server::TraceInfo &) {
-  LOG(FATAL)("error={}", error);
+  LOG(FATAL)("error={}"sv, error);
 }
 
 void WebSocketPrivate::operator()(
     const json::SystemStatus &system_status, const server::TraceInfo &) {
-  LOG(INFO)("system_status={}", system_status);
+  LOG(INFO)("system_status={}"sv, system_status);
 }
 
 void WebSocketPrivate::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  VLOG(1)("pong={}", pong);
+  VLOG(1)("pong={}"sv, pong);
 }
 
 void WebSocketPrivate::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  VLOG(1)("heartbeat={}", heartbeat);
+  VLOG(1)("heartbeat={}"sv, heartbeat);
 }
 
 void WebSocketPrivate::operator()(
     const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  LOG(INFO)("subscription_status={}", subscription_status);
+  LOG(INFO)("subscription_status={}"sv, subscription_status);
 }
 
 void WebSocketPrivate::operator()(
     const json::AddOrderStatus &add_order_status, const server::TraceInfo &trace_info) {
-  LOG(INFO)("add_order_status={}", add_order_status);
+  LOG(INFO)("add_order_status={}"sv, add_order_status);
   handler_(add_order_status, trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::CancelOrderStatus &cancel_order_status, const server::TraceInfo &trace_info) {
-  LOG(INFO)("cancel_order_status={}", cancel_order_status);
+  LOG(INFO)("cancel_order_status={}"sv, cancel_order_status);
   handler_(cancel_order_status, trace_info);
 }
 
