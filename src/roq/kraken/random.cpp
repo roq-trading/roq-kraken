@@ -15,7 +15,7 @@
 
 #include "roq/core/crypto/sha.h"
 
-using namespace std::literals;  // NOLINT
+using namespace roq::literals;
 
 namespace roq {
 namespace kraken {
@@ -37,17 +37,17 @@ std::string Random::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = (now - nonce_).count();
   LOG_IF(FATAL, diff < THRESHOLD)
-  (R"(Probably something wrong... diff={})"sv, diff);
+  (R"(Probably something wrong... diff={})"_sv, diff);
   if (diff < 0)
     ++nonce_;
   else
     nonce_ = now;
   if (password_.empty()) {
-    return fmt::format(R"(nonce={})"sv, nonce_.count());
+    return roq::format(R"(nonce={})"_sv, nonce_.count());
   } else {
-    return fmt::format(
+    return roq::format(
         R"("nonce={}&)"
-        R"("opt={}")"sv,
+        R"("opt={}")"_sv,
         nonce_.count(),
         password_);
   }
@@ -57,7 +57,7 @@ std::string Random::create_headers(
     const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
   assert(body.empty() == false);
-  auto nonce = fmt::format("{}"sv, nonce_.count());
+  auto nonce = roq::format("{}"_sv, nonce_.count());
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
@@ -71,9 +71,9 @@ std::string Random::create_headers(
   auto length_2 = hmac_.digest(buffer_2.data(), buffer_2.size());
   assert(length_2 == buffer_2.size());
   auto sign_2 = core::binascii::Base64::encode(buffer_2.data(), length_2);
-  return fmt::format(
+  return roq::format(
       "API-Key: {}\r\n"
-      "API-Sign: {}\r\n"sv,
+      "API-Sign: {}\r\n"_sv,
       key_,
       sign_2);
 }

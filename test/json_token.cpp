@@ -6,8 +6,8 @@
 #include "roq/kraken/json/result.h"
 #include "roq/kraken/json/token.h"
 
-using namespace roq;          // NOLINT
-using namespace roq::kraken;  // NOLINT
+using namespace roq;
+using namespace roq::kraken;
 
 TEST(json_token, parse) {
   const std::string_view message = R"({)"

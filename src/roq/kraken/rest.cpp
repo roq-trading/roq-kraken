@@ -19,16 +19,16 @@
 #include "roq/kraken/json/positions.h"
 #include "roq/kraken/json/token.h"
 
-using namespace std::literals;  // NOLINT
+using namespace roq::literals;
 
 namespace roq {
 namespace kraken {
 
 namespace {
-constexpr std::string_view CONNECTION = "rest"sv;
+constexpr std::string_view CONNECTION = "rest"_sv;
 
-static const std::string_view ACCEPT_JSON{"application/json"sv};
-static const std::string_view CONTENT_TYPE_FORM{"application/x-www-form-urlencoded"sv};
+static const std::string_view ACCEPT_JSON = "application/json"_sv;
+static const std::string_view CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"_sv;
 
 static auto create_counter(const std::string_view &function) {
   return core::metrics::Counter(Flags::name(), CONNECTION, function);
@@ -69,17 +69,17 @@ Rest::Rest(
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"sv),
+          .disconnect = create_counter("disconnect"_sv),
       },
       profile_{
-          .assets = create_profile("assets"sv),
-          .asset_pairs = create_profile("asset_pairs"sv),
-          .balance = create_profile("balance"sv),
-          .open_positions = create_profile("open_positions"sv),
-          .get_web_sockets_token = create_profile("get_web_sockets_token"sv),
+          .assets = create_profile("assets"_sv),
+          .asset_pairs = create_profile("asset_pairs"_sv),
+          .balance = create_profile("balance"_sv),
+          .open_positions = create_profile("open_positions"_sv),
+          .get_web_sockets_token = create_profile("get_web_sockets_token"_sv),
       },
       latency_{
-          .ping = create_latency("ping"sv),
+          .ping = create_latency("ping"_sv),
       } {
 }
 
@@ -116,7 +116,7 @@ void Rest::operator()(metrics::Writer &writer) {
 template <>
 void Rest::get(std::function<void(const core::Promise<json::Assets> &)> &&callback) {
   constexpr auto method = core::http::Method::GET;
-  constexpr std::string_view path = "/0/public/Assets"sv;
+  constexpr std::string_view path = "/0/public/Assets"_sv;
   connection_.request(
       method,
       path,
@@ -132,16 +132,16 @@ void Rest::get(std::function<void(const core::Promise<json::Assets> &)> &&callba
             core::json::Buffer buffer(decode_buffer_);
             auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
             if (assets.error.empty()) {
-              VLOG(1)(R"(assets={})"sv, assets);
+              VLOG(1)(R"(assets={})"_sv, assets);
               core::Promise<json::Assets> promise(assets);
               callback(promise);
             } else {
-              LOG(WARNING)(R"(assets={})"sv, assets);
-              LOG(FATAL)("Unexpected"sv);
+              LOG(WARNING)(R"(assets={})"_sv, assets);
+              LOG(FATAL)("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::Assets> promise(std::current_exception());
             callback(promise);
           }
@@ -152,7 +152,7 @@ void Rest::get(std::function<void(const core::Promise<json::Assets> &)> &&callba
 template <>
 void Rest::get(std::function<void(const core::Promise<json::AssetPairs> &)> &&callback) {
   constexpr auto method = core::http::Method::GET;
-  constexpr std::string_view path = "/0/public/AssetPairs"sv;
+  constexpr std::string_view path = "/0/public/AssetPairs"_sv;
   connection_.request(
       method,
       path,
@@ -169,16 +169,16 @@ void Rest::get(std::function<void(const core::Promise<json::AssetPairs> &)> &&ca
             auto asset_pairs =
                 core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
             if (asset_pairs.error.empty()) {
-              VLOG(1)(R"(asset_pairs={})"sv, asset_pairs);
+              VLOG(1)(R"(asset_pairs={})"_sv, asset_pairs);
               core::Promise<json::AssetPairs> promise(asset_pairs);
               callback(promise);
             } else {
-              LOG(WARNING)(R"(asset_pairs={})"sv, asset_pairs);
-              LOG(FATAL)("Unexpected"sv);
+              LOG(WARNING)(R"(asset_pairs={})"_sv, asset_pairs);
+              LOG(FATAL)("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::AssetPairs> promise(std::current_exception());
             callback(promise);
           }
@@ -191,7 +191,7 @@ template <>
 void Rest::get(
     std::function<void(const core::Promise<json::Balance>&)>&& callback) {
   constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/0/private/Balance"sv;
+  constexpr std::string_view path = "/0/private/Balance"_sv;
   auto body = random_.create_body();
   auto headers = random_.create_headers(
       method,
@@ -215,18 +215,18 @@ void Rest::get(
               buffer);
         if (balance.error.empty()) {
           VLOG(1)(
-              R"(balance={})"sv,
+              R"(balance={})"_sv,
               balance);
           handler_(balance);
         } else {
           LOG(WARNING)(
-              R"(balance={})"sv,
+              R"(balance={})"_sv,
               balance);
-          LOG(FATAL)("Unexpected"sv);
+          LOG(FATAL)("Unexpected"_sv);
         }
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            R"(Exception type={}, what="{}")"sv,
+            R"(Exception type={}, what="{}")"_sv,
             typeid(e).name(),
             e.what());
         core::Promise<json::Products> promise(std::current_exception());
@@ -240,7 +240,7 @@ void Rest::get(
 template <>
 void Rest::get(std::function<void(const core::Promise<json::Positions> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/0/private/OpenPositions"sv;
+  constexpr std::string_view path = "/0/private/OpenPositions"_sv;
   auto body = random_.create_body();
   auto headers = random_.create_headers(method, path, body);
   connection_.request(
@@ -258,16 +258,16 @@ void Rest::get(std::function<void(const core::Promise<json::Positions> &)> &&cal
             core::json::Buffer buffer(decode_buffer_);
             auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
             if (positions.error.empty()) {
-              VLOG(1)(R"(positions={})"sv, positions);
+              VLOG(1)(R"(positions={})"_sv, positions);
               core::Promise<json::Positions> promise(positions);
               callback(promise);
             } else {
-              LOG(WARNING)(R"(positions={})"sv, positions);
-              LOG(FATAL)("Unexpected"sv);
+              LOG(WARNING)(R"(positions={})"_sv, positions);
+              LOG(FATAL)("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::Positions> promise(std::current_exception());
             callback(promise);
           }
@@ -278,7 +278,7 @@ void Rest::get(std::function<void(const core::Promise<json::Positions> &)> &&cal
 template <>
 void Rest::get(std::function<void(const core::Promise<json::Token> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/0/private/GetWebSocketsToken"sv;
+  constexpr std::string_view path = "/0/private/GetWebSocketsToken"_sv;
   auto body = random_.create_body();
   auto headers = random_.create_headers(method, path, body);
   connection_.request(
@@ -298,17 +298,17 @@ void Rest::get(std::function<void(const core::Promise<json::Token> &)> &&callbac
                 response.body(),
                 buffer,
                 [](const roq::span<std::string_view> &e) {
-                  LOG(WARNING)(R"(error=[{}])"sv, fmt::join(e, ","sv));
-                  LOG(FATAL)("Unexpected"sv);
+                  LOG(WARNING)(R"(error=[{}])"_sv, fmt::join(e, ","_sv));
+                  LOG(FATAL)("Unexpected"_sv);
                 },
                 [&](const json::Token &token) {
-                  VLOG(1)(R"(token={})"sv, token);
+                  VLOG(1)(R"(token={})"_sv, token);
                   core::Promise<json::Token> promise(token);
                   callback(promise);
                 });
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::Token> promise(std::current_exception());
             callback(promise);
           }

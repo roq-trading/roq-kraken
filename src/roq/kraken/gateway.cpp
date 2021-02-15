@@ -12,7 +12,7 @@
 
 #include "roq/kraken/json/utils.h"
 
-using namespace std::literals;  // NOLINT
+using namespace roq::literals;
 
 namespace roq {
 namespace kraken {
@@ -93,14 +93,14 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
 }
 
 void Gateway::operator()(const Event<Start> &event) {
-  LOG(INFO)("Starting the gateway..."sv);
+  LOG(INFO)("Starting the gateway..."_sv);
   web_socket_public_.connection(event);
   web_socket_private_.connection(event);
   rest_.connection(event);
 }
 
 void Gateway::operator()(const Event<Stop> &event) {
-  LOG(INFO)("Stopping the gateway..."sv);
+  LOG(INFO)("Stopping the gateway..."_sv);
   rest_.connection(event);
   web_socket_private_.connection(event);
   web_socket_public_.connection(event);
@@ -113,7 +113,7 @@ void Gateway::operator()(const Event<Timer> &event) {
   // download
   /*
   if (_web_socket.download.has_expired()) {
-    LOG(WARNING)("WebSocket download has timed out"sv);
+    LOG(WARNING)("WebSocket download has timed out"_sv);
     _web_socket.download.reset();
     _web_socket.connection.close();
   }
@@ -240,9 +240,9 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
   server::TraceInfo trace_info;  // XXX not correct (*parsing* already done)
   symbols_.reserve(asset_pairs.result.size());
   for (auto &item : asset_pairs.result) {
-    VLOG(1)(R"(item={})"sv, item);
+    VLOG(1)(R"(item={})"_sv, item);
     if (item.wsname.empty()) {
-      VLOG(1)(R"(Skipping altname={}, reason: wsname is empty)"sv, item.altname);
+      VLOG(1)(R"(Skipping altname={}, reason: wsname is empty)"_sv, item.altname);
       continue;
     }
     std::string symbol(item.wsname);
@@ -274,14 +274,14 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
     };
-    VLOG(1)(R"(reference_data={})"sv, reference_data);
+    VLOG(1)(R"(reference_data={})"_sv, reference_data);
     server::create_trace_and_dispatch(trace_info, reference_data, dispatcher_, true);
     MarketStatus market_status{
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
     };
-    VLOG(2)(R"(market_status={})"sv, market_status);
+    VLOG(2)(R"(market_status={})"_sv, market_status);
     server::create_trace_and_dispatch(trace_info, market_status, dispatcher_, true);
   }
 }
@@ -291,7 +291,7 @@ void Gateway::operator()(const json::Positions &positions) {
 }
 
 void Gateway::operator()(const json::Token &token) {
-  LOG(INFO)(R"(token={})"sv, token);
+  LOG(INFO)(R"(token={})"_sv, token);
   // XXX maybe we have to URL decode here ???
   token_ = token.token;
 }
@@ -340,9 +340,9 @@ void Gateway::operator()(const WebSocketPublic &) {
 
 void Gateway::subscribe_public() {
   roq::span pairs(symbols_.data(), symbols_.size());
-  web_socket_public_.connection.subscribe("trade"sv, pairs);
-  web_socket_public_.connection.subscribe("spread"sv, pairs);
-  web_socket_public_.connection.subscribe("book"sv, pairs);
+  web_socket_public_.connection.subscribe("trade"_sv, pairs);
+  web_socket_public_.connection.subscribe("spread"_sv, pairs);
+  web_socket_public_.connection.subscribe("book"_sv, pairs);
 }
 
 void Gateway::operator()(
@@ -358,7 +358,7 @@ void Gateway::operator()(
   }
   LOG_IF(WARNING, !success)
   (R"(Insufficient trade array size: )"
-   R"(symbol="{}", len(trade)={}/{})"sv,
+   R"(symbol="{}", len(trade)={}/{})"_sv,
    pair,
    trade.data.size(),
    trade_.size());
@@ -369,7 +369,7 @@ void Gateway::operator()(
         .trades = {trade_.data(), trade_length},
         .exchange_time_utc = exchange_time_utc,
     };
-    VLOG(3)(R"(trade_summary={})"sv, trade_summary);
+    VLOG(3)(R"(trade_summary={})"_sv, trade_summary);
     server::create_trace_and_dispatch(trace_info, trade_summary, dispatcher_, true);
   }
 }
@@ -389,7 +389,7 @@ void Gateway::operator()(
       .snapshot = false,  // note! we don't know... false is probably ok
       .exchange_time_utc = spread.timestamp,
   };
-  VLOG(3)(R"(top_of_book={})"sv, top_of_book);
+  VLOG(3)(R"(top_of_book={})"_sv, top_of_book);
   server::create_trace_and_dispatch(trace_info, top_of_book, dispatcher_, true);
 }
 
@@ -397,7 +397,7 @@ void Gateway::operator()(
     const json::Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) {
   bool snapshot = book.bs.empty() == false && book.as.empty() == false;
   bool live = book.b.empty() == false && book.a.empty() == false;
-  LOG_IF(FATAL, snapshot && live)("Unexpected"sv);
+  LOG_IF(FATAL, snapshot && live)("Unexpected"_sv);
   bool success = true;
   std::chrono::nanoseconds exchange_time_utc = {};
   size_t bid_length = 0, ask_length = 0;
@@ -427,7 +427,7 @@ void Gateway::operator()(
   }
   LOG_IF(WARNING, !success)
   (R"(Insufficient bid/ask array size(s): )"
-   R"(symbol="{}", len(bid)={}+{}/{}, len(ask)={}+{}/{})"sv,
+   R"(symbol="{}", len(bid)={}+{}/{}, len(ask)={}+{}/{})"_sv,
    pair,
    book.b.size(),
    book.bs.size(),
@@ -444,7 +444,7 @@ void Gateway::operator()(
         .snapshot = snapshot,
         .exchange_time_utc = exchange_time_utc,
     };
-    VLOG(3)(R"(market_by_price_update={})"sv, market_by_price_update);
+    VLOG(3)(R"(market_by_price_update={})"_sv, market_by_price_update);
     server::create_trace_and_dispatch(trace_info, market_by_price_update, dispatcher_, true);
   }
 }
@@ -497,8 +497,8 @@ void Gateway::download_web_sockets_token() {
 }
 
 void Gateway::subscribe_private() {
-  web_socket_private_.connection.subscribe("ownTrades"sv, token_);
-  web_socket_private_.connection.subscribe("openOrders"sv, token_);
+  web_socket_private_.connection.subscribe("ownTrades"_sv, token_);
+  web_socket_private_.connection.subscribe("openOrders"_sv, token_);
 }
 
 void Gateway::operator()(const json::AddOrderStatus &, const server::TraceInfo &) {
@@ -527,7 +527,7 @@ void Gateway::update(GatewayStatus gateway_status) {
       .status = gateway_status_,
   };
   server::create_trace_and_dispatch(trace_info, order_manager_status, dispatcher_, true);
-  LOG(INFO)(R"(Update: gateway_status={})"sv, gateway_status_);
+  LOG(INFO)(R"(Update: gateway_status={})"_sv, gateway_status_);
 }
 
 }  // namespace kraken
