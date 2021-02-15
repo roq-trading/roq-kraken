@@ -35,7 +35,7 @@ std::string Random::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = (now - nonce_).count();
   LOG_IF(FATAL, diff < THRESHOLD)
-  (R"(Probably something wrong... diff={})"_sv, diff);
+  (R"(Probably something wrong... diff={})"_fmt, diff);
   if (diff < 0)
     ++nonce_;
   else

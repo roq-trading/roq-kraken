@@ -59,7 +59,7 @@ bool ParserPrivate::dispatch(
             LOG(FATAL)("Unexpected"_sv);
             break;
           case Event::UNKNOWN:
-            DLOG(FATAL)(R"(Unknown key="{}")"_sv, key);
+            DLOG(FATAL)(R"(Unknown key="{}")"_fmt, key);
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
@@ -218,7 +218,7 @@ bool ParserPrivate::dispatch(
           name.remove_suffix(name.size() - pos);
         channel = Channel(name);
         DLOG_IF(FATAL, channel == Channel::UNKNOWN)
-        (R"(Unknown channel="{}")"_sv, name);
+        (R"(Unknown channel="{}")"_fmt, name);
         break;
       }
       default:
@@ -226,7 +226,7 @@ bool ParserPrivate::dispatch(
     }
     ++offset;
   }
-  LOG_IF(FATAL, offset != 2)(R"(message={})"_sv, message);
+  LOG_IF(FATAL, offset != 2)(R"(message={})"_fmt, message);
   return dispatch2(handler, message, buffer, channel);
 }
 

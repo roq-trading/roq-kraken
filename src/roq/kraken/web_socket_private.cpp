@@ -91,7 +91,7 @@ void WebSocketPrivate::operator()(metrics::Writer &writer) {
 }
 
 void WebSocketPrivate::subscribe(const std::string_view &name, const std::string_view &token) {
-  LOG(INFO)(R"(subscribe name="{}", token="{}")"_sv, name, token);
+  LOG(INFO)(R"(subscribe name="{}", token="{}")"_fmt, name, token);
   auto message = roq::format(
       R"({{)"
       R"("event":"subscribe",)"
@@ -102,7 +102,7 @@ void WebSocketPrivate::subscribe(const std::string_view &name, const std::string
       R"(}})"_fmt,
       name,
       token);
-  VLOG(3)(R"(request="{}")"_sv, message);
+  VLOG(3)(R"(request="{}")"_fmt, message);
   connection_.send_text(message);
 }
 
@@ -146,36 +146,36 @@ void WebSocketPrivate::parse(const std::string_view &message) {
 }
 
 void WebSocketPrivate::operator()(const json::Error &error, const server::TraceInfo &) {
-  LOG(FATAL)("error={}"_sv, error);
+  LOG(FATAL)("error={}"_fmt, error);
 }
 
 void WebSocketPrivate::operator()(
     const json::SystemStatus &system_status, const server::TraceInfo &) {
-  LOG(INFO)("system_status={}"_sv, system_status);
+  LOG(INFO)("system_status={}"_fmt, system_status);
 }
 
 void WebSocketPrivate::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  VLOG(1)("pong={}"_sv, pong);
+  VLOG(1)("pong={}"_fmt, pong);
 }
 
 void WebSocketPrivate::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  VLOG(1)("heartbeat={}"_sv, heartbeat);
+  VLOG(1)("heartbeat={}"_fmt, heartbeat);
 }
 
 void WebSocketPrivate::operator()(
     const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  LOG(INFO)("subscription_status={}"_sv, subscription_status);
+  LOG(INFO)("subscription_status={}"_fmt, subscription_status);
 }
 
 void WebSocketPrivate::operator()(
     const json::AddOrderStatus &add_order_status, const server::TraceInfo &trace_info) {
-  LOG(INFO)("add_order_status={}"_sv, add_order_status);
+  LOG(INFO)("add_order_status={}"_fmt, add_order_status);
   handler_(add_order_status, trace_info);
 }
 
 void WebSocketPrivate::operator()(
     const json::CancelOrderStatus &cancel_order_status, const server::TraceInfo &trace_info) {
-  LOG(INFO)("cancel_order_status={}"_sv, cancel_order_status);
+  LOG(INFO)("cancel_order_status={}"_fmt, cancel_order_status);
   handler_(cancel_order_status, trace_info);
 }
 

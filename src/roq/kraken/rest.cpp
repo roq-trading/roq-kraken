@@ -131,16 +131,16 @@ void Rest::get(std::function<void(const core::Promise<json::Assets> &)> &&callba
             core::json::Buffer buffer(decode_buffer_);
             auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
             if (assets.error.empty()) {
-              VLOG(1)(R"(assets={})"_sv, assets);
+              VLOG(1)(R"(assets={})"_fmt, assets);
               core::Promise<json::Assets> promise(assets);
               callback(promise);
             } else {
-              LOG(WARNING)(R"(assets={})"_sv, assets);
+              LOG(WARNING)(R"(assets={})"_fmt, assets);
               LOG(FATAL)("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::Assets> promise(std::current_exception());
             callback(promise);
           }
@@ -168,16 +168,16 @@ void Rest::get(std::function<void(const core::Promise<json::AssetPairs> &)> &&ca
             auto asset_pairs =
                 core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
             if (asset_pairs.error.empty()) {
-              VLOG(1)(R"(asset_pairs={})"_sv, asset_pairs);
+              VLOG(1)(R"(asset_pairs={})"_fmt, asset_pairs);
               core::Promise<json::AssetPairs> promise(asset_pairs);
               callback(promise);
             } else {
-              LOG(WARNING)(R"(asset_pairs={})"_sv, asset_pairs);
+              LOG(WARNING)(R"(asset_pairs={})"_fmt, asset_pairs);
               LOG(FATAL)("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::AssetPairs> promise(std::current_exception());
             callback(promise);
           }
@@ -214,18 +214,18 @@ void Rest::get(
               buffer);
         if (balance.error.empty()) {
           VLOG(1)(
-              R"(balance={})"_sv,
+              R"(balance={})"_fmt,
               balance);
           handler_(balance);
         } else {
           LOG(WARNING)(
-              R"(balance={})"_sv,
+              R"(balance={})"_fmt,
               balance);
           LOG(FATAL)("Unexpected"_sv);
         }
       } catch (NetworkError& e) {
         LOG(WARNING)(
-            R"(Exception type={}, what="{}")"_sv,
+            R"(Exception type={}, what="{}")"_fmt,
             typeid(e).name(),
             e.what());
         core::Promise<json::Products> promise(std::current_exception());
@@ -257,16 +257,16 @@ void Rest::get(std::function<void(const core::Promise<json::Positions> &)> &&cal
             core::json::Buffer buffer(decode_buffer_);
             auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
             if (positions.error.empty()) {
-              VLOG(1)(R"(positions={})"_sv, positions);
+              VLOG(1)(R"(positions={})"_fmt, positions);
               core::Promise<json::Positions> promise(positions);
               callback(promise);
             } else {
-              LOG(WARNING)(R"(positions={})"_sv, positions);
+              LOG(WARNING)(R"(positions={})"_fmt, positions);
               LOG(FATAL)("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::Positions> promise(std::current_exception());
             callback(promise);
           }
@@ -301,13 +301,13 @@ void Rest::get(std::function<void(const core::Promise<json::Token> &)> &&callbac
                   LOG(FATAL)("Unexpected"_fmt);
                 },
                 [&](const json::Token &token) {
-                  VLOG(1)(R"(token={})"_sv, token);
+                  VLOG(1)(R"(token={})"_fmt, token);
                   core::Promise<json::Token> promise(token);
                   callback(promise);
                 });
           } catch (NetworkError &e) {
             LOG(WARNING)
-            (R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            (R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
             core::Promise<json::Token> promise(std::current_exception());
             callback(promise);
           }
