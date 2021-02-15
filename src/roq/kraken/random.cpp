@@ -2,8 +2,6 @@
 
 #include "roq/kraken/random.h"
 
-#include <fmt/format.h>
-
 #include <array>
 #include <random>
 
@@ -43,11 +41,11 @@ std::string Random::create_body() {
   else
     nonce_ = now;
   if (password_.empty()) {
-    return roq::format(R"(nonce={})"_sv, nonce_.count());
+    return roq::format(R"(nonce={})"_fmt, nonce_.count());
   } else {
     return roq::format(
         R"("nonce={}&)"
-        R"("opt={}")"_sv,
+        R"("opt={}")"_fmt,
         nonce_.count(),
         password_);
   }
@@ -57,7 +55,7 @@ std::string Random::create_headers(
     const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
   assert(body.empty() == false);
-  auto nonce = roq::format("{}"_sv, nonce_.count());
+  auto nonce = roq::format("{}"_fmt, nonce_.count());
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
@@ -73,7 +71,7 @@ std::string Random::create_headers(
   auto sign_2 = core::binascii::Base64::encode(buffer_2.data(), length_2);
   return roq::format(
       "API-Key: {}\r\n"
-      "API-Sign: {}\r\n"_sv,
+      "API-Sign: {}\r\n"_fmt,
       key_,
       sign_2);
 }

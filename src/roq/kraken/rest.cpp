@@ -3,7 +3,6 @@
 #include "roq/kraken/rest.h"
 
 #include <fmt/chrono.h>
-#include <fmt/format.h>
 
 #include <utility>
 
@@ -298,8 +297,8 @@ void Rest::get(std::function<void(const core::Promise<json::Token> &)> &&callbac
                 response.body(),
                 buffer,
                 [](const roq::span<std::string_view> &e) {
-                  LOG(WARNING)(R"(error=[{}])"_sv, fmt::join(e, ","_sv));
-                  LOG(FATAL)("Unexpected"_sv);
+                  LOG(WARNING)(R"(error=[{}])"_fmt, roq::join(e, ","_sv));
+                  LOG(FATAL)("Unexpected"_fmt);
                 },
                 [&](const json::Token &token) {
                   VLOG(1)(R"(token={})"_sv, token);

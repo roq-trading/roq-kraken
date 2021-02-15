@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <fmt/format.h>
-
 #include <stdexcept>
 #include <string_view>
 
@@ -38,7 +36,7 @@ struct Result final {
         result_handler(obj);
         return;
       } else {
-        throw std::runtime_error(roq::format(R"(Unexpected key="{}")"_sv, key));
+        throw std::runtime_error(roq::format(R"(Unexpected key="{}")"_fmt, key));
       }
     }
     throw std::runtime_error(R"(Didn't find key in {"error", "result"})"_s);

@@ -2,8 +2,6 @@
 
 #include "roq/kraken/web_socket_public.h"
 
-#include <fmt/format.h>
-
 #include "roq/core/clock.h"
 
 #include "roq/kraken/flags.h"
@@ -104,8 +102,8 @@ void WebSocketPublic::subscribe(const std::string_view &name, const roq::span<st
         R"("name":"{}",)"
         R"("depth":{})"
         R"(}})"
-        R"(}})"_sv,
-        fmt::join(pairs, R"(",")"_sv),
+        R"(}})"_fmt,
+        roq::join(pairs, R"(",")"_sv),
         name,
         Flags::ws_public_subscribe_book_depth());
     DLOG(INFO)(R"(request="{}")"_sv, message);
@@ -118,8 +116,8 @@ void WebSocketPublic::subscribe(const std::string_view &name, const roq::span<st
         R"("subscription":{{)"
         R"("name":"{}")"
         R"(}})"
-        R"(}})"_sv,
-        fmt::join(pairs, R"(",")"_sv),
+        R"(}})"_fmt,
+        roq::join(pairs, R"(",")"_sv),
         name);
     VLOG(3)(R"(request="{}")"_sv, message);
     connection_.send_text(message);

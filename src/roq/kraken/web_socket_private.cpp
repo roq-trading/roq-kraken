@@ -2,8 +2,6 @@
 
 #include "roq/kraken/web_socket_private.h"
 
-#include <fmt/format.h>
-
 #include "roq/core/clock.h"
 
 #include "roq/kraken/flags.h"
@@ -101,7 +99,7 @@ void WebSocketPrivate::subscribe(const std::string_view &name, const std::string
       R"("name":"{}",)"
       R"("token":"{}")"
       R"(}})"
-      R"(}})"_sv,
+      R"(}})"_fmt,
       name,
       token);
   VLOG(3)(R"(request="{}")"_sv, message);
