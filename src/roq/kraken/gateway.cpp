@@ -266,7 +266,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .min_trade_vol = min_trade_vol,
         .option_type = OptionType::UNDEFINED,
         .strike_currency = {},
-        .strike_price = std::numeric_limits<double>::quiet_NaN(),
+        .strike_price = NaN,
         .underlying = {},
         .time_zone = {},
         .issue_date = {},
