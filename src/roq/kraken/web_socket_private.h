@@ -12,10 +12,7 @@
 #include "roq/core/metrics/latency.h"
 #include "roq/core/metrics/profile.h"
 
-#include "roq/core/event/base.h"
-#include "roq/core/event/dns_base.h"
-
-#include "roq/core/ssl/ssl.h"
+#include "roq/core/io/context.h"
 
 #include "roq/core/web/socket.h"
 
@@ -42,12 +39,7 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
   };
 
   WebSocketPrivate(
-      Handler &handler,
-      const Config &config,
-      Random &random,
-      core::event::Base &base,
-      core::event::DNSBase &dns_base,
-      core::ssl::Context &ssl_context);
+      Handler &handler, const Config &config, Random &random, core::io::Context &context);
 
   WebSocketPrivate(WebSocketPrivate &&) = delete;
   WebSocketPrivate(const WebSocketPrivate &) = delete;

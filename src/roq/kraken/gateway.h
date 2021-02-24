@@ -10,8 +10,7 @@
 
 #include "roq/core/ssl/ssl.h"
 
-#include "roq/core/event/base.h"
-#include "roq/core/event/dns_base.h"
+#include "roq/core/io/context.h"
 
 #include "roq/kraken/config.h"
 #include "roq/kraken/random.h"
@@ -133,11 +132,8 @@ class Gateway final : public server::Handler,
   const std::string access_key_;
   // authentication
   Random random_;
-  // async
-  core::event::Base base_;
-  core::event::DNSBase dns_base_;
-  // crypto
-  core::ssl::Context ssl_context_;
+  // io
+  core::io::Context context_;
   // connections
   struct {
     WebSocketPublic connection;

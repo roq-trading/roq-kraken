@@ -48,16 +48,13 @@ static bool trade_update(C &data, size_t &offset, const T &item) {
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
     : dispatcher_(dispatcher), account_(config.get_account()), access_key_(config.get_access_key()),
       random_(config.get_access_key(), config.get_access_secret(), config.get_access_password()),
-      dns_base_(base_, true),
       web_socket_public_{
           .connection =
               {
                   *this,
                   config,
                   random_,
-                  base_,
-                  dns_base_,
-                  ssl_context_,
+                  context_,
               },
           .download = WebSocketDownload(
               std::chrono::seconds{Flags::ws_public_request_timeout_secs()},
@@ -69,9 +66,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   *this,
                   config,
                   random_,
-                  base_,
-                  dns_base_,
-                  ssl_context_,
+                  context_,
               },
           .download = WebSocketPrivateDownload(
               std::chrono::seconds{Flags::ws_private_request_timeout_secs()},
@@ -83,9 +78,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
                   *this,
                   config,
                   random_,
-                  base_,
-                  dns_base_,
-                  ssl_context_,
+                  context_,
               },
       },
       bid_(Flags::cache_mbp_max_depth()), ask_(Flags::cache_mbp_max_depth()),
@@ -118,7 +111,7 @@ void Gateway::operator()(const Event<Timer> &event) {
     _web_socket.connection.close();
   }
   */
-  base_.loop(EVLOOP_NONBLOCK);
+  context_.dispatch(true);
 }
 
 void Gateway::operator()(const Event<Connection> &) {
