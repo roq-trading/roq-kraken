@@ -24,30 +24,28 @@ namespace roq {
 namespace kraken {
 
 namespace {
-constexpr std::string_view CONNECTION = "rest"_sv;
+static const auto CONNECTION = "rest"_sv;
 
-static const std::string_view ACCEPT_JSON = "application/json"_sv;
-static const std::string_view CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"_sv;
+static const auto ACCEPT_JSON = "application/json"_sv;
+static const auto CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"_sv;
 
-static auto create_counter(const std::string_view &function) {
-  return core::metrics::Counter(Flags::name(), CONNECTION, function);
-}
+class create_metrics final {
+ public:
+  explicit create_metrics(const std::string_view &function) : function_(function) {}
+  create_metrics(create_metrics &&) = default;
+  create_metrics(const create_metrics &) = delete;
+  template <typename T>
+  operator T() {
+    return T(Flags::name(), CONNECTION, function_);
+  }
 
-static auto create_profile(const std::string_view &function) {
-  return core::metrics::Profile(Flags::name(), CONNECTION, function);
-}
-
-static auto create_latency(const std::string_view &function) {
-  return core::metrics::Latency(Flags::name(), CONNECTION, function);
-}
+ private:
+  std::string_view function_;
+};
 }  // namespace
 
-Rest::Rest(
-    Handler &handler,
-    [[maybe_unused]] const Config &config,
-    Random &random,
-    core::io::Context &context)
-    : handler_(handler), random_(random),
+Rest::Rest(Handler &handler, Security &security, core::io::Context &context)
+    : handler_(handler), security_(security),
       connection_(
           *this,
           context,
@@ -64,17 +62,17 @@ Rest::Rest(
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"_sv),
+          .disconnect = create_metrics("disconnect"_sv),
       },
       profile_{
-          .assets = create_profile("assets"_sv),
-          .asset_pairs = create_profile("asset_pairs"_sv),
-          .balance = create_profile("balance"_sv),
-          .open_positions = create_profile("open_positions"_sv),
-          .get_web_sockets_token = create_profile("get_web_sockets_token"_sv),
+          .assets = create_metrics("assets"_sv),
+          .asset_pairs = create_metrics("asset_pairs"_sv),
+          .balance = create_metrics("balance"_sv),
+          .open_positions = create_metrics("open_positions"_sv),
+          .get_web_sockets_token = create_metrics("get_web_sockets_token"_sv),
       },
       latency_{
-          .ping = create_latency("ping"_sv),
+          .ping = create_metrics("ping"_sv),
       } {
 }
 
@@ -187,8 +185,8 @@ void Rest::get(
     std::function<void(const core::Promise<json::Balance>&)>&& callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/Balance"_sv;
-  auto body = random_.create_body();
-  auto headers = random_.create_headers(
+  auto body = security_.create_body();
+  auto headers = security_.create_headers(
       method,
       path,
       body);
@@ -236,8 +234,8 @@ template <>
 void Rest::get(std::function<void(const core::Promise<json::Positions> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/OpenPositions"_sv;
-  auto body = random_.create_body();
-  auto headers = random_.create_headers(method, path, body);
+  auto body = security_.create_body();
+  auto headers = security_.create_headers(method, path, body);
   connection_.request(
       method,
       path,
@@ -274,8 +272,8 @@ template <>
 void Rest::get(std::function<void(const core::Promise<json::Token> &)> &&callback) {
   constexpr auto method = core::http::Method::POST;
   constexpr std::string_view path = "/0/private/GetWebSocketsToken"_sv;
-  auto body = random_.create_body();
-  auto headers = random_.create_headers(method, path, body);
+  auto body = security_.create_body();
+  auto headers = security_.create_headers(method, path, body);
   connection_.request(
       method,
       path,

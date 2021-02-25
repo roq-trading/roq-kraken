@@ -18,9 +18,6 @@
 
 #include "roq/server.h"
 
-#include "roq/kraken/config.h"
-#include "roq/kraken/random.h"
-
 #include "roq/kraken/json/parser_public.h"
 
 namespace roq {
@@ -46,8 +43,7 @@ class WebSocketPublic final : public core::web::Socket::Handler,
         const server::TraceInfo &trace_info) = 0;
   };
 
-  WebSocketPublic(
-      Handler &handler, const Config &config, Random &random, core::io::Context &context);
+  WebSocketPublic(Handler &handler, core::io::Context &context);
 
   WebSocketPublic(WebSocketPublic &&) = delete;
   WebSocketPublic(const WebSocketPublic &) = delete;
@@ -103,15 +99,10 @@ class WebSocketPublic final : public core::web::Socket::Handler,
 
  private:
   Handler &handler_;
-  // config
-  const std::string access_key_;
-  // authentication
-  Random &random_;
   // web socket
   core::web::Socket connection_;
   // buffers
   core::utils::Buffer decode_buffer_;
-  // core::stack::Buffer<char, 32> stack_buffer_;
   // metrics
   struct {
     core::metrics::Counter disconnect;

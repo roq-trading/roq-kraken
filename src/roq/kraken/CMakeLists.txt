@@ -5,8 +5,8 @@ set(SOURCES
     config.cpp
     flags.cpp
     gateway.cpp
-    random.cpp
     rest.cpp
+    security.cpp
     web_socket_private.cpp
     web_socket_public.cpp
     main.cpp)

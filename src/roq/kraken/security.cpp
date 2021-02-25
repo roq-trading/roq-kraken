@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2021, Hans Erik Thrane */
 
-#include "roq/kraken/random.h"
+#include "roq/kraken/security.h"
 
 #include <array>
 #include <random>
@@ -19,19 +19,20 @@ namespace roq {
 namespace kraken {
 
 namespace {
-constexpr int64_t THRESHOLD = -1000;
+static const auto THRESHOLD = -1000;
+
 static auto create_hmac(const std::string_view &secret) {
-  auto raw_secret = core::binascii::Base64::decode(secret.data(), secret.length(), true);
-  return core::crypto::HMAC_SHA512(raw_secret.data(), raw_secret.size());
+  auto raw_secret = core::binascii::Base64::decode(secret, true);
+  return core::crypto::HMAC_SHA512(raw_secret);
 }
 }  // namespace
 
-Random::Random(
-    const std::string_view &key, const std::string_view &secret, const std::string_view &password)
-    : key_(key), password_(password), hmac_(create_hmac(secret)) {
+Security::Security(const Config &config)
+    : key_(config.get_access_key()), password_(config.get_access_password()),
+      hmac_(create_hmac(config.get_access_secret())) {
 }
 
-std::string Random::create_body() {
+std::string Security::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = (now - nonce_).count();
   LOG_IF(FATAL, diff < THRESHOLD)
@@ -51,7 +52,7 @@ std::string Random::create_body() {
   }
 }
 
-std::string Random::create_headers(
+std::string Security::create_headers(
     const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
   assert(body.empty() == false);
@@ -59,16 +60,16 @@ std::string Random::create_headers(
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
-  std::array<char, 32> buffer_1;
-  auto length_1 = sha_.digest(buffer_1.data(), buffer_1.size());
+  std::array<char, 32u> buffer_1;
+  auto length_1 = sha_.digest(buffer_1);
   assert(length_1 == buffer_1.size());
   hmac_.clear();
   hmac_.update(path.data(), path.length());
   hmac_.update(buffer_1.data(), buffer_1.size());
-  std::array<char, 64> buffer_2;
-  auto length_2 = hmac_.digest(buffer_2.data(), buffer_2.size());
+  std::array<char, 64u> buffer_2;
+  auto length_2 = hmac_.digest(buffer_2);
   assert(length_2 == buffer_2.size());
-  auto sign_2 = core::binascii::Base64::encode(buffer_2.data(), length_2);
+  auto sign_2 = core::binascii::Base64::encode(buffer_2);
   return roq::format(
       "API-Key: {}\r\n"
       "API-Sign: {}\r\n"_fmt,

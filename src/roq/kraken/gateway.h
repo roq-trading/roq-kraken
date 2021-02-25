@@ -13,8 +13,8 @@
 #include "roq/core/io/context.h"
 
 #include "roq/kraken/config.h"
-#include "roq/kraken/random.h"
 #include "roq/kraken/rest.h"
+#include "roq/kraken/security.h"
 #include "roq/kraken/web_socket_private.h"
 #include "roq/kraken/web_socket_public.h"
 
@@ -129,9 +129,8 @@ class Gateway final : public server::Handler,
   server::Dispatcher &dispatcher_;
   // config
   const std::string account_;
-  const std::string access_key_;
   // authentication
-  Random random_;
+  Security security_;
   // io
   core::io::Context context_;
   // connections

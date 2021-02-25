@@ -17,6 +17,7 @@ using namespace roq::literals;
 namespace roq {
 namespace kraken {
 
+namespace {
 template <typename C, typename T>
 static bool mbp_update(C &data, size_t &offset, const T &item) {
   if (offset >= data.size())
@@ -44,16 +45,14 @@ static bool trade_update(C &data, size_t &offset, const T &item) {
   ++offset;
   return offset <= data.size();
 }
+}  // namespace
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
-    : dispatcher_(dispatcher), account_(config.get_account()), access_key_(config.get_access_key()),
-      random_(config.get_access_key(), config.get_access_secret(), config.get_access_password()),
+    : dispatcher_(dispatcher), account_(config.get_account()), security_(config),
       web_socket_public_{
           .connection =
               {
                   *this,
-                  config,
-                  random_,
                   context_,
               },
           .download = WebSocketDownload(
@@ -64,8 +63,6 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
           .connection =
               {
                   *this,
-                  config,
-                  random_,
                   context_,
               },
           .download = WebSocketPrivateDownload(
@@ -76,8 +73,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
           .connection =
               {
                   *this,
-                  config,
-                  random_,
+                  security_,
                   context_,
               },
       },
@@ -103,14 +99,6 @@ void Gateway::operator()(const Event<Timer> &event) {
   web_socket_public_.connection(event);
   web_socket_private_.connection(event);
   rest_.connection(event);
-  // download
-  /*
-  if (_web_socket.download.has_expired()) {
-    LOG(WARNING)("WebSocket download has timed out"_sv);
-    _web_socket.download.reset();
-    _web_socket.connection.close();
-  }
-  */
   context_.dispatch(true);
 }
 
@@ -250,14 +238,14 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .description = item.altname,
-        .security_type = SecurityType::UNDEFINED,
+        .security_type = {},
         .currency = item.aclass_quote,
         .settlement_currency = item.aclass_base,
         .commission_currency = item.aclass_base,
         .tick_size = tick_size,
         .multiplier = item.lot_multiplier,  // XXX check
         .min_trade_vol = min_trade_vol,
-        .option_type = OptionType::UNDEFINED,
+        .option_type = {},
         .strike_currency = {},
         .strike_price = NaN,
         .underlying = {},
@@ -342,7 +330,7 @@ void Gateway::operator()(
     const json::Trade &trade, const std::string_view &pair, const server::TraceInfo &trace_info) {
   bool success = true;
   std::chrono::nanoseconds exchange_time_utc = {};
-  size_t trade_length = 0;
+  size_t trade_length = {};
   for (auto &item : trade.data) {
     if (success == false)
       break;
@@ -355,7 +343,7 @@ void Gateway::operator()(
    pair,
    trade.data.size(),
    trade_.size());
-  if (trade_length > 0) {
+  if (trade_length > 0u) {
     TradeSummary trade_summary{
         .exchange = Flags::exchange(),
         .symbol = pair,
@@ -393,7 +381,7 @@ void Gateway::operator()(
   LOG_IF(FATAL, snapshot && live)("Unexpected"_sv);
   bool success = true;
   std::chrono::nanoseconds exchange_time_utc = {};
-  size_t bid_length = 0, ask_length = 0;
+  size_t bid_length = {}, ask_length = {};
   for (auto &item : book.b) {
     if (success == false)
       break;
@@ -428,7 +416,7 @@ void Gateway::operator()(
    book.a.size(),
    book.as.size(),
    ask_.size());
-  if (bid_length > 0 || ask_length > 0) {
+  if (bid_length > 0u || ask_length > 0u) {
     MarketByPriceUpdate market_by_price_update{
         .exchange = Flags::exchange(),
         .symbol = pair,

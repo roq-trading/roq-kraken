@@ -10,18 +10,17 @@
 
 #include "roq/core/http/method.h"
 
+#include "roq/kraken/config.h"
+
 namespace roq {
 namespace kraken {
 
-class Random final {
+class Security final {
  public:
-  explicit Random(
-      const std::string_view &key,
-      const std::string_view &secret,
-      const std::string_view &password);
+  explicit Security(const Config &);
 
-  Random(Random &&) = delete;
-  Random(const Random &) = delete;
+  Security(Security &&) = delete;
+  Security(const Security &) = delete;
 
   std::string create_body();
 

@@ -18,9 +18,6 @@
 
 #include "roq/server.h"
 
-#include "roq/kraken/config.h"
-#include "roq/kraken/random.h"
-
 #include "roq/kraken/json/parser_private.h"
 
 namespace roq {
@@ -38,8 +35,7 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
     virtual void operator()(const json::OwnTrades &, const server::TraceInfo &) = 0;
   };
 
-  WebSocketPrivate(
-      Handler &handler, const Config &config, Random &random, core::io::Context &context);
+  WebSocketPrivate(Handler &handler, core::io::Context &context);
 
   WebSocketPrivate(WebSocketPrivate &&) = delete;
   WebSocketPrivate(const WebSocketPrivate &) = delete;
@@ -87,10 +83,6 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
 
  private:
   Handler &handler_;
-  // config
-  const std::string access_key_;
-  // authentication
-  Random &random_;
   // web socket
   core::web::Socket connection_;
   // buffers

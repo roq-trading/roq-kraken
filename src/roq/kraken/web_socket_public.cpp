@@ -12,43 +12,43 @@ namespace roq {
 namespace kraken {
 
 namespace {
-constexpr std::string_view CONNECTION = "ws_public"_sv;
+static const auto CONNECTION = "ws_public"_sv;
 
-static auto create_counter(const std::string_view &function) {
-  return core::metrics::Counter(Flags::name(), CONNECTION, function);
-}
+class create_metrics final {
+ public:
+  explicit create_metrics(const std::string_view &function) : function_(function) {}
+  create_metrics(create_metrics &&) = default;
+  create_metrics(const create_metrics &) = delete;
+  template <typename T>
+  operator T() {
+    return T(Flags::name(), CONNECTION, function_);
+  }
 
-static auto create_profile(const std::string_view &function) {
-  return core::metrics::Profile(Flags::name(), CONNECTION, function);
-}
-
-static auto create_latency(const std::string_view &function) {
-  return core::metrics::Latency(Flags::name(), CONNECTION, function);
-}
+ private:
+  std::string_view function_;
+};
 }  // namespace
 
-WebSocketPublic::WebSocketPublic(
-    Handler &handler, const Config &config, Random &random, core::io::Context &context)
-    : handler_(handler), access_key_(config.get_access_key()), random_(random),
-      connection_(
-          *this,
-          context,
-          core::URI(Flags::ws_public_uri()),
-          std::string_view(),  // query
-          std::chrono::seconds{Flags::ws_public_ping_freq_secs()},
-          Flags::decode_buffer_size(),  // XXX need read buffer size
-          Flags::encode_buffer_size(),
-          []() { return std::string(); }),
+WebSocketPublic::WebSocketPublic(Handler &handler, core::io::Context &context)
+    : handler_(handler), connection_(
+                             *this,
+                             context,
+                             core::URI(Flags::ws_public_uri()),
+                             std::string_view(),  // query
+                             std::chrono::seconds{Flags::ws_public_ping_freq_secs()},
+                             Flags::decode_buffer_size(),  // XXX need read buffer size
+                             Flags::encode_buffer_size(),
+                             []() { return std::string(); }),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_counter("disconnect"_sv),
+          .disconnect = create_metrics("disconnect"_sv),
       },
       profile_{
-          .parse = create_profile("parse"_sv),
+          .parse = create_metrics("parse"_sv),
       },
       latency_{
-          .ping = create_latency("ping"_sv),
-          .heartbeat = create_latency("heartbeat"_sv),
+          .ping = create_metrics("ping"_sv),
+          .heartbeat = create_metrics("heartbeat"_sv),
       } {
 }
 

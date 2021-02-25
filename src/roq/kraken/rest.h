@@ -18,8 +18,7 @@
 
 #include "roq/server.h"
 
-#include "roq/kraken/config.h"
-#include "roq/kraken/random.h"
+#include "roq/kraken/security.h"
 
 namespace roq {
 namespace kraken {
@@ -31,7 +30,7 @@ class Rest final : public core::web::Client::Handler {
     virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
   };
 
-  Rest(Handler &handler, const Config &config, Random &random, core::io::Context &context);
+  Rest(Handler &handler, Security &security, core::io::Context &context);
 
   Rest(Rest &&) = delete;
   Rest(const Rest &) = delete;
@@ -55,7 +54,7 @@ class Rest final : public core::web::Client::Handler {
  private:
   Handler &handler_;
   // authentication
-  Random &random_;
+  Security &security_;
   // connection
   core::web::Client connection_;
   // buffers
