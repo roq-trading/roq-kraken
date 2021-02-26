@@ -4,6 +4,8 @@
 
 #include "roq/core/clock.h"
 
+#include "roq/core/metrics/factory.h"
+
 #include "roq/kraken/flags.h"
 
 using namespace roq::literals;
@@ -14,18 +16,9 @@ namespace kraken {
 namespace {
 static const auto CONNECTION = "ws_private"_sv;
 
-class create_metrics final {
- public:
-  explicit create_metrics(const std::string_view &function) : function_(function) {}
-  create_metrics(create_metrics &&) = default;
-  create_metrics(const create_metrics &) = delete;
-  template <typename T>
-  operator T() {
-    return T(Flags::name(), CONNECTION, function_);
-  }
-
- private:
-  std::string_view function_;
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(const std::string_view &function)
+      : core::metrics::Factory(Flags::name(), CONNECTION, function) {}
 };
 }  // namespace
 
