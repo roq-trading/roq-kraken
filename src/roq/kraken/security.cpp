@@ -13,13 +13,14 @@
 
 #include "roq/core/crypto/sha.h"
 
+using namespace std::literals;
 using namespace roq::literals;
 
 namespace roq {
 namespace kraken {
 
 namespace {
-static const auto THRESHOLD = -1000;
+static const constexpr auto THRESHOLD = -1000ms;
 
 static auto create_hmac(const std::string_view &secret) {
   auto raw_secret = core::binascii::Base64::decode(secret, true);
@@ -34,10 +35,10 @@ Security::Security(const Config &config)
 
 std::string Security::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
-  auto diff = (now - nonce_).count();
+  auto diff = now - nonce_;
   LOG_IF(FATAL, diff < THRESHOLD)
   (R"(Probably something wrong... diff={})"_fmt, diff);
-  if (diff < 0)
+  if (diff.count() < 0)  // XXX shouldn't this be <= ?
     ++nonce_;
   else
     nonce_ = now;
