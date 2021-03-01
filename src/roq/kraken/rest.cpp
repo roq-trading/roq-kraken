@@ -38,21 +38,20 @@ struct create_metrics final : public core::metrics::Factory {
 }  // namespace
 
 Rest::Rest(Handler &handler, Security &security, core::io::Context &context)
-    : handler_(handler), security_(security),
-      connection_(
-          *this,
-          context,
-          core::URI(Flags::rest_uri()),
-          ROQ_PACKAGE_NAME,
-          true,  // keep alive
-          Flags::rest_request_queue_depth(),
-          std::chrono::seconds{Flags::rest_request_timeout_secs()},
-          std::chrono::seconds{Flags::rest_rate_limit_interval_secs()},
-          Flags::rest_rate_limit_max_requests(),
-          std::chrono::seconds{Flags::rest_ping_freq_secs()},
-          Flags::decode_buffer_size(),
-          Flags::encode_buffer_size(),
-          Flags::rest_ping_path()),
+    : handler_(handler), security_(security), connection_(
+                                                  *this,
+                                                  context,
+                                                  core::URI(Flags::rest_uri()),
+                                                  ROQ_PACKAGE_NAME,
+                                                  true,  // keep alive
+                                                  Flags::rest_request_queue_depth(),
+                                                  Flags::rest_request_timeout(),
+                                                  Flags::rest_rate_limit_interval(),
+                                                  Flags::rest_rate_limit_max_requests(),
+                                                  Flags::rest_ping_freq(),
+                                                  Flags::decode_buffer_size(),
+                                                  Flags::encode_buffer_size(),
+                                                  Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics("disconnect"_sv),

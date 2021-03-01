@@ -15,7 +15,7 @@ add_subdirectory("json")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS private_state.json public_state.json)
+set(AUTOGEN_SCHEMAS private_state.json public_state.json flags.json)
 
 roq_autogen(
   OUTPUT

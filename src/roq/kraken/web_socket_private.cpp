@@ -28,7 +28,7 @@ WebSocketPrivate::WebSocketPrivate(Handler &handler, core::io::Context &context)
                              context,
                              core::URI(Flags::ws_private_uri()),
                              std::string_view(),  // query
-                             std::chrono::seconds{Flags::ws_private_ping_freq_secs()},
+                             Flags::ws_private_ping_freq(),
                              Flags::decode_buffer_size(),  // XXX need read buffer size
                              Flags::encode_buffer_size(),
                              []() { return std::string(); }),

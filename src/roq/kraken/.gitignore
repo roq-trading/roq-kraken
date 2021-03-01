@@ -8,3 +8,5 @@ private_state.cpp
 private_state.h
 public_state.cpp
 public_state.h
+flags.cpp
+flags.h
