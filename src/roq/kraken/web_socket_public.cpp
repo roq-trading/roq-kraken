@@ -130,6 +130,7 @@ void WebSocketPublic::operator()(const core::web::Socket::Close &) {
 void WebSocketPublic::operator()(const core::web::Socket::Latency &latency) {
   server::TraceInfo trace_info;
   ExternalLatency external_latency{
+      .stream_id = {},
       .name = CONNECTION,
       .latency = latency.sample,
   };

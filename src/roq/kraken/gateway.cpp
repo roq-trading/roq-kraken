@@ -233,6 +233,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
     auto tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals));
     auto min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals));
     ReferenceData reference_data{
+        .stream_id = {},
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .description = item.altname,
@@ -256,6 +257,7 @@ void Gateway::operator()(const json::AssetPairs &asset_pairs) {
     VLOG(1)(R"(reference_data={})"_fmt, reference_data);
     server::create_trace_and_dispatch(trace_info, reference_data, dispatcher_, true);
     MarketStatus market_status{
+        .stream_id = {},
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
@@ -343,6 +345,7 @@ void Gateway::operator()(
    trade_.size());
   if (trade_length > 0u) {
     TradeSummary trade_summary{
+        .stream_id = {},
         .exchange = Flags::exchange(),
         .symbol = pair,
         .trades = {trade_.data(), trade_length},
@@ -356,6 +359,7 @@ void Gateway::operator()(
 void Gateway::operator()(
     const json::Spread &spread, const std::string_view &pair, const server::TraceInfo &trace_info) {
   TopOfBook top_of_book{
+      .stream_id = {},
       .exchange = Flags::exchange(),
       .symbol = pair,
       .layer =
@@ -416,6 +420,7 @@ void Gateway::operator()(
    ask_.size());
   if (bid_length > 0u || ask_length > 0u) {
     MarketByPriceUpdate market_by_price_update{
+        .stream_id = {},
         .exchange = Flags::exchange(),
         .symbol = pair,
         .bids = {bid_.data(), bid_length},
@@ -498,10 +503,12 @@ void Gateway::update(GatewayStatus gateway_status) {
   gateway_status_ = gateway_status;
   server::TraceInfo trace_info;
   MarketDataStatus market_data_status{
+      .stream_id = {},
       .status = gateway_status_,
   };
   server::create_trace_and_dispatch(trace_info, market_data_status, dispatcher_, false);
   OrderManagerStatus order_manager_status{
+      .stream_id = {},
       .account = account_,
       .status = gateway_status_,
   };
