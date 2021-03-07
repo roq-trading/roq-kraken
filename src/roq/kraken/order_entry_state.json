@@ -1,12 +1,12 @@
 {
-"name": "PublicState",
+"name": "OrderEntryState",
 "type": "enum",
 "values": [
+	{ "name": "token" },
 	{ "name": "assets" },
 	{ "name": "asset_pairs" },
 	{ "name": "balance" },
 	{ "name": "open_positions" },
-	{ "name": "subscribe_public" },
 	{ "name": "done" }
 ]
 }

@@ -2,39 +2,32 @@
 
 #pragma once
 
+#include <absl/container/flat_hash_map.h>
+
+#include <list>
+#include <memory>
 #include <string>
-#include <vector>
 
-#include "roq/download.h"
 #include "roq/server.h"
-
-#include "roq/core/ssl/ssl.h"
 
 #include "roq/core/io/context.h"
 
 #include "roq/kraken/config.h"
-#include "roq/kraken/rest.h"
+#include "roq/kraken/drop_copy.h"
+#include "roq/kraken/market_data.h"
+#include "roq/kraken/order_entry.h"
 #include "roq/kraken/security.h"
-#include "roq/kraken/web_socket_private.h"
-#include "roq/kraken/web_socket_public.h"
-
-#include "roq/kraken/private_state.h"
-#include "roq/kraken/public_state.h"
-
-#include "roq/kraken/json/asset_pairs.h"
-#include "roq/kraken/json/assets.h"
-#include "roq/kraken/json/positions.h"
-#include "roq/kraken/json/token.h"
+#include "roq/kraken/shared.h"
 
 namespace roq {
 namespace kraken {
 
 class Gateway final : public server::Handler,
-                      public Rest::Handler,
-                      public WebSocketPublic::Handler,
-                      public WebSocketPrivate::Handler {
+                      public OrderEntry::Handler,
+                      public MarketData::Handler,
+                      public DropCopy::Handler {
  public:
-  Gateway(server::Dispatcher &dispatcher, const Config &config);
+  Gateway(server::Dispatcher &, const Config &);
 
  protected:
   // server::Handler
@@ -45,116 +38,54 @@ class Gateway final : public server::Handler,
   void operator()(const Event<Connection> &) override;
 
   void operator()(
-      const Event<CreateOrder> &event,
+      const Event<CreateOrder> &,
       const std::string_view &request_id,
       uint32_t gateway_order_id) override;
   void operator()(
-      const Event<ModifyOrder> &event,
+      const Event<ModifyOrder> &,
       const std::string_view &request_id,
-      const server::OMS_Order &order) override;
+      const server::OMS_Order &) override;
   void operator()(
-      const Event<CancelOrder> &event,
+      const Event<CancelOrder> &,
       const std::string_view &request_id,
-      const server::OMS_Order &order) override;
+      const server::OMS_Order &) override;
 
-  void operator()(metrics::Writer &writer) override;
+  void operator()(metrics::Writer &) override;
 
-  // all
-  void operator()(const ExternalLatency &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<ExternalLatency> &) override;
 
-  // Rest::Handler
+  void operator()(const server::Trace<MarketDataStatus> &) override;
+  void operator()(const server::Trace<ReferenceData> &, bool is_last) override;
+  void operator()(const server::Trace<MarketStatus> &, bool is_last) override;
+  void operator()(const server::Trace<TopOfBook> &, bool is_last) override;
+  void operator()(const server::Trace<MarketByPriceUpdate> &, bool is_last) override;
+  void operator()(const server::Trace<TradeSummary> &, bool is_last) override;
 
-  void operator()(const Rest &) override;
+  void operator()(const server::Trace<OrderManagerStatus> &) override;
 
-  // WebSocketPublic::Handler
+  void operator()(OrderEntry::TokenUpdate &) override;
+  void operator()(OrderEntry::SymbolsUpdate &) override;
 
-  void operator()(const WebSocketPublic &) override;
+  // utilities
 
-  void operator()(
-      const json::Trade &trade,
-      const std::string_view &pair,
-      const server::TraceInfo &trace_info) override;
-  void operator()(
-      const json::Spread &spread,
-      const std::string_view &pair,
-      const server::TraceInfo &trace_info) override;
-  void operator()(
-      const json::Book &book,
-      const std::string_view &pair,
-      const server::TraceInfo &trace_info) override;
-
-  // WebSocketPrivate::Handler
-
-  void operator()(const WebSocketPrivate &) override;
-
-  void operator()(const json::AddOrderStatus &, const server::TraceInfo &) override;
-  void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) override;
-
-  void operator()(const json::OpenOrders &, const server::TraceInfo &) override;
-  void operator()(const json::OwnTrades &, const server::TraceInfo &) override;
-
- private:
-  void operator()(const json::Assets &);
-  void operator()(const json::AssetPairs &);
-  void operator()(const json::Positions &);
-  void operator()(const json::Token &);
-
-  using WebSocketDownload = server::Download<PublicState>;
-
-  int32_t download(WebSocketDownload::State state);
-
-  using WebSocketPrivateDownload = server::Download<PrivateState>;
-
-  int32_t download(WebSocketPrivateDownload::State state);
-
-  void update(GatewayStatus gateway_status);
-
-  // public
-
-  void download_assets();
-  void download_asset_pairs();
-
-  void download_balance();
-  void download_open_positions();
-
-  void subscribe_public();
-
-  // private
-
-  void download_web_sockets_token();
-
-  void subscribe_private();
+  OrderEntry &get_order_entry(const std::string_view &account);
 
  private:
   server::Dispatcher &dispatcher_;
   // config
-  const std::string account_;
-  // authentication
-  Security security_;
+  const std::string master_account_;
+  // security
+  absl::flat_hash_map<std::string, std::unique_ptr<Security>> security_;
   // io
   core::io::Context context_;
-  // connections
-  struct {
-    WebSocketPublic connection;
-    WebSocketDownload download;
-  } web_socket_public_;
-  struct {
-    WebSocketPrivate connection;
-    WebSocketPrivateDownload download;
-  } web_socket_private_;
-  struct {
-    Rest connection;
-  } rest_;
-  // download (web socket)
-  std::vector<std::string> symbols_;
-  // market data + order manager
-  GatewayStatus gateway_status_ = GatewayStatus::DISCONNECTED;
-  // market data
-  core::page_aligned_vector<MBPUpdate> bid_, ask_;
-  core::page_aligned_vector<Trade> trade_;
-
-  // experimental
-  std::string token_;
+  // shared
+  Shared shared_;
+  // seed
+  uint16_t stream_id_ = {};
+  // streams
+  absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
+  absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
+  std::list<std::unique_ptr<MarketData>> market_data_;
 };
 
 }  // namespace kraken

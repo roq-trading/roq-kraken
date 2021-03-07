@@ -1,9 +1,0 @@
-{
-"name": "PrivateState",
-"type": "enum",
-"values": [
-	{ "name": "web_sockets_token" },
-	{ "name": "subscribe_private" },
-	{ "name": "done" }
-]
-}

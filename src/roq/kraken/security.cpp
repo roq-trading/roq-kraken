@@ -28,8 +28,8 @@ static auto create_hmac(const std::string_view &secret) {
 }
 }  // namespace
 
-Security::Security(const Config &config)
-    : key_(config.get_access_key()), password_(config.get_access_password()),
+Security::Security(const Config &config, const std::string_view &account)
+    : account_(account), key_(config.get_access_key()), password_(config.get_access_password()),
       hmac_(create_hmac(config.get_access_secret())) {
 }
 

@@ -98,6 +98,13 @@
       "description": "book depth (size)"
     },
     {
+      "name": "ws_public_max_subscriptions_per_stream",
+      "type": "uint32_t",
+      "validator": "roq::core::flags::Positive<uint32_t>",
+      "default": 128,
+      "description": "Cmax subscriptions per connection (count)"
+    },
+    {
       "name": "ws_private_uri",
       "type": "roq::core::URI",
       "validator": "roq::core::flags::URI<std::string>",

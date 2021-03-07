@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <chrono>
-#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -16,60 +14,55 @@
 
 #include "roq/core/web/socket.h"
 
+#include "roq/download.h"
 #include "roq/server.h"
+
+#include "roq/kraken/market_data_state.h"
+#include "roq/kraken/shared.h"
 
 #include "roq/kraken/json/parser_public.h"
 
 namespace roq {
 namespace kraken {
 
-class WebSocketPublic final : public core::web::Socket::Handler,
-                              public json::ParserPublic::Handler {
+class MarketData final : public core::web::Socket::Handler, public json::ParserPublic::Handler {
  public:
   struct Handler {
-    virtual void operator()(const WebSocketPublic &) = 0;
-    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
-    virtual void operator()(
-        const json::Trade &trade,
-        const std::string_view &pair,
-        const server::TraceInfo &trace_info) = 0;
-    virtual void operator()(
-        const json::Spread &spread,
-        const std::string_view &pair,
-        const server::TraceInfo &trace_info) = 0;
-    virtual void operator()(
-        const json::Book &book,
-        const std::string_view &pair,
-        const server::TraceInfo &trace_info) = 0;
+    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const server::Trace<MarketDataStatus> &) = 0;
+    virtual void operator()(const server::Trace<TopOfBook> &, bool is_last) = 0;
+    virtual void operator()(const server::Trace<MarketByPriceUpdate> &, bool is_last) = 0;
+    virtual void operator()(const server::Trace<TradeSummary> &, bool is_last) = 0;
   };
 
-  WebSocketPublic(Handler &handler, core::io::Context &context);
+  MarketData(Handler &, core::io::Context &, uint16_t stream_id, Shared &);
 
-  WebSocketPublic(WebSocketPublic &&) = delete;
-  WebSocketPublic(const WebSocketPublic &) = delete;
-
-  bool ready() const;
-
-  void close();
+  MarketData(MarketData &&) = delete;
+  MarketData(const MarketData &) = delete;
 
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
-  void operator()(metrics::Writer &writer);
+  void operator()(metrics::Writer &);
 
-  template <typename T>
-  void subscribe(const std::string_view &name, const roq::span<T> &pairs);
+  void update_subscriptions(std::vector<std::string> &symbols);
 
  protected:
-  // core::web::Socket::Handler
-
   void operator()(const core::web::Socket::Connected &) override;
   void operator()(const core::web::Socket::Disconnected &) override;
   void operator()(const core::web::Socket::Ready &) override;
   void operator()(const core::web::Socket::Close &) override;
   void operator()(const core::web::Socket::Latency &) override;
   void operator()(const core::web::Socket::Text &) override;
+
+  void operator()(GatewayStatus);
+
+  uint32_t download(MarketDataState);
+
+  void subscribe(const roq::span<std::string> &symbols);
+
+  void subscribe(const std::string_view &name, const roq::span<std::string> &symbols);
 
   // json::ParserPublic::Handler
 
@@ -80,17 +73,11 @@ class WebSocketPublic final : public core::web::Socket::Handler,
   void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override;
 
   void operator()(
-      const json::Trade &trade,
-      const std::string_view &pair,
-      const server::TraceInfo &trace_info) override;
+      const json::Trade &, const std::string_view &pair, const server::TraceInfo &) override;
   void operator()(
-      const json::Spread &spread,
-      const std::string_view &pair,
-      const server::TraceInfo &trace_info) override;
+      const json::Spread &, const std::string_view &pair, const server::TraceInfo &) override;
   void operator()(
-      const json::Book &book,
-      const std::string_view &pair,
-      const server::TraceInfo &trace_info) override;
+      const json::Book &, const std::string_view &pair, const server::TraceInfo &) override;
 
  private:
   void parse(const std::string_view &message);
@@ -99,6 +86,9 @@ class WebSocketPublic final : public core::web::Socket::Handler,
 
  private:
   Handler &handler_;
+  // config
+  const uint16_t stream_id_;
+  const std::string name_;
   // web socket
   core::web::Socket connection_;
   // buffers
@@ -113,6 +103,14 @@ class WebSocketPublic final : public core::web::Socket::Handler,
   struct {
     core::metrics::Latency ping, heartbeat;
   } latency_;
+  // cache
+  Shared &shared_;
+  std::vector<std::string> symbols_;
+  // state
+  bool ready_ = false;
+  std::chrono::nanoseconds next_heartbeat_ = {};
+  GatewayStatus status_ = {};
+  server::Download<MarketDataState> download_;
 };
 
 }  // namespace kraken

@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <chrono>
-#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -16,45 +14,45 @@
 
 #include "roq/core/web/socket.h"
 
+#include "roq/download.h"
 #include "roq/server.h"
+
+#include "roq/kraken/drop_copy_state.h"
+#include "roq/kraken/security.h"
+#include "roq/kraken/shared.h"
 
 #include "roq/kraken/json/parser_private.h"
 
 namespace roq {
 namespace kraken {
 
-class WebSocketPrivate final : public core::web::Socket::Handler,
-                               public json::ParserPrivate::Handler {
+class DropCopy final : public core::web::Socket::Handler, public json::ParserPrivate::Handler {
  public:
   struct Handler {
-    virtual void operator()(const WebSocketPrivate &) = 0;
-    virtual void operator()(const ExternalLatency &, const server::TraceInfo &) = 0;
-    virtual void operator()(const json::AddOrderStatus &, const server::TraceInfo &) = 0;
-    virtual void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) = 0;
-    virtual void operator()(const json::OpenOrders &, const server::TraceInfo &) = 0;
-    virtual void operator()(const json::OwnTrades &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const server::Trace<OrderManagerStatus> &) = 0;
   };
 
-  WebSocketPrivate(Handler &handler, core::io::Context &context);
+  DropCopy(
+      Handler &,
+      core::io::Context &,
+      uint16_t stream_id,
+      Security &,
+      Shared &,
+      const std::string_view &token);
 
-  WebSocketPrivate(WebSocketPrivate &&) = delete;
-  WebSocketPrivate(const WebSocketPrivate &) = delete;
-
-  bool ready() const;
-
-  void close();
+  DropCopy(DropCopy &&) = delete;
+  DropCopy(const DropCopy &) = delete;
 
   void operator()(const Event<Start> &);
   void operator()(const Event<Stop> &);
   void operator()(const Event<Timer> &);
 
-  void operator()(metrics::Writer &writer);
+  void operator()(metrics::Writer &);
 
   void subscribe(const std::string_view &name, const std::string_view &token);
 
  protected:
-  // core::web::Socket::Handler
-
   void operator()(const core::web::Socket::Connected &) override;
   void operator()(const core::web::Socket::Disconnected &) override;
   void operator()(const core::web::Socket::Ready &) override;
@@ -62,7 +60,14 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
   void operator()(const core::web::Socket::Latency &) override;
   void operator()(const core::web::Socket::Text &) override;
 
-  // json::ParserPrivate::Handler
+  void operator()(GatewayStatus);
+
+  uint32_t download(DropCopyState);
+
+  void subscribe();
+  void subscribe(const std::string_view &name);
+
+  void parse(const std::string_view &message);
 
   void operator()(const json::Error &, const server::TraceInfo &) override;
   void operator()(const json::SystemStatus &, const server::TraceInfo &) override;
@@ -76,13 +81,14 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
   void operator()(const json::OpenOrders &, const server::TraceInfo &) override;
   void operator()(const json::OwnTrades &, const server::TraceInfo &) override;
 
- protected:
   void reset();
-
-  void parse(const std::string_view &message);
 
  private:
   Handler &handler_;
+  // config
+  const uint16_t stream_id_;
+  const std::string name_;
+  const std::string token_;
   // web socket
   core::web::Socket connection_;
   // buffers
@@ -98,6 +104,15 @@ class WebSocketPrivate final : public core::web::Socket::Handler,
   struct {
     core::metrics::Latency ping, heartbeat;
   } latency_;
+  // security
+  Security &security_;
+  // cache
+  Shared &shared_;
+  // state
+  bool ready_ = false;
+  std::chrono::nanoseconds next_heartbeat_ = {};
+  GatewayStatus status_ = {};
+  server::Download<DropCopyState> download_;
 };
 
 }  // namespace kraken

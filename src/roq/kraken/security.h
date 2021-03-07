@@ -17,10 +17,12 @@ namespace kraken {
 
 class Security final {
  public:
-  explicit Security(const Config &);
+  Security(const Config &, const std::string_view &account);
 
   Security(Security &&) = delete;
   Security(const Security &) = delete;
+
+  std::string_view get_account() const { return account_; }
 
   std::string create_body();
 
@@ -28,6 +30,7 @@ class Security final {
       const core::http::Method &method, const std::string_view &path, const std::string_view &body);
 
  private:
+  const std::string account_;
   const std::string key_;
   const std::string password_;
   core::crypto::SHA256 sha_;

@@ -3,19 +3,20 @@ set(TARGET_NAME "${PROJECT_NAME}")
 set(SOURCES
     application.cpp
     config.cpp
+    drop_copy.cpp
     flags.cpp
     gateway.cpp
-    rest.cpp
+    market_data.cpp
+    order_entry.cpp
     security.cpp
-    web_socket_private.cpp
-    web_socket_public.cpp
+    shared.cpp
     main.cpp)
 
 add_subdirectory("json")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS private_state.json public_state.json flags.json)
+set(AUTOGEN_SCHEMAS order_entry_state.json drop_copy_state.json market_data_state.json flags.json)
 
 roq_autogen(
   OUTPUT
