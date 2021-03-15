@@ -57,12 +57,7 @@ class OrderEntry final : public core::web::Client::Handler {
   };
 
   OrderEntry(
-      Handler &,
-      core::io::Context &context,
-      uint16_t stream_id,
-      Security &,
-      Shared &,
-      bool is_master);
+      Handler &, core::io::Context &context, uint16_t stream_id, Security &, Shared &, bool master);
 
   OrderEntry(OrderEntry &&) = delete;
   OrderEntry(const OrderEntry &) = delete;
@@ -108,7 +103,7 @@ class OrderEntry final : public core::web::Client::Handler {
   // config
   const uint16_t stream_id_;
   const std::string name_;
-  const bool is_master_;
+  const bool master_;
   // connection
   core::web::Client connection_;
   // buffers

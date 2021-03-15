@@ -30,16 +30,16 @@ DropCopy::DropCopy(
     Shared &shared,
     const std::string_view &token)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}_{}"_fmt, CONNECTION, stream_id_)), token_(token),
-      connection_(
-          *this,
-          context,
-          core::URI(Flags::ws_private_uri()),
-          std::string_view(),  // query
-          Flags::ws_private_ping_freq(),
-          Flags::decode_buffer_size(),  // XXX need read buffer size
-          Flags::encode_buffer_size(),
-          []() { return std::string(); }),
+      name_(roq::format("{}:{}:{}"_fmt, stream_id_, CONNECTION, security.get_account())),
+      token_(token), connection_(
+                         *this,
+                         context,
+                         core::URI(Flags::ws_private_uri()),
+                         std::string_view(),  // query
+                         Flags::ws_private_ping_freq(),
+                         Flags::decode_buffer_size(),  // XXX need read buffer size
+                         Flags::encode_buffer_size(),
+                         []() { return std::string(); }),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics(name_, "disconnect"_sv),

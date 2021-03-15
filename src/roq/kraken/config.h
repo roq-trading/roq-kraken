@@ -17,26 +17,11 @@ class Config final : public server::Config, public server::ConfigReader::Handler
  public:
   explicit Config(const std::string_view &path);
 
-  std::string get_account() const;
+  std::string get_master_account() const;
 
-  auto get_access_key() const {
-    using namespace roq::literals;
-    if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported"_s);
-    return (*accounts.begin()).second.login;
-  }
-  auto get_access_secret() const {
-    using namespace roq::literals;
-    if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported"_s);
-    return (*accounts.begin()).second.secret;
-  }
-  auto get_access_password() const {
-    using namespace roq::literals;
-    if (accounts.size() != 1)
-      throw std::runtime_error("More accounts not yet supported"_s);
-    return (*accounts.begin()).second.password;
-  }
+  std::string get_access_key(const std::string_view &account) const;
+  std::string get_access_secret(const std::string_view &account) const;
+  std::string get_access_password(const std::string_view &account) const;
 
  protected:
   // server::Config
@@ -52,6 +37,7 @@ class Config final : public server::Config, public server::ConfigReader::Handler
   std::vector<server::User> users;
   server::Symbols symbols;
   absl::flat_hash_map<std::string, server::Account> accounts;
+  std::string master_account_;
 };
 
 }  // namespace kraken

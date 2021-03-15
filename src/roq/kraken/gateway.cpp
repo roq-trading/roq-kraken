@@ -13,9 +13,10 @@ namespace kraken {
 
 namespace {
 static auto create_security(const Config &config) {
-  auto account = config.get_account();
   absl::flat_hash_map<std::string, std::unique_ptr<Security>> result;
-  result.try_emplace(account, std::make_unique<Security>(config, account));
+  for (auto &[_, iter] : config.accounts) {
+    result.try_emplace(iter.name, std::make_unique<Security>(config, iter.name));
+  }
   return result;
 }
 
@@ -29,11 +30,10 @@ static auto create_order_entry(
     const std::string_view &master_account) {
   absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> result;
   for (auto &iter : security) {
-    auto is_master = iter.first == master_account;
+    auto master = iter.first == master_account;
     result.try_emplace(
         iter.first,
-        std::make_unique<OrderEntry>(
-            gateway, context, ++stream_id, *iter.second, shared, is_master));
+        std::make_unique<OrderEntry>(gateway, context, ++stream_id, *iter.second, shared, master));
   }
   return result;
 }
@@ -49,7 +49,7 @@ static auto create_drop_copy(T &security) {
 }  // namespace
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
-    : dispatcher_(dispatcher), master_account_(config.get_account()),
+    : dispatcher_(dispatcher), master_account_(config.get_master_account()),
       security_(create_security(config)), shared_(dispatcher),
       order_entry_(
           create_order_entry(*this, context_, stream_id_, security_, shared_, master_account_)),

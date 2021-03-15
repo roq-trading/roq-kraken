@@ -37,23 +37,23 @@ OrderEntry::OrderEntry(
     uint16_t stream_id,
     Security &security,
     Shared &shared,
-    bool is_master)
+    bool master)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}_{}"_fmt, CONNECTION, stream_id_)), is_master_(is_master),
-      connection_(
-          *this,
-          context,
-          core::URI(Flags::rest_uri()),
-          ROQ_PACKAGE_NAME,
-          true,  // keep alive
-          Flags::rest_request_queue_depth(),
-          Flags::rest_request_timeout(),
-          Flags::rest_rate_limit_interval(),
-          Flags::rest_rate_limit_max_requests(),
-          Flags::rest_ping_freq(),
-          Flags::decode_buffer_size(),
-          Flags::encode_buffer_size(),
-          Flags::rest_ping_path()),
+      name_(roq::format("{}:{}:{}"_fmt, stream_id_, CONNECTION, security.get_account())),
+      master_(master), connection_(
+                           *this,
+                           context,
+                           core::URI(Flags::rest_uri()),
+                           ROQ_PACKAGE_NAME,
+                           true,  // keep alive
+                           Flags::rest_request_queue_depth(),
+                           Flags::rest_request_timeout(),
+                           Flags::rest_rate_limit_interval(),
+                           Flags::rest_rate_limit_max_requests(),
+                           Flags::rest_ping_freq(),
+                           Flags::decode_buffer_size(),
+                           Flags::encode_buffer_size(),
+                           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics(name_, "disconnect"_sv),
@@ -372,14 +372,14 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       download_token();
       return 1u;
     case OrderEntryState::ASSETS:
-      if (is_master_) {
+      if (master_) {
         download_assets();
         return 1u;
       } else {
         return {};
       }
     case OrderEntryState::ASSET_PAIRS:
-      if (is_master_) {
+      if (master_) {
         download_asset_pairs();
         return 1u;
       } else {
