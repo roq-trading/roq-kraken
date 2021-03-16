@@ -4,7 +4,7 @@
 
 #include <utility>
 
-#include "roq/core/update.h"
+#include "roq/update.h"
 
 #include "roq/core/json/parser.h"
 
@@ -120,7 +120,7 @@ void OrderEntry::operator()(
 }
 
 void OrderEntry::operator()(GatewayStatus status) {
-  if (core::update(status_, status)) {
+  if (update(status_, status)) {
     server::TraceInfo trace_info;
     OrderManagerStatus order_manager_status{
         .stream_id = stream_id_,

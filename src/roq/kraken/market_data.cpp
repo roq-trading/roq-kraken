@@ -4,8 +4,9 @@
 
 #include <algorithm>
 
+#include "roq/update.h"
+
 #include "roq/core/back_emplacer.h"
-#include "roq/core/update.h"
 
 #include "roq/core/metrics/factory.h"
 
@@ -153,7 +154,7 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
 }
 
 void MarketData::operator()(GatewayStatus status) {
-  if (core::update(status_, status)) {
+  if (update(status_, status)) {
     server::TraceInfo trace_info;
     MarketDataStatus market_data_status{
         .stream_id = stream_id_,
@@ -258,7 +259,7 @@ void MarketData::operator()(
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
     trades.emplace_back([&item](auto &result) { emplace(result, item); });
-    core::update_first(exchange_time_utc, item.time);
+    update_first(exchange_time_utc, item.time);
   }
   if (!trades.empty()) {
     TradeSummary trade_summary{
@@ -301,19 +302,19 @@ void MarketData::operator()(
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : book.b) {
     bids.emplace_back([&item](auto &result) { emplace(result, item); });
-    core::update_first(exchange_time_utc, item.timestamp);
+    update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.bs) {
     bids.emplace_back([&item](auto &result) { emplace(result, item); });
-    core::update_first(exchange_time_utc, item.timestamp);
+    update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.a) {
     asks.emplace_back([&item](auto &result) { emplace(result, item); });
-    core::update_first(exchange_time_utc, item.timestamp);
+    update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.as) {
     asks.emplace_back([&item](auto &result) { emplace(result, item); });
-    core::update_first(exchange_time_utc, item.timestamp);
+    update_first(exchange_time_utc, item.timestamp);
   }
   if (!(bids.empty() && asks.empty())) {
     MarketByPriceUpdate market_by_price_update{
