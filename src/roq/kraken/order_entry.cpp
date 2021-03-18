@@ -4,6 +4,7 @@
 
 #include <utility>
 
+#include "roq/mask.h"
 #include "roq/update.h"
 
 #include "roq/core/json/parser.h"
@@ -20,7 +21,17 @@ namespace roq {
 namespace kraken {
 
 namespace {
-static const auto CONNECTION = "om"_sv;
+static const auto NAME = "om"_sv;
+static const auto SUPPORTS = Mask{
+    SupportType::CREATE_ORDER,
+    SupportType::CANCEL_ORDER,
+    SupportType::ORDER_ACK,
+};
+static const auto SUPPORTS_MASTER = Mask{
+    SUPPORTS,
+    SupportType::REFERENCE_DATA,
+    SupportType::MARKET_STATUS,
+};
 
 static const auto ACCEPT_JSON = "application/json"_sv;
 static const auto CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"_sv;
@@ -39,21 +50,21 @@ OrderEntry::OrderEntry(
     Shared &shared,
     bool master)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_fmt, stream_id_, CONNECTION, security.get_account())),
-      master_(master), connection_(
-                           *this,
-                           context,
-                           core::URI(Flags::rest_uri()),
-                           ROQ_PACKAGE_NAME,
-                           true,  // keep alive
-                           Flags::rest_request_queue_depth(),
-                           Flags::rest_request_timeout(),
-                           Flags::rest_rate_limit_interval(),
-                           Flags::rest_rate_limit_max_requests(),
-                           Flags::rest_ping_freq(),
-                           Flags::decode_buffer_size(),
-                           Flags::encode_buffer_size(),
-                           Flags::rest_ping_path()),
+      name_(roq::format("{}:{}:{}"_fmt, stream_id_, NAME, security.get_account())), master_(master),
+      connection_(
+          *this,
+          context,
+          core::URI(Flags::rest_uri()),
+          ROQ_PACKAGE_NAME,
+          true,  // keep alive
+          Flags::rest_request_queue_depth(),
+          Flags::rest_request_timeout(),
+          Flags::rest_rate_limit_interval(),
+          Flags::rest_rate_limit_max_requests(),
+          Flags::rest_ping_freq(),
+          Flags::decode_buffer_size(),
+          Flags::encode_buffer_size(),
+          Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics(name_, "disconnect"_sv),
@@ -122,13 +133,16 @@ void OrderEntry::operator()(
 void OrderEntry::operator()(GatewayStatus status) {
   if (update(status_, status)) {
     server::TraceInfo trace_info;
-    OrderManagerStatus order_manager_status{
+    StreamUpdate stream_update{
         .stream_id = stream_id_,
+        .type = StreamType::REST,
+        .supports = (master_ ? SUPPORTS_MASTER : SUPPORTS).get(),
         .account = security_.get_account(),
+        .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("order_manager_status={}"_fmt, order_manager_status);
-    server::create_trace_and_dispatch(trace_info, order_manager_status, handler_);
+    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
 
@@ -139,11 +153,11 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       ACCEPT_JSON,
-      std::string_view(),  // content_type
-      std::string_view(),  // headers
-      std::string_view(),  // body
+      {},  // content_type
+      {},  // headers
+      {},  // body
       [this, callback{std::move(callback)}](auto &response) {
         profile_.assets([&]() {
           try {
@@ -175,11 +189,11 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       ACCEPT_JSON,
-      std::string_view(),  // content_type
-      std::string_view(),  // headers
-      std::string_view(),  // body
+      {},  // content_type
+      {},  // headers
+      {},  // body
       [this, callback{std::move(callback)}](auto &response) {
         profile_.asset_pairs([&]() {
           try {
@@ -219,7 +233,7 @@ void OrderEntry::get(
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       headers,
       body,
       [this, callback{std::move(callback)}](auto& response) {
@@ -265,7 +279,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       ACCEPT_JSON,
       CONTENT_TYPE_FORM,
       headers,
@@ -303,7 +317,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
   connection_.request(
       method,
       path,
-      std::string_view(),  // query
+      {},  // query
       ACCEPT_JSON,
       CONTENT_TYPE_FORM,
       headers,

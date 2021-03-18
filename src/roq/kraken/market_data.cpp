@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include "roq/mask.h"
 #include "roq/update.h"
 
 #include "roq/core/back_emplacer.h"
@@ -20,7 +21,12 @@ namespace roq {
 namespace kraken {
 
 namespace {
-static const auto CONNECTION = "md"_sv;
+static const auto NAME = "md"_sv;
+static const auto SUPPORTS = Mask{
+    SupportType::TOP_OF_BOOK,
+    SupportType::MARKET_BY_PRICE,
+    SupportType::TRADE_SUMMARY,
+};
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
@@ -48,13 +54,12 @@ void emplace(Trade &result, const T &value) {
 
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}"_fmt, stream_id_, CONNECTION)),
+    : handler_(handler), stream_id_(stream_id), name_(roq::format("{}:{}"_fmt, stream_id_, NAME)),
       connection_(
           *this,
           context,
           core::URI(Flags::ws_public_uri()),
-          std::string_view(),  // query
+          {},  // query
           Flags::ws_public_ping_freq(),
           Flags::decode_buffer_size(),  // XXX need read buffer size
           Flags::encode_buffer_size(),
@@ -156,12 +161,16 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
 void MarketData::operator()(GatewayStatus status) {
   if (update(status_, status)) {
     server::TraceInfo trace_info;
-    MarketDataStatus market_data_status{
+    StreamUpdate stream_update{
         .stream_id = stream_id_,
+        .type = StreamType::WEB_SOCKET,
+        .supports = SUPPORTS.get(),
+        .account = {},
+        .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("market_data_status={}"_fmt, market_data_status);
-    server::create_trace_and_dispatch(trace_info, market_data_status, handler_);
+    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
 
