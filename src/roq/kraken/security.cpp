@@ -57,7 +57,7 @@ std::string Security::create_body() {
 std::string Security::create_headers(
     const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
-  assert(body.empty() == false);
+  assert(!body.empty());
   auto nonce = roq::format("{}"_fmt, nonce_.count());
   sha_.clear();
   sha_.update(nonce);

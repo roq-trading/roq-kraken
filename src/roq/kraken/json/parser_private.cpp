@@ -180,13 +180,13 @@ static bool dispatch2(
       }
     }
   }
-  if (dispatched == false && channel == Channel::BOOK) {
+  if (!dispatched && channel == Channel::BOOK) {
     if (data_count == 2) {
-      if (book_2.a.empty() == false) {
-        LOG_IF(FATAL, book_1.a.empty() == false)("Unexpected"_sv);
+      if (!book_2.a.empty()) {
+        LOG_IF(FATAL, !book_1.a.empty())("Unexpected"_sv);
         book_1.a = book_2.a;
-      } else if (book_2.b.empty() == false) {
-        LOG_IF(FATAL, book_1.b.empty() == false)("Unexpected"_sv);
+      } else if (!book_2.b.empty()) {
+        LOG_IF(FATAL, !book_1.b.empty())("Unexpected"_sv);
         book_1.b = book_2.b;
       } else {
         LOG(FATAL)("Unexpected"_sv);

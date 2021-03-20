@@ -303,8 +303,8 @@ void MarketData::operator()(
 void MarketData::operator()(
     const json::Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) {
   VLOG(3)(R"(book={}, pair="{}")"_fmt, book, pair);
-  bool snapshot = book.bs.empty() == false && book.as.empty() == false;
-  bool live = book.b.empty() == false && book.a.empty() == false;
+  bool snapshot = !book.bs.empty() && !book.as.empty();
+  bool live = !book.b.empty() && !book.a.empty();
   LOG_IF(FATAL, snapshot && live)("Unexpected"_sv);
   core::back_emplacer bids(shared_.bids), asks(shared_.asks);
   std::chrono::nanoseconds exchange_time_utc = {};
