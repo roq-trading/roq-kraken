@@ -87,7 +87,7 @@ void DropCopy::subscribe() {
 }
 
 void DropCopy::subscribe(const std::string_view &name) {
-  LOG(INFO)(R"(subscribe name="{}", token="{}")"_fmt, name, token_);
+  log::info(R"(subscribe name="{}", token="{}")"_fmt, name, token_);
   assert(!token_.empty());
   auto message = roq::format(
       R"({{)"
@@ -99,7 +99,7 @@ void DropCopy::subscribe(const std::string_view &name) {
       R"(}})"_fmt,
       name,
       token_);
-  VLOG(3)(R"(request="{}")"_fmt, message);
+  log::trace_3(R"(request="{}")"_fmt, message);
   connection_.send_text(message);
 }
 
@@ -148,7 +148,7 @@ void DropCopy::operator()(GatewayStatus status) {
         .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    log::info("stream_update={}"_fmt, stream_update);
     server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
@@ -176,50 +176,51 @@ void DropCopy::parse(const std::string_view &message) {
     server::TraceInfo trace_info;
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
-    LOG_IF(WARNING, !result)(R"(Unexpected: message="{}")"_fmt, message);
+    if (ROQ_UNLIKELY(!result))
+      log::warn(R"(Unexpected: message="{}")"_fmt, message);
   });
 }
 
 void DropCopy::operator()(const json::Error &error, const server::TraceInfo &) {
-  LOG(FATAL)("error={}"_fmt, error);
+  log::fatal("error={}"_fmt, error);
 }
 
 void DropCopy::operator()(const json::SystemStatus &system_status, const server::TraceInfo &) {
-  LOG(INFO)("system_status={}"_fmt, system_status);
+  log::info("system_status={}"_fmt, system_status);
 }
 
 void DropCopy::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  VLOG(1)("pong={}"_fmt, pong);
+  log::trace_1("pong={}"_fmt, pong);
 }
 
 void DropCopy::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  VLOG(1)("heartbeat={}"_fmt, heartbeat);
+  log::trace_1("heartbeat={}"_fmt, heartbeat);
 }
 
 void DropCopy::operator()(
     const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  LOG(INFO)("subscription_status={}"_fmt, subscription_status);
+  log::info("subscription_status={}"_fmt, subscription_status);
 }
 
 void DropCopy::operator()(const json::AddOrderStatus &add_order_status, const server::TraceInfo &) {
-  LOG(INFO)("add_order_status={}"_fmt, add_order_status);
-  LOG(FATAL)("NOT IMPLEMENTED");
+  log::info("add_order_status={}"_fmt, add_order_status);
+  log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 void DropCopy::operator()(
     const json::CancelOrderStatus &cancel_order_status, const server::TraceInfo &) {
-  LOG(INFO)("cancel_order_status={}"_fmt, cancel_order_status);
-  LOG(FATAL)("NOT IMPLEMENTED");
+  log::info("cancel_order_status={}"_fmt, cancel_order_status);
+  log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 void DropCopy::operator()(const json::OpenOrders &open_orders, const server::TraceInfo &) {
-  LOG(INFO)("open_orders={}"_fmt, open_orders);
-  LOG(FATAL)("NOT IMPLEMENTED");
+  log::info("open_orders={}"_fmt, open_orders);
+  log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 void DropCopy::operator()(const json::OwnTrades &own_trades, const server::TraceInfo &) {
-  LOG(INFO)("own_trades={}"_fmt, own_trades);
-  LOG(FATAL)("NOT IMPLEMENTED");
+  log::info("own_trades={}"_fmt, own_trades);
+  log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 }  // namespace kraken

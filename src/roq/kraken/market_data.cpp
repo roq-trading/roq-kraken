@@ -168,7 +168,7 @@ void MarketData::operator()(GatewayStatus status) {
         .priority = Priority::PRIMARY,
         .status = status_,
     };
-    LOG(INFO)("stream_update={}"_fmt, stream_update);
+    log::info("stream_update={}"_fmt, stream_update);
     server::create_trace_and_dispatch(trace_info, stream_update, handler_);
   }
 }
@@ -198,7 +198,7 @@ void MarketData::subscribe(const roq::span<std::string> &symbols) {
 }
 
 void MarketData::subscribe(const std::string_view &name, const roq::span<std::string> &symbols) {
-  LOG(INFO)(R"(subscribe name="{}", len(symbols)={})"_fmt, name, std::size(symbols));
+  log::info(R"(subscribe name="{}", len(symbols)={})"_fmt, name, std::size(symbols));
   if (Flags::ws_public_subscribe_book_depth() && name.compare("book"_sv) == 0) {
     auto message = roq::format(
         R"({{)"
@@ -212,7 +212,7 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
         roq::join(symbols, R"(",")"_sv),
         name,
         Flags::ws_public_subscribe_book_depth());
-    VLOG(3)(R"(request="{}")"_fmt, message);
+    log::trace_3(R"(request="{}")"_fmt, message);
     connection_.send_text(message);
   } else {
     auto message = roq::format(
@@ -225,7 +225,7 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
         R"(}})"_fmt,
         roq::join(symbols, R"(",")"_sv),
         name);
-    VLOG(3)(R"(request="{}")"_fmt, message);
+    log::trace_3(R"(request="{}")"_fmt, message);
     connection_.send_text(message);
   }
 }
@@ -235,34 +235,35 @@ void MarketData::parse(const std::string_view &message) {
     server::TraceInfo trace_info;
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
-    LOG_IF(WARNING, !result)(R"(Unexpected: message="{}")"_fmt, message);
+    if (ROQ_UNLIKELY(!result))
+      log::warn(R"(Unexpected: message="{}")"_fmt, message);
   });
 }
 
 void MarketData::operator()(const json::Error &error, const server::TraceInfo &) {
-  LOG(FATAL)("error={}"_fmt, error);
+  log::fatal("error={}"_fmt, error);
 }
 
 void MarketData::operator()(const json::SystemStatus &system_status, const server::TraceInfo &) {
-  LOG(INFO)("system_status={}"_fmt, system_status);
+  log::info("system_status={}"_fmt, system_status);
 }
 
 void MarketData::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  VLOG(1)("pong={}"_fmt, pong);
+  log::trace_1("pong={}"_fmt, pong);
 }
 
 void MarketData::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  VLOG(1)("heartbeat={}"_fmt, heartbeat);
+  log::trace_1("heartbeat={}"_fmt, heartbeat);
 }
 
 void MarketData::operator()(
     const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  VLOG(1)("subscription_status={}"_fmt, subscription_status);
+  log::trace_1("subscription_status={}"_fmt, subscription_status);
 }
 
 void MarketData::operator()(
     const json::Trade &trade, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  VLOG(3)(R"(trade={}, pair="{}")"_fmt, trade, pair);
+  log::trace_3(R"(trade={}, pair="{}")"_fmt, trade, pair);
   core::back_emplacer trades(shared_.trades);
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
@@ -283,7 +284,7 @@ void MarketData::operator()(
 
 void MarketData::operator()(
     const json::Spread &spread, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  VLOG(3)(R"(spread={}, pair="{}")"_fmt, spread, pair);
+  log::trace_3(R"(spread={}, pair="{}")"_fmt, spread, pair);
   TopOfBook top_of_book{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
@@ -302,10 +303,11 @@ void MarketData::operator()(
 
 void MarketData::operator()(
     const json::Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  VLOG(3)(R"(book={}, pair="{}")"_fmt, book, pair);
+  log::trace_3(R"(book={}, pair="{}")"_fmt, book, pair);
   bool snapshot = !book.bs.empty() && !book.as.empty();
   bool live = !book.b.empty() && !book.a.empty();
-  LOG_IF(FATAL, snapshot && live)("Unexpected"_sv);
+  if (ROQ_UNLIKELY(snapshot && live))
+    log::fatal("Unexpected"_sv);
   core::back_emplacer bids(shared_.bids), asks(shared_.asks);
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : book.b) {

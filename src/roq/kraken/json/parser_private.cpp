@@ -56,10 +56,10 @@ bool ParserPrivate::dispatch(
         auto event = Event(value);
         switch (event) {
           case Event::UNDEFINED:
-            LOG(FATAL)("Unexpected"_sv);
+            log::fatal("Unexpected"_sv);
             break;
           case Event::UNKNOWN:
-            DLOG(FATAL)(R"(Unknown key="{}")"_fmt, key);
+            log::fatal(R"(Unknown key="{}")"_fmt, key);
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
@@ -130,7 +130,7 @@ static bool dispatch2(
     switch (channel) {
       case Channel::UNDEFINED:
       case Channel::UNKNOWN:
-        LOG(FATAL)("Unexpected"_sv);
+        log::fatal("Unexpected"_sv);
         break;
       case Channel::TICKER: {
         throw std::runtime_error("ticker not supported"_sv);
@@ -166,7 +166,7 @@ static bool dispatch2(
             book_2 = Book(value, buffer);
             break;
           default:
-            LOG(FATAL)("Unexpected"_sv);
+            log::fatal("Unexpected"_sv);
         }
         break;
       }
@@ -189,7 +189,7 @@ static bool dispatch2(
         LOG_IF(FATAL, !book_1.b.empty())("Unexpected"_sv);
         book_1.b = book_2.b;
       } else {
-        LOG(FATAL)("Unexpected"_sv);
+        log::fatal("Unexpected"_sv);
       }
     }
     handler(book_1, pair);
@@ -217,8 +217,10 @@ bool ParserPrivate::dispatch(
         if (pos != name.npos)
           name.remove_suffix(name.size() - pos);
         channel = Channel(name);
-        DLOG_IF(FATAL, channel == Channel::UNKNOWN)
-        (R"(Unknown channel="{}")"_fmt, name);
+#if !defined(NDEBUG)
+        if (ROQ_UNLIKELY(channel == Channel::UNKNOWN))
+          log::fatal(R"(Unknown channel="{}")"_fmt, name);
+#endif
         break;
       }
       default:
@@ -226,7 +228,8 @@ bool ParserPrivate::dispatch(
     }
     ++offset;
   }
-  LOG_IF(FATAL, offset != 2)(R"(message={})"_fmt, message);
+  if (ROQ_UNLIKELY(offset != 2))
+    log::fatal(R"(message={})"_fmt, message);
   return dispatch2(handler, message, buffer, channel);
 }
 

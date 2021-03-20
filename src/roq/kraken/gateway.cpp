@@ -57,7 +57,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
 }
 
 void Gateway::operator()(const Event<Start> &event) {
-  LOG(INFO)("Starting the gateway..."_sv);
+  log::info("Starting the gateway..."_sv);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -68,7 +68,7 @@ void Gateway::operator()(const Event<Start> &event) {
 }
 
 void Gateway::operator()(const Event<Stop> &event) {
-  LOG(INFO)("Stopping the gateway..."_sv);
+  log::info("Stopping the gateway..."_sv);
   for (auto &market_data : market_data_)
     (*market_data)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -160,9 +160,10 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   auto &account = token_update.account;
   assert(!account.empty());
   auto iter = drop_copy_.find(account);
-  LOG_IF(FATAL, iter == drop_copy_.end())(R"(Unexpected: account="{}")"_fmt, account);
+  if (ROQ_UNLIKELY(iter == drop_copy_.end()))
+    log::fatal(R"(Unexpected: account="{}")"_fmt, account);
   if (!static_cast<bool>((*iter).second)) {
-    LOG(INFO)("Create drop-copy (ws-private)"_sv);
+    log::info("Create drop-copy (ws-private)"_sv);
     auto drop_copy = std::make_unique<DropCopy>(
         *this, context_, ++stream_id_, *security_[account], shared_, token_update.token);
     MessageInfo message_info;  // XXX something sensible
@@ -182,7 +183,7 @@ void Gateway::operator()(OrderEntry::SymbolsUpdate &symbols_update) {
   for (;;) {
     if (symbols.empty())
       break;
-    LOG(INFO)("Create market-data (ws-public)"_sv);
+    log::info("Create market-data (ws-public)"_sv);
     auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_);
     (*market_data).update_subscriptions(symbols);
     MessageInfo message_info;  // XXX something sensible
