@@ -38,7 +38,7 @@ std::string Security::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = now - nonce_;
   if (ROQ_UNLIKELY(diff < THRESHOLD))
-    log::fatal(R"(Probably something wrong... diff={})"_fmt, diff);
+    log::fatal("Probably something wrong... diff={})"_fmt, diff);
   if (diff.count() < 0)  // XXX shouldn't this be <= ?
     ++nonce_;
   else
@@ -46,6 +46,7 @@ std::string Security::create_body() {
   if (password_.empty()) {
     return roq::format(R"(nonce={})"_fmt, nonce_.count());
   } else {
+    // XXX something weird with the quotes here... review
     return roq::format(
         R"("nonce={}&)"
         R"("opt={}")"_fmt,

@@ -245,7 +245,7 @@ bool ParserPublic::dispatch(
     }
   }
   if (ROQ_UNLIKELY(offset != 3))
-    log::fatal(R"(message={})"_fmt, message);
+    log::fatal(R"(message="{}")"_fmt, message);
   return dispatch2(handler, message, buffer, trace_info, channel_id, channel, pair, data_count);
 }
 

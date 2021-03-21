@@ -10,14 +10,14 @@ using namespace roq;
 using namespace roq::kraken;
 
 TEST(json_token, parse) {
-  const std::string_view message = R"({)"
-                                   R"("error":[],)"
-                                   R"("result":{)"
-                                   R"("token":"abc",)"
-                                   R"("expires":123)"
-                                   R"(})"
-                                   R"(})";
-  core::utils::Buffer buffer_(8192);
+  const auto message = R"({)"
+                       R"("error":[],)"
+                       R"("result":{)"
+                       R"("token":"abc",)"
+                       R"("expires":123)"
+                       R"(})"
+                       R"(})"_sv;
+  core::utils::Buffer buffer_(8192u);
   core::json::Buffer buffer(buffer_);
   json::Result::dispatch<json::Token>(
       message,

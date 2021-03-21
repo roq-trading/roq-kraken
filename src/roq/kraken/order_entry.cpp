@@ -165,11 +165,11 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
             core::json::Buffer buffer(decode_buffer_);
             auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
             if (assets.error.empty()) {
-              log::trace_1(R"(assets={})"_fmt, assets);
+              log::trace_1("assets={}"_fmt, assets);
               core::Promise<json::Assets> promise(assets);
               callback(promise);
             } else {
-              log::warn(R"(assets={})"_fmt, assets);
+              log::warn("assets={}"_fmt, assets);
               log::fatal("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
@@ -201,11 +201,11 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
             auto asset_pairs =
                 core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
             if (asset_pairs.error.empty()) {
-              log::trace_1(R"(asset_pairs={})"_fmt, asset_pairs);
+              log::trace_1("asset_pairs={}"_fmt, asset_pairs);
               core::Promise<json::AssetPairs> promise(asset_pairs);
               callback(promise);
             } else {
-              log::warn(R"(asset_pairs={})"_fmt, asset_pairs);
+              log::warn("asset_pairs={}"_fmt, asset_pairs);
               log::fatal("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
@@ -246,12 +246,12 @@ void OrderEntry::get(
               buffer);
         if (balance.error.empty()) {
           log::trace_1(
-              R"(balance={})"_fmt,
+              "balance={}"_fmt,
               balance);
           handler_(balance);
         } else {
           log::warn(
-              R"(balance={})"_fmt,
+              "balance={}"_fmt,
               balance);
           log::fatal("Unexpected"_sv);
         }
@@ -289,11 +289,11 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
             core::json::Buffer buffer(decode_buffer_);
             auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
             if (positions.error.empty()) {
-              log::trace_1(R"(positions={})"_fmt, positions);
+              log::trace_1("positions={}"_fmt, positions);
               core::Promise<json::Positions> promise(positions);
               callback(promise);
             } else {
-              log::warn(R"(positions={})"_fmt, positions);
+              log::warn("positions={}"_fmt, positions);
               log::fatal("Unexpected"_sv);
             }
           } catch (NetworkError &e) {
@@ -328,11 +328,11 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
                 response.body(),
                 buffer,
                 [](const roq::span<std::string_view> &e) {
-                  log::warn(R"(error=[{}])"_fmt, roq::join(e, ","_sv));
+                  log::warn("error=[{}]"_fmt, roq::join(e, ","_sv));
                   log::fatal("Unexpected"_sv);
                 },
                 [&](const json::Token &token) {
-                  log::trace_1(R"(token={})"_fmt, token);
+                  log::trace_1("token={}"_fmt, token);
                   core::Promise<json::Token> promise(token);
                   callback(promise);
                 });
@@ -507,9 +507,9 @@ void OrderEntry::operator()(const json::AssetPairs &asset_pairs) {
   symbols.reserve(asset_pairs.result.size());
   size_t counter = {};
   for (auto &item : asset_pairs.result) {
-    log::trace_1(R"(item={})"_fmt, item);
+    log::trace_1("item={}"_fmt, item);
     if (item.wsname.empty()) {
-      log::trace_1(R"(Skipping altname={}, reason: wsname is empty)"_fmt, item.altname);
+      log::trace_1(R"(Skipping altname="{}", reason: wsname is empty)"_fmt, item.altname);
       continue;
     }
     std::string symbol(item.wsname);
