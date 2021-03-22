@@ -2,8 +2,8 @@
 
 #include "roq/kraken/drop_copy.h"
 
-#include "roq/mask.h"
-#include "roq/update.h"
+#include "roq/utils/mask.h"
+#include "roq/utils/update.h"
 
 #include "roq/core/metrics/factory.h"
 
@@ -16,7 +16,7 @@ namespace kraken {
 
 namespace {
 static const auto NAME = "ex"_sv;
-static const auto SUPPORTS = Mask<SupportType>{};
+static const auto SUPPORTS = utils::Mask<SupportType>{};
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
@@ -138,7 +138,7 @@ void DropCopy::operator()(const core::web::Socket::Text &text) {
 }
 
 void DropCopy::operator()(GatewayStatus status) {
-  if (update(status_, status)) {
+  if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
     StreamUpdate stream_update{
         .stream_id = stream_id_,

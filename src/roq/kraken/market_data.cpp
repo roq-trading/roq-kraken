@@ -4,8 +4,8 @@
 
 #include <algorithm>
 
-#include "roq/mask.h"
-#include "roq/update.h"
+#include "roq/utils/mask.h"
+#include "roq/utils/update.h"
 
 #include "roq/core/back_emplacer.h"
 
@@ -22,7 +22,7 @@ namespace kraken {
 
 namespace {
 static const auto NAME = "md"_sv;
-static const auto SUPPORTS = Mask{
+static const auto SUPPORTS = utils::Mask{
     SupportType::TOP_OF_BOOK,
     SupportType::MARKET_BY_PRICE,
     SupportType::TRADE_SUMMARY,
@@ -158,7 +158,7 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
 }
 
 void MarketData::operator()(GatewayStatus status) {
-  if (update(status_, status)) {
+  if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
     StreamUpdate stream_update{
         .stream_id = stream_id_,
@@ -268,7 +268,7 @@ void MarketData::operator()(
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
     trades.emplace_back([&item](auto &result) { emplace(result, item); });
-    update_first(exchange_time_utc, item.time);
+    utils::update_first(exchange_time_utc, item.time);
   }
   if (!trades.empty()) {
     TradeSummary trade_summary{
@@ -312,19 +312,19 @@ void MarketData::operator()(
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : book.b) {
     bids.emplace_back([&item](auto &result) { emplace(result, item); });
-    update_first(exchange_time_utc, item.timestamp);
+    utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.bs) {
     bids.emplace_back([&item](auto &result) { emplace(result, item); });
-    update_first(exchange_time_utc, item.timestamp);
+    utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.a) {
     asks.emplace_back([&item](auto &result) { emplace(result, item); });
-    update_first(exchange_time_utc, item.timestamp);
+    utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.as) {
     asks.emplace_back([&item](auto &result) { emplace(result, item); });
-    update_first(exchange_time_utc, item.timestamp);
+    utils::update_first(exchange_time_utc, item.timestamp);
   }
   if (!(bids.empty() && asks.empty())) {
     MarketByPriceUpdate market_by_price_update{

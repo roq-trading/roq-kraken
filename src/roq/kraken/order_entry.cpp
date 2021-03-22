@@ -4,8 +4,8 @@
 
 #include <utility>
 
-#include "roq/mask.h"
-#include "roq/update.h"
+#include "roq/utils/mask.h"
+#include "roq/utils/update.h"
 
 #include "roq/core/json/parser.h"
 
@@ -22,12 +22,12 @@ namespace kraken {
 
 namespace {
 static const auto NAME = "om"_sv;
-static const auto SUPPORTS = Mask{
+static const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
-static const auto SUPPORTS_MASTER = Mask{
+static const auto SUPPORTS_MASTER = utils::Mask{
     SUPPORTS,
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
@@ -131,7 +131,7 @@ void OrderEntry::operator()(
 }
 
 void OrderEntry::operator()(GatewayStatus status) {
-  if (update(status_, status)) {
+  if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
     StreamUpdate stream_update{
         .stream_id = stream_id_,
