@@ -71,7 +71,7 @@ TEST(json_book, parse_test_snapshot) {
                        R"("EOS/USD")"
                        R"(])"_sv;
   Handler handler;
-  core::utils::Buffer buffer_(8192);
+  core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   server::TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
@@ -89,7 +89,7 @@ TEST(json_book, parse_test_update_bid_1) {
                        R"("EOS/USD")"
                        R"(])"_sv;
   Handler handler;
-  core::utils::Buffer buffer_(8192);
+  core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   server::TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
@@ -107,7 +107,7 @@ TEST(json_book, parse_test_update_ask_1) {
                        R"("EOS/USD")"
                        R"(])"_sv;
   Handler handler;
-  core::utils::Buffer buffer_(8192);
+  core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   server::TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
@@ -207,7 +207,7 @@ TEST(json_book, parse_test_update_complex) {
                        R"("EOS/USD")"
                        R"(])"_sv;
   Handler handler;
-  core::utils::Buffer buffer_(8192);
+  core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   server::TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
@@ -280,7 +280,7 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
                        R"("EOS/USD")"
                        R"(])"_sv;
   Handler handler;
-  core::utils::Buffer buffer_(8192);
+  core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   server::TraceInfo trace_info;
   EXPECT_THROW(

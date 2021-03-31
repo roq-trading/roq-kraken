@@ -22,6 +22,7 @@ namespace kraken {
 
 namespace {
 static const auto NAME = "om"_sv;
+
 static const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
     SupportType::CANCEL_ORDER,
@@ -32,6 +33,9 @@ static const auto SUPPORTS_MASTER = utils::Mask{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
 };
+
+static const auto KEEP_ALIVE = true;
+static const auto ALLOW_PIPELINING = true;
 
 static const auto ACCEPT_JSON = "application/json"_sv;
 static const auto CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"_sv;
@@ -54,16 +58,16 @@ OrderEntry::OrderEntry(
       connection_(
           *this,
           context,
+          Flags::decode_buffer_size(),
+          Flags::encode_buffer_size(),
           core::URI(Flags::rest_uri()),
           ROQ_PACKAGE_NAME,
-          true,  // keep alive
-          Flags::rest_request_queue_depth(),
+          KEEP_ALIVE,
+          ALLOW_PIPELINING,
           Flags::rest_request_timeout(),
           Flags::rest_rate_limit_interval(),
           Flags::rest_rate_limit_max_requests(),
           Flags::rest_ping_freq(),
-          Flags::decode_buffer_size(),
-          Flags::encode_buffer_size(),
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
@@ -158,6 +162,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
       {},  // content_type
       {},  // headers
       {},  // body
+      {},  // QoS
       [this, callback{std::move(callback)}](auto &response) {
         profile_.assets([&]() {
           try {
@@ -193,6 +198,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
       {},  // content_type
       {},  // headers
       {},  // body
+      {},  // QoS
       [this, callback{std::move(callback)}](auto &response) {
         profile_.asset_pairs([&]() {
           try {
@@ -234,6 +240,7 @@ void OrderEntry::get(
       {},  // query
       headers,
       body,
+      {},  // QoS
       [this, callback{std::move(callback)}](auto& response) {
     profile_.balance(
         [&]() {
@@ -282,6 +289,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
       CONTENT_TYPE_FORM,
       headers,
       body,
+      {},  // QoS
       [this, callback{std::move(callback)}](auto &response) {
         profile_.open_positions([&]() {
           try {
@@ -319,6 +327,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
       CONTENT_TYPE_FORM,
       headers,
       body,
+      {},  // QoS
       [this, callback{std::move(callback)}](auto &response) {
         profile_.get_web_sockets_token([&]() {
           try {

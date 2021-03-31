@@ -17,7 +17,7 @@ TEST(json_token, parse) {
                        R"("expires":123)"
                        R"(})"
                        R"(})"_sv;
-  core::utils::Buffer buffer_(8192u);
+  core::Buffer buffer_(8192u);
   core::json::Buffer buffer(buffer_);
   json::Result::dispatch<json::Token>(
       message,

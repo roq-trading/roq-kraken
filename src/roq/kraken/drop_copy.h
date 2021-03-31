@@ -92,7 +92,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   // web socket
   core::web::Socket connection_;
   // buffers
-  core::utils::Buffer decode_buffer_;
+  core::Buffer decode_buffer_;
   // core::stack::Buffer<char, 32> stack_buffer_;
   // metrics
   struct {
