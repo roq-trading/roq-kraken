@@ -36,10 +36,10 @@ struct Result final {
         result_handler(obj);
         return;
       } else {
-        throw std::runtime_error(roq::format(R"(Unexpected key="{}")"_fmt, key));
+        throw RuntimeErrorException(R"(Unexpected key="{}")"_fmt, key);
       }
     }
-    throw std::runtime_error(R"(Didn't find key in {"error", "result"})"_s);
+    throw RuntimeErrorException(R"(Didn't find key in {"error", "result"})"_sv);
   }
 };
 
