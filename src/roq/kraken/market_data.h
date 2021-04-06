@@ -56,7 +56,7 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   void operator()(const core::web::Socket::Latency &) override;
   void operator()(const core::web::Socket::Text &) override;
 
-  void operator()(GatewayStatus);
+  void operator()(ConnectionStatus);
 
   uint32_t download(MarketDataState);
 
@@ -109,7 +109,7 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
   // state
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
-  GatewayStatus status_ = {};
+  ConnectionStatus status_ = {};
   server::Download<MarketDataState> download_;
 };
 

@@ -60,7 +60,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   void operator()(const core::web::Socket::Latency &) override;
   void operator()(const core::web::Socket::Text &) override;
 
-  void operator()(GatewayStatus);
+  void operator()(ConnectionStatus);
 
   uint32_t download(DropCopyState);
 
@@ -111,7 +111,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   // state
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
-  GatewayStatus status_ = {};
+  ConnectionStatus status_ = {};
   server::Download<DropCopyState> download_;
 };
 

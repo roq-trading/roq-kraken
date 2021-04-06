@@ -80,7 +80,7 @@ class OrderEntry final : public core::web::Client::Handler {
   void operator()(const core::web::Client::Disconnected &) override;
   void operator()(const core::web::Client::Latency &) override;
 
-  void operator()(GatewayStatus);
+  void operator()(ConnectionStatus);
 
   template <typename T>
   void get(std::function<void(const core::Promise<T> &)> &&callback);
@@ -126,7 +126,7 @@ class OrderEntry final : public core::web::Client::Handler {
   // state
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
-  GatewayStatus status_ = {};
+  ConnectionStatus status_ = {};
   server::Download<OrderEntryState> download_;
 };
 
