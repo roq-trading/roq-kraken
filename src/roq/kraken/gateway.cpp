@@ -131,7 +131,7 @@ void Gateway::operator()(metrics::Writer &writer) {
     (*market_data)(writer);
 }
 
-void Gateway::operator()(const server::Trace<StreamUpdate> &event) {
+void Gateway::operator()(const server::Trace<StreamStatus> &event) {
   dispatcher_(event);
 }
 
