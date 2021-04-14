@@ -228,8 +228,8 @@ bool ParserPrivate::dispatch(
     }
     ++offset;
   }
-  if (ROQ_UNLIKELY(offset != 2))
-    log::fatal(R"(message="{}")"_fmt, message);
+  if (ROQ_UNLIKELY(offset < 3u))
+    log::fatal(R"(Unexpected: message="{}")"_fmt, message);
   return dispatch2(handler, message, buffer, channel);
 }
 
