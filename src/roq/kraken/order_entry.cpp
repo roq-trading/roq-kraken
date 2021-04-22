@@ -152,8 +152,9 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 template <>
 void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&callback) {
-  constexpr auto method = core::http::Method::GET;
-  constexpr std::string_view path = "/0/public/Assets"_sv;
+  auto method = core::http::Method::GET;
+  auto path = "/0/public/Assets"_sv;
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -163,6 +164,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
       {},  // headers
       {},  // body
       {},  // QoS
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.assets([&]() {
           try {
@@ -188,8 +190,9 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
 
 template <>
 void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)> &&callback) {
-  constexpr auto method = core::http::Method::GET;
-  constexpr std::string_view path = "/0/public/AssetPairs"_sv;
+  auto method = core::http::Method::GET;
+  auto path = "/0/public/AssetPairs"_sv;
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -199,6 +202,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
       {},  // headers
       {},  // body
       {},  // QoS
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.asset_pairs([&]() {
           try {
@@ -227,13 +231,14 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
 template <>
 void OrderEntry::get(
     std::function<void(const core::Promise<json::Balance>&)>&& callback) {
-  constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/0/private/Balance"_sv;
+  auto method = core::http::Method::POST;
+  auto path = "/0/private/Balance"_sv;
   auto body = security_.create_body();
   auto headers = security_.create_headers(
       method,
       path,
       body);
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -241,6 +246,7 @@ void OrderEntry::get(
       headers,
       body,
       {},  // QoS
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto& response) {
     profile_.balance(
         [&]() {
@@ -277,10 +283,11 @@ void OrderEntry::get(
 
 template <>
 void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)> &&callback) {
-  constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/0/private/OpenPositions"_sv;
+  auto method = core::http::Method::POST;
+  auto path = "/0/private/OpenPositions"_sv;
   auto body = security_.create_body();
   auto headers = security_.create_headers(method, path, body);
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -290,6 +297,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
       headers,
       body,
       {},  // QoS
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.open_positions([&]() {
           try {
@@ -315,10 +323,11 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
 
 template <>
 void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&callback) {
-  constexpr auto method = core::http::Method::POST;
-  constexpr std::string_view path = "/0/private/GetWebSocketsToken"_sv;
+  auto method = core::http::Method::POST;
+  auto path = "/0/private/GetWebSocketsToken"_sv;
   auto body = security_.create_body();
   auto headers = security_.create_headers(method, path, body);
+  auto rate_limit_weight = 1;
   connection_.request(
       method,
       path,
@@ -328,6 +337,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
       headers,
       body,
       {},  // QoS
+      rate_limit_weight,
       [this, callback{std::move(callback)}](auto &response) {
         profile_.get_web_sockets_token([&]() {
           try {
