@@ -134,6 +134,11 @@ void OrderEntry::operator()(
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
+void OrderEntry::operator()(
+    const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
+  log::fatal("NOT IMPLEMENTED"_sv);
+}
+
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
