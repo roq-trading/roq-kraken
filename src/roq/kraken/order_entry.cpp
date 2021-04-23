@@ -403,28 +403,28 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       break;
     case OrderEntryState::TOKEN:
       download_token();
-      return 1u;
+      return 1;
     case OrderEntryState::ASSETS:
       if (master_) {
         download_assets();
-        return 1u;
+        return 1;
       } else {
         return {};
       }
     case OrderEntryState::ASSET_PAIRS:
       if (master_) {
         download_asset_pairs();
-        return 1u;
+        return 1;
       } else {
         return {};
       }
     case OrderEntryState::BALANCE:
       download_balance();
-      // return 1u;
+      // return 1;
       return {};
     case OrderEntryState::OPEN_POSITIONS:
       download_open_positions();
-      return 1u;
+      return 1;
     case OrderEntryState::DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);

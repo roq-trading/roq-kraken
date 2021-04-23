@@ -63,13 +63,13 @@ std::string Security::create_headers(
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
-  std::array<char, 32u> buffer_1;
+  std::array<char, 32> buffer_1;
   auto length_1 = sha_.digest(buffer_1);
   assert(length_1 == buffer_1.size());
   hmac_.clear();
   hmac_.update(path.data(), path.length());
   hmac_.update(buffer_1.data(), buffer_1.size());
-  std::array<char, 64u> buffer_2;
+  std::array<char, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
   assert(length_2 == buffer_2.size());
   auto sign_2 = core::binascii::Base64::encode(buffer_2);
