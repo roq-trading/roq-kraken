@@ -114,9 +114,7 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 }
 
 void OrderEntry::operator()(
-    const Event<CreateOrder> &,
-    [[maybe_unused]] const std::string_view &request_id,
-    [[maybe_unused]] uint32_t gateway_order_id) {
+    const Event<CreateOrder> &, [[maybe_unused]] const std::string_view &request_id) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
