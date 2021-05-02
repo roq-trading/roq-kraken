@@ -113,26 +113,26 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(latency_.ping, metrics::LATENCY);
 }
 
-void OrderEntry::operator()(
+uint16_t OrderEntry::operator()(
     const Event<CreateOrder> &, [[maybe_unused]] const std::string_view &request_id) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
-void OrderEntry::operator()(
+uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &,
     [[maybe_unused]] const std::string_view &request_id,
     const server::OMS_Order &) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
-void OrderEntry::operator()(
+uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &,
     [[maybe_unused]] const std::string_view &request_id,
     const server::OMS_Order &) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
-void OrderEntry::operator()(
+uint16_t OrderEntry::operator()(
     const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
