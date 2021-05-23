@@ -9,6 +9,8 @@
 
 #include "roq/core/memory.h"
 
+#include "roq/core/stack/buffer.h"
+
 namespace roq {
 namespace kraken {
 
@@ -17,6 +19,8 @@ struct Shared final {
 
   Shared(Shared &&) = default;
   Shared(const Shared &) = delete;
+
+  std::string_view next_request_id();
 
   auto next_trade_id() { return dispatcher_.next_trade_id(); }
 
@@ -35,6 +39,8 @@ struct Shared final {
 
  private:
   server::Dispatcher &dispatcher_;
+  uint32_t request_id_ = 0;
+  core::stack::Buffer<char, 32> stack_buffer_;
 };
 
 }  // namespace kraken
