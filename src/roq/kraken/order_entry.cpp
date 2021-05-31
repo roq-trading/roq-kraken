@@ -34,11 +34,7 @@ static const auto SUPPORTS_MASTER = utils::Mask{
     SupportType::MARKET_STATUS,
 };
 
-static const auto KEEP_ALIVE = true;
 static const auto ALLOW_PIPELINING = true;
-
-static const auto ACCEPT_JSON = "application/json"_sv;
-static const auto CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"_sv;
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
@@ -62,7 +58,7 @@ OrderEntry::OrderEntry(
           Flags::encode_buffer_size(),
           core::URI(Flags::rest_uri()),
           ROQ_PACKAGE_NAME,
-          KEEP_ALIVE,
+          core::http::Connection::KEEP_ALIVE,
           ALLOW_PIPELINING,
           Flags::rest_request_timeout(),
           Flags::rest_rate_limit_interval(),
@@ -155,79 +151,74 @@ void OrderEntry::operator()(ConnectionStatus status) {
 
 template <>
 void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&callback) {
-  auto method = core::http::Method::GET;
-  auto path = "/0/public/Assets"_sv;
-  auto rate_limit_weight = 1;
-  connection_.request(
-      method,
-      path,
-      {},  // query
-      ACCEPT_JSON,
-      {},  // content_type
-      {},  // headers
-      {},  // body
-      {},  // QoS
-      rate_limit_weight,
-      [this, callback{std::move(callback)}](auto &response) {
-        profile_.assets([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
-            if (assets.error.empty()) {
-              log::trace_1("assets={}"_fmt, assets);
-              core::Promise<json::Assets> promise(assets);
-              callback(promise);
-            } else {
-              log::warn("assets={}"_fmt, assets);
-              log::fatal("Unexpected"_sv);
-            }
-          } catch (NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-            core::Promise<json::Assets> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
+  core::web::Request request{
+      .method = core::http::Method::GET,
+      .path = "/0/public/Assets"_sv,
+      .query = {},
+      .accept = core::http::Accept::JSON,
+      .content_type = {},
+      .headers = {},
+      .body = {},
+      .quality_of_service = {},
+      .rate_limit_weight = 1,
+  };
+  connection_(request, [this, callback{std::move(callback)}](auto &response) {
+    profile_.assets([&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(decode_buffer_);
+        auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
+        if (assets.error.empty()) {
+          log::trace_1("assets={}"_fmt, assets);
+          core::Promise<json::Assets> promise(assets);
+          callback(promise);
+        } else {
+          log::warn("assets={}"_fmt, assets);
+          log::fatal("Unexpected"_sv);
+        }
+      } catch (NetworkError &e) {
+        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        core::Promise<json::Assets> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 template <>
 void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)> &&callback) {
-  auto method = core::http::Method::GET;
-  auto path = "/0/public/AssetPairs"_sv;
-  auto rate_limit_weight = 1;
-  connection_.request(
-      method,
-      path,
-      {},  // query
-      ACCEPT_JSON,
-      {},  // content_type
-      {},  // headers
-      {},  // body
-      {},  // QoS
-      rate_limit_weight,
-      [this, callback{std::move(callback)}](auto &response) {
-        profile_.asset_pairs([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto asset_pairs =
-                core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
-            if (asset_pairs.error.empty()) {
-              log::trace_1("asset_pairs={}"_fmt, asset_pairs);
-              core::Promise<json::AssetPairs> promise(asset_pairs);
-              callback(promise);
-            } else {
-              log::warn("asset_pairs={}"_fmt, asset_pairs);
-              log::fatal("Unexpected"_sv);
-            }
-          } catch (NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-            core::Promise<json::AssetPairs> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
+  core::web::Request request{
+      .method = core::http::Method::GET,
+      .path = "/0/public/AssetPairs"_sv,
+      .query = {},
+      .accept = core::http::Accept::JSON,
+      .content_type = {},
+      .headers = {},
+      .body = {},
+      .quality_of_service = {},
+      .rate_limit_weight = 1,
+  };
+  connection_(request, [this, callback{std::move(callback)}](auto &response) {
+    profile_.asset_pairs([&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(decode_buffer_);
+        auto asset_pairs = core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
+        if (asset_pairs.error.empty()) {
+          log::trace_1("asset_pairs={}"_fmt, asset_pairs);
+          core::Promise<json::AssetPairs> promise(asset_pairs);
+          callback(promise);
+        } else {
+          log::warn("asset_pairs={}"_fmt, asset_pairs);
+          log::fatal("Unexpected"_sv);
+        }
+      } catch (NetworkError &e) {
+        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        core::Promise<json::AssetPairs> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 /*
@@ -290,38 +281,38 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
   auto path = "/0/private/OpenPositions"_sv;
   auto body = security_.create_body();
   auto headers = security_.create_headers(method, path, body);
-  auto rate_limit_weight = 1;
-  connection_.request(
-      method,
-      path,
-      {},  // query
-      ACCEPT_JSON,
-      CONTENT_TYPE_FORM,
-      headers,
-      body,
-      {},  // QoS
-      rate_limit_weight,
-      [this, callback{std::move(callback)}](auto &response) {
-        profile_.open_positions([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
-            if (positions.error.empty()) {
-              log::trace_1("positions={}"_fmt, positions);
-              core::Promise<json::Positions> promise(positions);
-              callback(promise);
-            } else {
-              log::warn("positions={}"_fmt, positions);
-              log::fatal("Unexpected"_sv);
-            }
-          } catch (NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-            core::Promise<json::Positions> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
+  core::web::Request request{
+      .method = method,
+      .path = path,
+      .query = {},
+      .accept = core::http::Accept::JSON,
+      .content_type = core::http::ContentType::FORM,
+      .headers = headers,
+      .body = body,
+      .quality_of_service = {},
+      .rate_limit_weight = 1,
+  };
+  connection_(request, [this, callback{std::move(callback)}](auto &response) {
+    profile_.open_positions([&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(decode_buffer_);
+        auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
+        if (positions.error.empty()) {
+          log::trace_1("positions={}"_fmt, positions);
+          core::Promise<json::Positions> promise(positions);
+          callback(promise);
+        } else {
+          log::warn("positions={}"_fmt, positions);
+          log::fatal("Unexpected"_sv);
+        }
+      } catch (NetworkError &e) {
+        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        core::Promise<json::Positions> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 template <>
@@ -330,41 +321,41 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
   auto path = "/0/private/GetWebSocketsToken"_sv;
   auto body = security_.create_body();
   auto headers = security_.create_headers(method, path, body);
-  auto rate_limit_weight = 1;
-  connection_.request(
-      method,
-      path,
-      {},  // query
-      ACCEPT_JSON,
-      CONTENT_TYPE_FORM,
-      headers,
-      body,
-      {},  // QoS
-      rate_limit_weight,
-      [this, callback{std::move(callback)}](auto &response) {
-        profile_.get_web_sockets_token([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            json::Result::dispatch<json::Token>(
-                response.body(),
-                buffer,
-                [](const roq::span<std::string_view> &e) {
-                  log::warn("error=[{}]"_fmt, roq::join(e, ","_sv));
-                  log::fatal("Unexpected"_sv);
-                },
-                [&](const json::Token &token) {
-                  log::trace_1("token={}"_fmt, token);
-                  core::Promise<json::Token> promise(token);
-                  callback(promise);
-                });
-          } catch (NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
-            core::Promise<json::Token> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
+  core::web::Request request{
+      .method = method,
+      .path = path,
+      .query = {},
+      .accept = core::http::Accept::JSON,
+      .content_type = core::http::ContentType::FORM,
+      .headers = headers,
+      .body = body,
+      .quality_of_service = {},
+      .rate_limit_weight = 1,
+  };
+  connection_(request, [this, callback{std::move(callback)}](auto &response) {
+    profile_.get_web_sockets_token([&]() {
+      try {
+        response.expect(core::http::Status::OK);
+        core::json::Buffer buffer(decode_buffer_);
+        json::Result::dispatch<json::Token>(
+            response.body(),
+            buffer,
+            [](const roq::span<std::string_view> &e) {
+              log::warn("error=[{}]"_fmt, roq::join(e, ","_sv));
+              log::fatal("Unexpected"_sv);
+            },
+            [&](const json::Token &token) {
+              log::trace_1("token={}"_fmt, token);
+              core::Promise<json::Token> promise(token);
+              callback(promise);
+            });
+      } catch (NetworkError &e) {
+        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        core::Promise<json::Token> promise(std::current_exception());
+        callback(promise);
+      }
+    });
+  });
 }
 
 void OrderEntry::operator()(const core::web::Client::Connected &) {
