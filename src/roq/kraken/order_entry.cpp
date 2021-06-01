@@ -116,15 +116,17 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &,
+    const server::Order &,
     [[maybe_unused]] const std::string_view &request_id,
-    const server::OMS_Order &) {
+    [[maybe_unused]] const std::string_view &previous_request_id) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &,
+    const server::Order &,
     [[maybe_unused]] const std::string_view &request_id,
-    const server::OMS_Order &) {
+    [[maybe_unused]] const std::string_view &previous_request_id) {
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
