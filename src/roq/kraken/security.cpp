@@ -38,18 +38,18 @@ std::string Security::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = now - nonce_;
   if (ROQ_UNLIKELY(diff < THRESHOLD))
-    log::fatal("Probably something wrong... diff={})"_fmt, diff);
+    log::fatal("Probably something wrong... diff={})"_sv, diff);
   if (diff.count() < 0)  // XXX shouldn't this be <= ?
     ++nonce_;
   else
     nonce_ = now;
   if (password_.empty()) {
-    return roq::format(R"(nonce={})"_fmt, nonce_.count());
+    return roq::format(R"(nonce={})"_sv, nonce_.count());
   } else {
     // XXX something weird with the quotes here... review
     return roq::format(
         R"("nonce={}&)"
-        R"("opt={}")"_fmt,
+        R"("opt={}")"_sv,
         nonce_.count(),
         password_);
   }
@@ -59,7 +59,7 @@ std::string Security::create_headers(
     const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
   assert(!body.empty());
-  auto nonce = roq::format("{}"_fmt, nonce_.count());
+  auto nonce = roq::format("{}"_sv, nonce_.count());
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
@@ -75,7 +75,7 @@ std::string Security::create_headers(
   auto sign_2 = core::binascii::Base64::encode(buffer_2);
   return roq::format(
       "API-Key: {}\r\n"
-      "API-Sign: {}\r\n"_fmt,
+      "API-Sign: {}\r\n"_sv,
       key_,
       sign_2);
 }

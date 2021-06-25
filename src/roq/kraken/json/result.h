@@ -36,7 +36,7 @@ struct Result final {
         result_handler(obj);
         return;
       } else {
-        throw RuntimeErrorException(R"(Unexpected key="{}")"_fmt, key);
+        throw RuntimeErrorException(R"(Unexpected key="{}")"_sv, key);
       }
     }
     throw RuntimeErrorException(R"(Didn't find key in {"error", "result"})"_sv);

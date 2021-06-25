@@ -32,7 +32,7 @@ DropCopy::DropCopy(
     Shared &shared,
     const std::string_view &token)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_fmt, stream_id_, NAME, security.get_account())), token_(token),
+      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), token_(token),
       connection_(
           *this,
           context,
@@ -87,7 +87,7 @@ void DropCopy::subscribe() {
 }
 
 void DropCopy::subscribe(const std::string_view &name) {
-  log::info(R"(subscribe name="{}", token="{}")"_fmt, name, token_);
+  log::info(R"(subscribe name="{}", token="{}")"_sv, name, token_);
   assert(!token_.empty());
   auto message = roq::format(
       R"({{)"
@@ -96,10 +96,10 @@ void DropCopy::subscribe(const std::string_view &name) {
       R"("name":"{}",)"
       R"("token":"{}")"
       R"(}})"
-      R"(}})"_fmt,
+      R"(}})"_sv,
       name,
       token_);
-  log::trace_3(R"(request="{}")"_fmt, message);
+  log::info<3>(R"(request="{}")"_sv, message);
   connection_.send_text(message);
 }
 
@@ -148,7 +148,7 @@ void DropCopy::operator()(ConnectionStatus status) {
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_fmt, stream_status);
+    log::info("stream_status={}"_sv, stream_status);
     server::create_trace_and_dispatch(trace_info, stream_status, handler_);
   }
 }
@@ -177,49 +177,49 @@ void DropCopy::parse(const std::string_view &message) {
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))
-      log::warn(R"(Unexpected: message="{}")"_fmt, message);
+      log::warn(R"(Unexpected: message="{}")"_sv, message);
   });
 }
 
 void DropCopy::operator()(const json::Error &error, const server::TraceInfo &) {
-  log::fatal("error={}"_fmt, error);
+  log::fatal("error={}"_sv, error);
 }
 
 void DropCopy::operator()(const json::SystemStatus &system_status, const server::TraceInfo &) {
-  log::info("system_status={}"_fmt, system_status);
+  log::info("system_status={}"_sv, system_status);
 }
 
 void DropCopy::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  log::trace_1("pong={}"_fmt, pong);
+  log::info<1>("pong={}"_sv, pong);
 }
 
 void DropCopy::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  log::trace_1("heartbeat={}"_fmt, heartbeat);
+  log::info<1>("heartbeat={}"_sv, heartbeat);
 }
 
 void DropCopy::operator()(
     const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  log::info("subscription_status={}"_fmt, subscription_status);
+  log::info("subscription_status={}"_sv, subscription_status);
 }
 
 void DropCopy::operator()(const json::AddOrderStatus &add_order_status, const server::TraceInfo &) {
-  log::info("add_order_status={}"_fmt, add_order_status);
+  log::info("add_order_status={}"_sv, add_order_status);
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 void DropCopy::operator()(
     const json::CancelOrderStatus &cancel_order_status, const server::TraceInfo &) {
-  log::info("cancel_order_status={}"_fmt, cancel_order_status);
+  log::info("cancel_order_status={}"_sv, cancel_order_status);
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 void DropCopy::operator()(const json::OpenOrders &open_orders, const server::TraceInfo &) {
-  log::info("open_orders={}"_fmt, open_orders);
+  log::info("open_orders={}"_sv, open_orders);
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 
 void DropCopy::operator()(const json::OwnTrades &own_trades, const server::TraceInfo &) {
-  log::info("own_trades={}"_fmt, own_trades);
+  log::info("own_trades={}"_sv, own_trades);
   log::fatal("NOT IMPLEMENTED"_sv);
 }
 

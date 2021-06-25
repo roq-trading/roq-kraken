@@ -57,7 +57,7 @@ void emplace(Trade &result, const T &value) {
 
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(roq::format("{}:{}"_fmt, stream_id_, NAME)),
+    : handler_(handler), stream_id_(stream_id), name_(roq::format("{}:{}"_sv, stream_id_, NAME)),
       connection_(
           *this,
           context,
@@ -171,7 +171,7 @@ void MarketData::operator()(ConnectionStatus status) {
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_fmt, stream_status);
+    log::info("stream_status={}"_sv, stream_status);
     server::create_trace_and_dispatch(trace_info, stream_status, handler_);
   }
 }
@@ -201,7 +201,7 @@ void MarketData::subscribe(const roq::span<std::string> &symbols) {
 }
 
 void MarketData::subscribe(const std::string_view &name, const roq::span<std::string> &symbols) {
-  log::info(R"(subscribe name="{}", len(symbols)={})"_fmt, name, std::size(symbols));
+  log::info(R"(subscribe name="{}", len(symbols)={})"_sv, name, std::size(symbols));
   if (Flags::ws_public_subscribe_book_depth() && name.compare("book"_sv) == 0) {
     auto message = roq::format(
         R"({{)"
@@ -211,11 +211,11 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
         R"("name":"{}",)"
         R"("depth":{})"
         R"(}})"
-        R"(}})"_fmt,
+        R"(}})"_sv,
         roq::join(symbols, R"(",")"_sv),
         name,
         Flags::ws_public_subscribe_book_depth());
-    log::trace_3(R"(request="{}")"_fmt, message);
+    log::info<3>(R"(request="{}")"_sv, message);
     connection_.send_text(message);
   } else {
     auto message = roq::format(
@@ -225,10 +225,10 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
         R"("subscription":{{)"
         R"("name":"{}")"
         R"(}})"
-        R"(}})"_fmt,
+        R"(}})"_sv,
         roq::join(symbols, R"(",")"_sv),
         name);
-    log::trace_3(R"(request="{}")"_fmt, message);
+    log::info<3>(R"(request="{}")"_sv, message);
     connection_.send_text(message);
   }
 }
@@ -239,34 +239,34 @@ void MarketData::parse(const std::string_view &message) {
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))
-      log::warn(R"(Unexpected: message="{}")"_fmt, message);
+      log::warn(R"(Unexpected: message="{}")"_sv, message);
   });
 }
 
 void MarketData::operator()(const json::Error &error, const server::TraceInfo &) {
-  log::fatal("error={}"_fmt, error);
+  log::fatal("error={}"_sv, error);
 }
 
 void MarketData::operator()(const json::SystemStatus &system_status, const server::TraceInfo &) {
-  log::info("system_status={}"_fmt, system_status);
+  log::info("system_status={}"_sv, system_status);
 }
 
 void MarketData::operator()(const json::Pong &pong, const server::TraceInfo &) {
-  log::trace_1("pong={}"_fmt, pong);
+  log::info<1>("pong={}"_sv, pong);
 }
 
 void MarketData::operator()(const json::Heartbeat &heartbeat, const server::TraceInfo &) {
-  log::trace_1("heartbeat={}"_fmt, heartbeat);
+  log::info<1>("heartbeat={}"_sv, heartbeat);
 }
 
 void MarketData::operator()(
     const json::SubscriptionStatus &subscription_status, const server::TraceInfo &) {
-  log::trace_1("subscription_status={}"_fmt, subscription_status);
+  log::info<1>("subscription_status={}"_sv, subscription_status);
 }
 
 void MarketData::operator()(
     const json::Trade &trade, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  log::trace_3(R"(trade={}, pair="{}")"_fmt, trade, pair);
+  log::info<3>(R"(trade={}, pair="{}")"_sv, trade, pair);
   core::back_emplacer trades(shared_.trades);
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
@@ -287,7 +287,7 @@ void MarketData::operator()(
 
 void MarketData::operator()(
     const json::Spread &spread, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  log::trace_3(R"(spread={}, pair="{}")"_fmt, spread, pair);
+  log::info<3>(R"(spread={}, pair="{}")"_sv, spread, pair);
   TopOfBook top_of_book{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
@@ -306,7 +306,7 @@ void MarketData::operator()(
 
 void MarketData::operator()(
     const json::Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) {
-  log::trace_3(R"(book={}, pair="{}")"_fmt, book, pair);
+  log::info<3>(R"(book={}, pair="{}")"_sv, book, pair);
   bool snapshot = !book.bs.empty() && !book.as.empty();
   bool live = !book.b.empty() && !book.a.empty();
   if (ROQ_UNLIKELY(snapshot && live))

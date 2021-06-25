@@ -59,7 +59,7 @@ bool ParserPrivate::dispatch(
             log::fatal("Unexpected"_sv);
             break;
           case Event::UNKNOWN:
-            log::fatal(R"(Unknown key="{}")"_fmt, key);
+            log::fatal(R"(Unknown key="{}")"_sv, key);
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
@@ -219,7 +219,7 @@ bool ParserPrivate::dispatch(
         channel = Channel(name);
 #if !defined(NDEBUG)
         if (ROQ_UNLIKELY(channel == Channel::UNKNOWN))
-          log::fatal(R"(Unknown channel="{}")"_fmt, name);
+          log::fatal(R"(Unknown channel="{}")"_sv, name);
 #endif
         break;
       }
@@ -229,7 +229,7 @@ bool ParserPrivate::dispatch(
     ++offset;
   }
   if (ROQ_UNLIKELY(offset < 3))
-    log::fatal(R"(Unexpected: message="{}")"_fmt, message);
+    log::fatal(R"(Unexpected: message="{}")"_sv, message);
   return dispatch2(handler, message, buffer, channel);
 }
 

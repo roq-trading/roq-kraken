@@ -54,7 +54,7 @@ struct fmt::formatter<roq::kraken::Config> : public roq::formatter {
         "{{"
         "users=[{}], "
         "accounts=..."
-        "}}"_fmt,
+        "}}"_sv,
         roq::join(value.users, ", "_sv));
   }
 };

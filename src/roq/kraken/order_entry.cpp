@@ -50,7 +50,7 @@ OrderEntry::OrderEntry(
     Shared &shared,
     bool master)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_fmt, stream_id_, NAME, security.get_account())), master_(master),
+      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), master_(master),
       connection_(
           *this,
           context,
@@ -146,7 +146,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .type = StreamType::REST,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_fmt, stream_status);
+    log::info("stream_status={}"_sv, stream_status);
     server::create_trace_and_dispatch(trace_info, stream_status, handler_);
   }
 }
@@ -171,15 +171,15 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
         core::json::Buffer buffer(decode_buffer_);
         auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
         if (assets.error.empty()) {
-          log::trace_1("assets={}"_fmt, assets);
+          log::info<1>("assets={}"_sv, assets);
           core::Promise<json::Assets> promise(assets);
           callback(promise);
         } else {
-          log::warn("assets={}"_fmt, assets);
+          log::warn("assets={}"_sv, assets);
           log::fatal("Unexpected"_sv);
         }
       } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
         core::Promise<json::Assets> promise(std::current_exception());
         callback(promise);
       }
@@ -207,15 +207,15 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
         core::json::Buffer buffer(decode_buffer_);
         auto asset_pairs = core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
         if (asset_pairs.error.empty()) {
-          log::trace_1("asset_pairs={}"_fmt, asset_pairs);
+          log::info<1>("asset_pairs={}"_sv, asset_pairs);
           core::Promise<json::AssetPairs> promise(asset_pairs);
           callback(promise);
         } else {
-          log::warn("asset_pairs={}"_fmt, asset_pairs);
+          log::warn("asset_pairs={}"_sv, asset_pairs);
           log::fatal("Unexpected"_sv);
         }
       } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
         core::Promise<json::AssetPairs> promise(std::current_exception());
         callback(promise);
       }
@@ -254,19 +254,19 @@ void OrderEntry::get(
               response.body(),
               buffer);
         if (balance.error.empty()) {
-          log::trace_1(
-              "balance={}"_fmt,
+          log::info<1>(
+              "balance={}"_sv,
               balance);
           handler_(balance);
         } else {
           log::warn(
-              "balance={}"_fmt,
+              "balance={}"_sv,
               balance);
           log::fatal("Unexpected"_sv);
         }
       } catch (NetworkError& e) {
         log::warn(
-            R"(Exception type={}, what="{}")"_fmt,
+            R"(Exception type={}, what="{}")"_sv,
             typeid(e).name(),
             e.what());
         core::Promise<json::Products> promise(std::current_exception());
@@ -301,15 +301,15 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
         core::json::Buffer buffer(decode_buffer_);
         auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
         if (positions.error.empty()) {
-          log::trace_1("positions={}"_fmt, positions);
+          log::info<1>("positions={}"_sv, positions);
           core::Promise<json::Positions> promise(positions);
           callback(promise);
         } else {
-          log::warn("positions={}"_fmt, positions);
+          log::warn("positions={}"_sv, positions);
           log::fatal("Unexpected"_sv);
         }
       } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
         core::Promise<json::Positions> promise(std::current_exception());
         callback(promise);
       }
@@ -343,16 +343,16 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
             response.body(),
             buffer,
             [](const roq::span<std::string_view> &e) {
-              log::warn("error=[{}]"_fmt, roq::join(e, ","_sv));
+              log::warn("error=[{}]"_sv, roq::join(e, ","_sv));
               log::fatal("Unexpected"_sv);
             },
             [&](const json::Token &token) {
-              log::trace_1("token={}"_fmt, token);
+              log::info<1>("token={}"_sv, token);
               core::Promise<json::Token> promise(token);
               callback(promise);
             });
       } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_fmt, typeid(e).name(), e.what());
+        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
         core::Promise<json::Token> promise(std::current_exception());
         callback(promise);
       }
@@ -504,7 +504,7 @@ void OrderEntry::download_open_positions() {
 }
 
 void OrderEntry::operator()(const json::Token &token) {
-  log::info(R"(token={})"_fmt, token);
+  log::info(R"(token={})"_sv, token);
   TokenUpdate token_update{
       .account = security_.get_account(),
       .token = token.token,
@@ -522,9 +522,9 @@ void OrderEntry::operator()(const json::AssetPairs &asset_pairs) {
   symbols.reserve(asset_pairs.result.size());
   size_t counter = {};
   for (auto &item : asset_pairs.result) {
-    log::trace_1("item={}"_fmt, item);
+    log::info<1>("item={}"_sv, item);
     if (item.wsname.empty()) {
-      log::trace_1(R"(Skipping altname="{}", reason: wsname is empty)"_fmt, item.altname);
+      log::info<1>(R"(Skipping altname="{}", reason: wsname is empty)"_sv, item.altname);
       continue;
     }
     std::string symbol(item.wsname);
@@ -568,7 +568,7 @@ void OrderEntry::operator()(const json::AssetPairs &asset_pairs) {
     };
     server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
   }
-  log::info("AssetPairs {} / {}"_fmt, counter, asset_pairs.result.size());
+  log::info("AssetPairs {} / {}"_sv, counter, asset_pairs.result.size());
   if (!symbols.empty()) {
     SymbolsUpdate symbols_update{
         .symbols = symbols,
