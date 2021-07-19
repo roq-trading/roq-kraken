@@ -285,5 +285,5 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   server::TraceInfo trace_info;
   EXPECT_THROW(
       json::ParserPublic::dispatch(handler, message, buffer, trace_info),
-      std::out_of_range);  //  XXX maybe wrap as core::market::BadState?
+      OutOfRange);  //  XXX maybe wrap as core::market::BadState?
 }
