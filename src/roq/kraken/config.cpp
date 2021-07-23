@@ -48,7 +48,7 @@ std::string Config::get_access_password(const std::string_view &account) const {
 void Config::dispatch(server::Config::Handler &handler) const {
   handler(Flags::exchange());
   handler(symbols);
-  for (auto iter : accounts)
+  for (auto &iter : accounts)
     handler(iter.second);
   for (auto &user : users)
     handler(user);
@@ -71,6 +71,8 @@ void Config::dispatch(server::Config::Handler &handler) const {
       .oms_download_has_routing_id = {},
   };
   handler(settings);
+  for (auto &iter : rate_limits)
+    handler(iter.second);
 }
 
 void Config::operator()(server::Symbols &&symbols) {
