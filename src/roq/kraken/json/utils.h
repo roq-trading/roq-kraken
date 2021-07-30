@@ -12,7 +12,6 @@
 
 #include "roq/kraken/json/order_type.h"
 #include "roq/kraken/json/side.h"
-#include "roq/kraken/json/update_type.h"
 
 namespace roq {
 namespace kraken {
@@ -25,10 +24,6 @@ inline void update(T &result, const core::json::value_t &value) {
 
 template <>
 inline void update(std::chrono::milliseconds &result, const core::json::value_t &value) {
-  /*
-  auto text = core::json::get<std::string_view>(value);
-  result = core::charconv::to_datetime(text);
-  */
   return std::visit(
       overloaded{
           [&](const core::json::null_t &) { result = std::chrono::milliseconds{}; },
@@ -48,24 +43,6 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
           [](const core::json::array_t &) { throw std::bad_cast(); },
       },
       value);
-}
-
-template <>
-inline void update(OrderType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(Side &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
-}
-
-template <>
-inline void update(UpdateType &result, const core::json::value_t &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
-  result = result_type(core::json::get<std::string_view>(value));
 }
 
 inline roq::OrderType map(json::OrderType order_type) {
