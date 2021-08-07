@@ -44,10 +44,10 @@ std::string Security::create_body() {
   else
     nonce_ = now;
   if (password_.empty()) {
-    return roq::format(R"(nonce={})"_sv, nonce_.count());
+    return fmt::format(R"(nonce={})"_sv, nonce_.count());
   } else {
     // XXX something weird with the quotes here... review
-    return roq::format(
+    return fmt::format(
         R"("nonce={}&)"
         R"("opt={}")"_sv,
         nonce_.count(),
@@ -59,7 +59,7 @@ std::string Security::create_headers(
     const core::http::Method &method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
   assert(!body.empty());
-  auto nonce = roq::format("{}"_sv, nonce_.count());
+  auto nonce = fmt::format("{}"_sv, nonce_.count());
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
@@ -73,7 +73,7 @@ std::string Security::create_headers(
   auto length_2 = hmac_.digest(buffer_2);
   assert(length_2 == buffer_2.size());
   auto sign_2 = core::binascii::Base64::encode(buffer_2);
-  return roq::format(
+  return fmt::format(
       "API-Key: {}\r\n"
       "API-Sign: {}\r\n"_sv,
       key_,

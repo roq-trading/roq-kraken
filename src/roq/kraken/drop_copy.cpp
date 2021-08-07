@@ -32,7 +32,7 @@ DropCopy::DropCopy(
     Shared &shared,
     const std::string_view &token)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), token_(token),
+      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), token_(token),
       connection_(
           *this,
           context,
@@ -89,7 +89,7 @@ void DropCopy::subscribe() {
 void DropCopy::subscribe(const std::string_view &name) {
   log::info(R"(subscribe name="{}", token="{}")"_sv, name, token_);
   assert(!token_.empty());
-  auto message = roq::format(
+  auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"
       R"("subscription":{{)"

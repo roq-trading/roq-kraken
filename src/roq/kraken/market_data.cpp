@@ -57,7 +57,7 @@ void emplace(Trade &result, const T &value) {
 
 MarketData::MarketData(
     Handler &handler, core::io::Context &context, uint16_t stream_id, Shared &shared)
-    : handler_(handler), stream_id_(stream_id), name_(roq::format("{}:{}"_sv, stream_id_, NAME)),
+    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"_sv, stream_id_, NAME)),
       connection_(
           *this,
           context,
@@ -203,7 +203,7 @@ void MarketData::subscribe(const roq::span<std::string> &symbols) {
 void MarketData::subscribe(const std::string_view &name, const roq::span<std::string> &symbols) {
   log::info(R"(subscribe name="{}", len(symbols)={})"_sv, name, std::size(symbols));
   if (Flags::ws_public_subscribe_book_depth() && name.compare("book"_sv) == 0) {
-    auto message = roq::format(
+    auto message = fmt::format(
         R"({{)"
         R"("event":"subscribe",)"
         R"("pair":["{}"],)"
@@ -212,13 +212,13 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
         R"("depth":{})"
         R"(}})"
         R"(}})"_sv,
-        roq::join(symbols, R"(",")"_sv),
+        fmt::join(symbols, R"(",")"_sv),
         name,
         Flags::ws_public_subscribe_book_depth());
     log::info<3>(R"(request="{}")"_sv, message);
     connection_.send_text(message);
   } else {
-    auto message = roq::format(
+    auto message = fmt::format(
         R"({{)"
         R"("event":"subscribe",)"
         R"("pair":["{}"],)"
@@ -226,7 +226,7 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
         R"("name":"{}")"
         R"(}})"
         R"(}})"_sv,
-        roq::join(symbols, R"(",")"_sv),
+        fmt::join(symbols, R"(",")"_sv),
         name);
     log::info<3>(R"(request="{}")"_sv, message);
     connection_.send_text(message);

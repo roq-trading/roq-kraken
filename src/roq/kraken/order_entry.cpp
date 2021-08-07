@@ -50,7 +50,7 @@ OrderEntry::OrderEntry(
     Shared &shared,
     bool master)
     : handler_(handler), stream_id_(stream_id),
-      name_(roq::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), master_(master),
+      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), master_(master),
       connection_(
           *this,
           context,
@@ -343,7 +343,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
             response.body(),
             buffer,
             [](const roq::span<std::string_view> &e) {
-              log::warn("error=[{}]"_sv, roq::join(e, ","_sv));
+              log::warn("error=[{}]"_sv, fmt::join(e, ","_sv));
               log::fatal("Unexpected"_sv);
             },
             [&](const json::Token &token) {
