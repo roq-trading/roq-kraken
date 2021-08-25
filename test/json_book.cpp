@@ -5,7 +5,7 @@
 
 #include "roq/core/datetime.h"
 
-#include "roq/core/market/bad_state.h"
+#include "roq/core/market/exceptions.h"
 
 #include "roq/kraken/json/parser_public.h"
 
