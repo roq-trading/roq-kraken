@@ -111,7 +111,7 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 
 uint16_t OrderEntry::operator()(
     const Event<CreateOrder> &, [[maybe_unused]] const std::string_view &request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+  throw NotImplementedException();
 }
 
 uint16_t OrderEntry::operator()(
@@ -119,7 +119,7 @@ uint16_t OrderEntry::operator()(
     const server::OMS_Order &,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+  throw NotImplementedException();
 }
 
 uint16_t OrderEntry::operator()(
@@ -127,7 +127,7 @@ uint16_t OrderEntry::operator()(
     const server::OMS_Order &,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
-  log::fatal("NOT IMPLEMENTED"_sv);
+  throw NotImplementedException();
 }
 
 uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &) {
