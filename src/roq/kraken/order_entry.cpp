@@ -116,7 +116,7 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<ModifyOrder> &,
-    const server::OMS_Order &,
+    const oms::Order &,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
   throw NotImplementedException();
@@ -124,7 +124,7 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<CancelOrder> &,
-    const server::OMS_Order &,
+    const oms::Order &,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
   throw NotImplementedException();
