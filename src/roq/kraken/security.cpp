@@ -72,7 +72,7 @@ std::string Security::create_headers(
   std::array<char, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
   assert(length_2 == buffer_2.size());
-  auto sign_2 = core::binascii::Base64::encode(buffer_2);
+  auto sign_2 = core::binascii::Base64::encode(buffer_2, false);
   return fmt::format(
       "API-Key: {}\r\n"
       "API-Sign: {}\r\n"_sv,
