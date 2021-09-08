@@ -130,7 +130,8 @@ uint16_t OrderEntry::operator()(
   throw NotImplementedException();
 }
 
-uint16_t OrderEntry::operator()(const Event<CancelAllOrders> &) {
+uint16_t OrderEntry::operator()(
+    const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
   log::warn("*** CANCEL ALL ORDERS *NOT* SUPPORTED ***"_sv);
   return stream_id_;
 }
@@ -164,27 +165,30 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
       .quality_of_service = {},
       .rate_limit_weight = 1,
   };
-  connection_(request, [this, callback{std::move(callback)}](auto &response) {
-    profile_.assets([&]() {
-      try {
-        response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(decode_buffer_);
-        auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
-        if (assets.error.empty()) {
-          log::info<1>("assets={}"_sv, assets);
-          core::Promise<json::Assets> promise(assets);
-          callback(promise);
-        } else {
-          log::warn("assets={}"_sv, assets);
-          log::fatal("Unexpected"_sv);
-        }
-      } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-        core::Promise<json::Assets> promise(std::current_exception());
-        callback(promise);
-      }
-    });
-  });
+  connection_(
+      "assets"_sv,
+      request,
+      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
+        profile_.assets([&]() {
+          try {
+            response.expect(core::http::Status::OK);
+            core::json::Buffer buffer(decode_buffer_);
+            auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
+            if (assets.error.empty()) {
+              log::info<1>("assets={}"_sv, assets);
+              core::Promise<json::Assets> promise(assets);
+              callback(promise);
+            } else {
+              log::warn("assets={}"_sv, assets);
+              log::fatal("Unexpected"_sv);
+            }
+          } catch (NetworkError &e) {
+            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            core::Promise<json::Assets> promise(std::current_exception());
+            callback(promise);
+          }
+        });
+      });
 }
 
 template <>
@@ -200,27 +204,31 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
       .quality_of_service = {},
       .rate_limit_weight = 1,
   };
-  connection_(request, [this, callback{std::move(callback)}](auto &response) {
-    profile_.asset_pairs([&]() {
-      try {
-        response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(decode_buffer_);
-        auto asset_pairs = core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
-        if (asset_pairs.error.empty()) {
-          log::info<1>("asset_pairs={}"_sv, asset_pairs);
-          core::Promise<json::AssetPairs> promise(asset_pairs);
-          callback(promise);
-        } else {
-          log::warn("asset_pairs={}"_sv, asset_pairs);
-          log::fatal("Unexpected"_sv);
-        }
-      } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-        core::Promise<json::AssetPairs> promise(std::current_exception());
-        callback(promise);
-      }
-    });
-  });
+  connection_(
+      "asset_pairs"_sv,
+      request,
+      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
+        profile_.asset_pairs([&]() {
+          try {
+            response.expect(core::http::Status::OK);
+            core::json::Buffer buffer(decode_buffer_);
+            auto asset_pairs =
+                core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
+            if (asset_pairs.error.empty()) {
+              log::info<1>("asset_pairs={}"_sv, asset_pairs);
+              core::Promise<json::AssetPairs> promise(asset_pairs);
+              callback(promise);
+            } else {
+              log::warn("asset_pairs={}"_sv, asset_pairs);
+              log::fatal("Unexpected"_sv);
+            }
+          } catch (NetworkError &e) {
+            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            core::Promise<json::AssetPairs> promise(std::current_exception());
+            callback(promise);
+          }
+        });
+      });
 }
 
 /*
@@ -294,27 +302,30 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
       .quality_of_service = {},
       .rate_limit_weight = 1,
   };
-  connection_(request, [this, callback{std::move(callback)}](auto &response) {
-    profile_.open_positions([&]() {
-      try {
-        response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(decode_buffer_);
-        auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
-        if (positions.error.empty()) {
-          log::info<1>("positions={}"_sv, positions);
-          core::Promise<json::Positions> promise(positions);
-          callback(promise);
-        } else {
-          log::warn("positions={}"_sv, positions);
-          log::fatal("Unexpected"_sv);
-        }
-      } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-        core::Promise<json::Positions> promise(std::current_exception());
-        callback(promise);
-      }
-    });
-  });
+  connection_(
+      "positions"_sv,
+      request,
+      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
+        profile_.open_positions([&]() {
+          try {
+            response.expect(core::http::Status::OK);
+            core::json::Buffer buffer(decode_buffer_);
+            auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
+            if (positions.error.empty()) {
+              log::info<1>("positions={}"_sv, positions);
+              core::Promise<json::Positions> promise(positions);
+              callback(promise);
+            } else {
+              log::warn("positions={}"_sv, positions);
+              log::fatal("Unexpected"_sv);
+            }
+          } catch (NetworkError &e) {
+            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            core::Promise<json::Positions> promise(std::current_exception());
+            callback(promise);
+          }
+        });
+      });
 }
 
 template <>
@@ -334,30 +345,33 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
       .quality_of_service = {},
       .rate_limit_weight = 1,
   };
-  connection_(request, [this, callback{std::move(callback)}](auto &response) {
-    profile_.get_web_sockets_token([&]() {
-      try {
-        response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(decode_buffer_);
-        json::Result::dispatch<json::Token>(
-            response.body(),
-            buffer,
-            [](const roq::span<std::string_view> &e) {
-              log::warn("error=[{}]"_sv, fmt::join(e, ","_sv));
-              log::fatal("Unexpected"_sv);
-            },
-            [&](const json::Token &token) {
-              log::info<1>("token={}"_sv, token);
-              core::Promise<json::Token> promise(token);
-              callback(promise);
-            });
-      } catch (NetworkError &e) {
-        log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-        core::Promise<json::Token> promise(std::current_exception());
-        callback(promise);
-      }
-    });
-  });
+  connection_(
+      "token"_sv,
+      request,
+      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
+        profile_.get_web_sockets_token([&]() {
+          try {
+            response.expect(core::http::Status::OK);
+            core::json::Buffer buffer(decode_buffer_);
+            json::Result::dispatch<json::Token>(
+                response.body(),
+                buffer,
+                [](const roq::span<std::string_view> &e) {
+                  log::warn("error=[{}]"_sv, fmt::join(e, ","_sv));
+                  log::fatal("Unexpected"_sv);
+                },
+                [&](const json::Token &token) {
+                  log::info<1>("token={}"_sv, token);
+                  core::Promise<json::Token> promise(token);
+                  callback(promise);
+                });
+          } catch (NetworkError &e) {
+            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+            core::Promise<json::Token> promise(std::current_exception());
+            callback(promise);
+          }
+        });
+      });
 }
 
 void OrderEntry::operator()(const core::web::Client::Connected &) {
