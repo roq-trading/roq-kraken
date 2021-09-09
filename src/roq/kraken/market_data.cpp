@@ -148,7 +148,7 @@ void MarketData::operator()(const core::web::Socket::Close &) {
 
 void MarketData::operator()(const core::web::Socket::Latency &latency) {
   server::TraceInfo trace_info;
-  ExternalLatency external_latency{
+  const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .latency = latency.sample,
   };
@@ -163,7 +163,7 @@ void MarketData::operator()(const core::web::Socket::Text &text) {
 void MarketData::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     server::TraceInfo trace_info;
-    StreamStatus stream_status{
+    const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS.get(),
@@ -233,6 +233,38 @@ void MarketData::subscribe(const std::string_view &name, const roq::span<std::st
   }
 }
 
+void MarketData::subscribe_book(const std::string_view &symbol) {
+  auto message = fmt::format(
+      R"({{)"
+      R"("event":"subscribe",)"
+      R"("pair":["{}"],)"
+      R"("subscription":{{)"
+      R"("name":"book",)"
+      R"("depth":{})"
+      R"(}})"
+      R"(}})"_sv,
+      symbol,
+      Flags::ws_public_subscribe_book_depth());
+  log::info<3>(R"(request="{}")"_sv, message);
+  connection_.send_text(message);
+}
+
+void MarketData::unsubscribe_book(const std::string_view &symbol) {
+  auto message = fmt::format(
+      R"({{)"
+      R"("event":"unsubscribe",)"
+      R"("pair":["{}"],)"
+      R"("subscription":{{)"
+      R"("name":"book",)"
+      R"("depth":{})"
+      R"(}})"
+      R"(}})"_sv,
+      symbol,
+      Flags::ws_public_subscribe_book_depth());
+  log::info<3>(R"(request="{}")"_sv, message);
+  connection_.send_text(message);
+}
+
 void MarketData::parse(const std::string_view &message) {
   profile_.parse([&]() {
     server::TraceInfo trace_info;
@@ -274,7 +306,7 @@ void MarketData::operator()(
     utils::update_first(exchange_time_utc, item.time);
   }
   if (!trades.empty()) {
-    TradeSummary trade_summary{
+    const TradeSummary trade_summary{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = pair,
@@ -288,7 +320,7 @@ void MarketData::operator()(
 void MarketData::operator()(
     const json::Spread &spread, const std::string_view &pair, const server::TraceInfo &trace_info) {
   log::info<3>(R"(spread={}, pair="{}")"_sv, spread, pair);
-  TopOfBook top_of_book{
+  const TopOfBook top_of_book{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
       .symbol = pair,
@@ -308,6 +340,15 @@ void MarketData::operator()(
     const json::Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) {
   log::info<3>(R"(book={}, pair="{}")"_sv, book, pair);
   bool snapshot = !book.bs.empty() && !book.as.empty();
+  auto iter = latch_.find(pair);
+  if (ROQ_UNLIKELY(iter != latch_.end())) {
+    if (!snapshot) {
+      return;  //  waiting for snapshot
+    } else {
+      latch_.erase(iter);  // unlatch
+      log::info(R"(DEBUG: unlatching symbol="{}")"_sv, pair);
+    }
+  }
   bool live = !book.b.empty() && !book.a.empty();
   if (ROQ_UNLIKELY(snapshot && live))
     log::fatal("Unexpected"_sv);
@@ -330,7 +371,7 @@ void MarketData::operator()(
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   if (!(bids.empty() && asks.empty())) {
-    MarketByPriceUpdate market_by_price_update{
+    const MarketByPriceUpdate market_by_price_update{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = pair,
@@ -339,8 +380,38 @@ void MarketData::operator()(
         .snapshot = snapshot,
         .exchange_time_utc = exchange_time_utc,
     };
-    server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
+    try {
+      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
+    } catch (market::BadState &) {
+      resubscribe(trace_info, pair);
+    }
   }
+}
+
+void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::string_view &symbol) {
+  log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"_sv, symbol);
+  MarketByPriceUpdate market_by_price_update{
+      .stream_id = stream_id_,
+      .exchange = Flags::exchange(),
+      .symbol = symbol,
+      .bids = {},
+      .asks = {},
+      .snapshot = true,
+      .exchange_time_utc = {},
+  };
+  log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
+  server::create_trace_and_dispatch(
+      trace_info,
+      market_by_price_update,
+      shared_,
+      true,
+      shared_.final_bids,
+      shared_.final_asks,
+      []([[maybe_unused]] auto &market_by_price) {});
+  latch_.emplace(symbol);  // latch
+  log::info(R"(DEBUG: latching symbol="{}")"_sv, symbol);
+  unsubscribe_book(symbol);
+  subscribe_book(symbol);
 }
 
 }  // namespace kraken

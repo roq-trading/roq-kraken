@@ -31,6 +31,11 @@ struct Shared final {
     return dispatcher_.update_order(std::forward<Args>(args)...);
   }
 
+  template <typename... Args>
+  auto operator()(Args &&...args) {
+    return dispatcher_(std::forward<Args>(args)...);
+  }
+
  public:
   core::page_aligned_vector<MBPUpdate> bids, asks, final_bids, final_asks;
   core::page_aligned_vector<Trade> trades;
