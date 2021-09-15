@@ -182,7 +182,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&
               log::warn("assets={}"_sv, assets);
               log::fatal("Unexpected"_sv);
             }
-          } catch (NetworkError &e) {
+          } catch (core::NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::Assets> promise(std::current_exception());
             callback(promise);
@@ -222,7 +222,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)
               log::warn("asset_pairs={}"_sv, asset_pairs);
               log::fatal("Unexpected"_sv);
             }
-          } catch (NetworkError &e) {
+          } catch (core::NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::AssetPairs> promise(std::current_exception());
             callback(promise);
@@ -272,7 +272,7 @@ void OrderEntry::get(
               balance);
           log::fatal("Unexpected"_sv);
         }
-      } catch (NetworkError& e) {
+      } catch (core::NetworkError& e) {
         log::warn(
             R"(Exception type={}, what="{}")"_sv,
             typeid(e).name(),
@@ -319,7 +319,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)>
               log::warn("positions={}"_sv, positions);
               log::fatal("Unexpected"_sv);
             }
-          } catch (NetworkError &e) {
+          } catch (core::NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::Positions> promise(std::current_exception());
             callback(promise);
@@ -365,7 +365,7 @@ void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&c
                   core::Promise<json::Token> promise(token);
                   callback(promise);
                 });
-          } catch (NetworkError &e) {
+          } catch (core::NetworkError &e) {
             log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
             core::Promise<json::Token> promise(std::current_exception());
             callback(promise);
@@ -446,7 +446,7 @@ void OrderEntry::download_token() {
         return;
       (*this)(promise.get());
       download_.check(state);
-    } catch (NetworkError &) {
+    } catch (core::NetworkError &) {
       download_.retry(state);
     }
   });
@@ -460,7 +460,7 @@ void OrderEntry::download_assets() {
         return;
       (*this)(promise.get());
       download_.check(state);
-    } catch (NetworkError &) {
+    } catch (core::NetworkError &) {
       download_.retry(state);
     }
   });
@@ -475,7 +475,7 @@ void OrderEntry::download_asset_pairs() {
         return;
       (*this)(promise.get());
       download_.check(state);
-    } catch (NetworkError &) {
+    } catch (core::NetworkError &) {
       download_.retry(state);
     }
   });
@@ -492,7 +492,7 @@ void OrderEntry::download_balance() {
       if (download_.skip(sequence, state)) return;
       (*this)(promise.get());
       download_.check(state);
-    } catch (NetworkError&) {
+    } catch (core::NetworkError&) {
       download_.retry(state);
     }
   });
@@ -508,7 +508,7 @@ void OrderEntry::download_open_positions() {
         return;
       (*this)(promise.get());
       download_.check(state);
-    } catch (NetworkError &) {
+    } catch (core::NetworkError &) {
       download_.retry(state);
     }
   });
