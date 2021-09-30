@@ -381,7 +381,7 @@ void MarketData::operator()(
         .exchange_time_utc = exchange_time_utc,
     };
     try {
-      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true);
+      server::create_trace_and_dispatch(trace_info, market_by_price_update, handler_, true, false);
     } catch (market::BadState &) {
       resubscribe(trace_info, pair);
     }
@@ -405,6 +405,7 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       market_by_price_update,
       shared_,
       true,
+      false,
       shared_.final_bids,
       shared_.final_asks,
       []([[maybe_unused]] auto &market_by_price) {});
