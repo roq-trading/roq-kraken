@@ -110,7 +110,9 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 }
 
 uint16_t OrderEntry::operator()(
-    const Event<CreateOrder> &, [[maybe_unused]] const std::string_view &request_id) {
+    const Event<CreateOrder> &,
+    const oms::Order &,
+    [[maybe_unused]] const std::string_view &request_id) {
   throw NotImplementedException();
 }
 
