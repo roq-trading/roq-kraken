@@ -2,15 +2,14 @@
 
 #pragma once
 
-#include <chrono>
 #include <string>
-
-#include "roq/core/crypto/hmac.h"
-#include "roq/core/crypto/sha.h"
+#include <string_view>
 
 #include "roq/core/http/method.h"
 
 #include "roq/kraken/config.h"
+
+#include "roq/kraken/tools/hasher.h"
 
 namespace roq {
 namespace kraken {
@@ -27,16 +26,11 @@ class Security final {
   std::string create_body();
 
   std::string create_headers(
-      const core::http::Method &method, const std::string_view &path, const std::string_view &body);
+      core::http::Method, const std::string_view &path, const std::string_view &body);
 
  private:
   const std::string account_;
-  const std::string key_;
-  const std::string password_;
-  core::crypto::SHA256 sha_;
-  core::crypto::HMAC_SHA512 hmac_;
-  // experimental
-  std::chrono::milliseconds nonce_ = {};
+  tools::Hasher hasher_;
 };
 
 }  // namespace kraken
