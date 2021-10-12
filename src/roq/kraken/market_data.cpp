@@ -330,7 +330,7 @@ void MarketData::operator()(
           .ask_price = spread.ask,
           .ask_quantity = spread.ask_volume,
       },
-      .snapshot = false,  // note! we don't know... false is probably ok
+      .update_type = UpdateType::INCREMENTAL,
       .exchange_time_utc = spread.timestamp,
   };
   server::create_trace_and_dispatch(trace_info, top_of_book, handler_, true);
@@ -377,7 +377,7 @@ void MarketData::operator()(
         .symbol = pair,
         .bids = bids,
         .asks = asks,
-        .snapshot = snapshot,
+        .update_type = snapshot ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL,
         .exchange_time_utc = exchange_time_utc,
     };
     try {
@@ -396,7 +396,7 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       .symbol = symbol,
       .bids = {},
       .asks = {},
-      .snapshot = true,
+      .update_type = UpdateType::STALE,
       .exchange_time_utc = {},
   };
   log::info<3>("market_by_price_update={}"_sv, market_by_price_update);
