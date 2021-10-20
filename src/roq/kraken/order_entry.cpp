@@ -556,8 +556,8 @@ void OrderEntry::operator()(const json::AssetPairs &asset_pairs) {
         .symbol = symbol,
         .description = item.altname,
         .security_type = {},
-        .currency = item.aclass_quote,
-        .settlement_currency = item.aclass_base,
+        .base_currency = item.aclass_base,
+        .quote_currency = item.aclass_quote,
         .commission_currency = item.aclass_base,
         .tick_size = tick_size,
         .multiplier = item.lot_multiplier,  // XXX check
