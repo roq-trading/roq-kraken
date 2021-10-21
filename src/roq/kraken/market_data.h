@@ -70,18 +70,15 @@ class MarketData final : public core::web::Socket::Handler, public json::ParserP
 
   // json::ParserPublic::Handler
 
-  void operator()(const json::Error &, const server::TraceInfo &) override;
-  void operator()(const json::SystemStatus &, const server::TraceInfo &) override;
-  void operator()(const json::Pong &, const server::TraceInfo &) override;
-  void operator()(const json::Heartbeat &, const server::TraceInfo &) override;
-  void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Error> &) override;
+  void operator()(const server::Trace<json::SystemStatus> &) override;
+  void operator()(const server::Trace<json::Pong> &) override;
+  void operator()(const server::Trace<json::Heartbeat> &) override;
+  void operator()(const server::Trace<json::SubscriptionStatus> &) override;
 
-  void operator()(
-      const json::Trade &, const std::string_view &pair, const server::TraceInfo &) override;
-  void operator()(
-      const json::Spread &, const std::string_view &pair, const server::TraceInfo &) override;
-  void operator()(
-      const json::Book &, const std::string_view &pair, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Trade> &, const std::string_view &pair) override;
+  void operator()(const server::Trace<json::Spread> &, const std::string_view &pair) override;
+  void operator()(const server::Trace<json::Book> &, const std::string_view &pair) override;
 
  private:
   void parse(const std::string_view &message);

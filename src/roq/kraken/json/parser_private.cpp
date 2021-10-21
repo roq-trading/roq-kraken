@@ -63,43 +63,50 @@ bool ParserPrivate::dispatch(
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
-            handler(error, trace_info);
+            server::Trace event(trace_info, error);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::SYSTEM_STATUS: {
             auto system_status = core::json::Parser::create<SystemStatus>(message);
-            handler(system_status, trace_info);
+            server::Trace event(trace_info, system_status);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
-            handler(pong, trace_info);
+            server::Trace event(trace_info, pong);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::HEARTBEAT: {
             auto heartbeat = core::json::Parser::create<Heartbeat>(message);
-            handler(heartbeat, trace_info);
+            server::Trace event(trace_info, heartbeat);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
-            handler(subscription_status, trace_info);
+            server::Trace event(trace_info, subscription_status);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::ADD_ORDER_STATUS: {
             auto add_order_status = core::json::Parser::create<AddOrderStatus>(message);
-            handler(add_order_status, trace_info);
+            server::Trace event(trace_info, add_order_status);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::CANCEL_ORDER_STATUS:
             auto cancel_order_status = core::json::Parser::create<CancelOrderStatus>(message);
-            handler(cancel_order_status, trace_info);
+            server::Trace event(trace_info, cancel_order_status);
+            handler(event);
             dispatched = true;
             break;
         }

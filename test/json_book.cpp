@@ -15,24 +15,19 @@ using namespace roq::kraken;
 namespace {
 struct Handler : public json::ParserPublic::Handler {
  protected:
-  void operator()(const json::Error &, const server::TraceInfo &) override {}
-  void operator()(const json::SystemStatus &, const server::TraceInfo &) override {}
-  void operator()(const json::Pong &, const server::TraceInfo &) override {}
-  void operator()(const json::Heartbeat &, const server::TraceInfo &) override {}
-  void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override {}
+  void operator()(const server::Trace<json::Error> &) override {}
+  void operator()(const server::Trace<json::SystemStatus> &) override {}
+  void operator()(const server::Trace<json::Pong> &) override {}
+  void operator()(const server::Trace<json::Heartbeat> &) override {}
+  void operator()(const server::Trace<json::SubscriptionStatus> &) override {}
 
   void operator()(
-      const json::Trade &,
-      [[maybe_unused]] const std::string_view &pair,
-      const server::TraceInfo &) override {}
+      const server::Trace<json::Trade> &, [[maybe_unused]] const std::string_view &pair) override {}
   void operator()(
-      const json::Spread &,
-      [[maybe_unused]] const std::string_view &pair,
-      const server::TraceInfo &) override {}
+      const server::Trace<json::Spread> &, [[maybe_unused]] const std::string_view &pair) override {
+  }
   void operator()(
-      const json::Book &,
-      [[maybe_unused]] const std::string_view &pair,
-      const server::TraceInfo &) override {}
+      const server::Trace<json::Book> &, [[maybe_unused]] const std::string_view &pair) override {}
 
  private:
   json::Book _book;

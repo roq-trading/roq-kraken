@@ -63,31 +63,36 @@ bool ParserPublic::dispatch(
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
-            handler(error, trace_info);
+            server::Trace event(trace_info, error);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::SYSTEM_STATUS: {
             auto system_status = core::json::Parser::create<SystemStatus>(message);
-            handler(system_status, trace_info);
+            server::Trace event(trace_info, system_status);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
-            handler(pong, trace_info);
+            server::Trace event(trace_info, pong);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::HEARTBEAT: {
             auto heartbeat = core::json::Parser::create<Heartbeat>(message);
-            handler(heartbeat, trace_info);
+            server::Trace event(trace_info, heartbeat);
+            handler(event);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
-            handler(subscription_status, trace_info);
+            server::Trace event(trace_info, subscription_status);
+            handler(event);
             dispatched = true;
             break;
           }
@@ -147,7 +152,8 @@ static bool dispatch2(
         if (ROQ_UNLIKELY(data_count != 1))
           log::fatal("Unexpected"_sv);
         Trade trade(value, buffer);
-        handler(trade, pair, trace_info);
+        server::Trace event(trace_info, trade);
+        handler(event, pair);
         dispatched = true;
         break;
       }
@@ -155,7 +161,8 @@ static bool dispatch2(
         if (ROQ_UNLIKELY(data_count != 1))
           log::fatal("Unexpected"_sv);
         Spread spread(value);
-        handler(spread, pair, trace_info);
+        server::Trace event(trace_info, spread);
+        handler(event, pair);
         dispatched = true;
         break;
       }
@@ -196,7 +203,8 @@ static bool dispatch2(
         log::fatal("Unexpected"_sv);
       }
     }
-    handler(book_1, pair, trace_info);
+    server::Trace event(trace_info, book_1);
+    handler(event, pair);
     dispatched = true;
   }
   return dispatched;

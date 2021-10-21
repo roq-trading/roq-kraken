@@ -69,17 +69,17 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
 
   void parse(const std::string_view &message);
 
-  void operator()(const json::Error &, const server::TraceInfo &) override;
-  void operator()(const json::SystemStatus &, const server::TraceInfo &) override;
-  void operator()(const json::Pong &, const server::TraceInfo &) override;
-  void operator()(const json::Heartbeat &, const server::TraceInfo &) override;
-  void operator()(const json::SubscriptionStatus &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::Error> &) override;
+  void operator()(const server::Trace<json::SystemStatus> &) override;
+  void operator()(const server::Trace<json::Pong> &) override;
+  void operator()(const server::Trace<json::Heartbeat> &) override;
+  void operator()(const server::Trace<json::SubscriptionStatus> &) override;
 
-  void operator()(const json::AddOrderStatus &, const server::TraceInfo &) override;
-  void operator()(const json::CancelOrderStatus &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::AddOrderStatus> &) override;
+  void operator()(const server::Trace<json::CancelOrderStatus> &) override;
 
-  void operator()(const json::OpenOrders &, const server::TraceInfo &) override;
-  void operator()(const json::OwnTrades &, const server::TraceInfo &) override;
+  void operator()(const server::Trace<json::OpenOrders> &) override;
+  void operator()(const server::Trace<json::OwnTrades> &) override;
 
   void reset();
 

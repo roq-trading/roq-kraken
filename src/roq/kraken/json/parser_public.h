@@ -24,20 +24,15 @@ namespace json {
 
 struct ParserPublic final {
   struct Handler {
-    virtual void operator()(const Error &, const server::TraceInfo &) = 0;
-    virtual void operator()(const SystemStatus &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Pong &, const server::TraceInfo &) = 0;
-    virtual void operator()(const Heartbeat &, const server::TraceInfo &) = 0;
-    virtual void operator()(const SubscriptionStatus &, const server::TraceInfo &) = 0;
+    virtual void operator()(const server::Trace<Error> &) = 0;
+    virtual void operator()(const server::Trace<SystemStatus> &) = 0;
+    virtual void operator()(const server::Trace<Pong> &) = 0;
+    virtual void operator()(const server::Trace<Heartbeat> &) = 0;
+    virtual void operator()(const server::Trace<SubscriptionStatus> &) = 0;
 
-    virtual void operator()(
-        const Trade &trade, const std::string_view &pair, const server::TraceInfo &trace_info) = 0;
-    virtual void operator()(
-        const Spread &spread,
-        const std::string_view &pair,
-        const server::TraceInfo &trace_info) = 0;
-    virtual void operator()(
-        const Book &book, const std::string_view &pair, const server::TraceInfo &trace_info) = 0;
+    virtual void operator()(const server::Trace<Trade> &, const std::string_view &pair) = 0;
+    virtual void operator()(const server::Trace<Spread> &, const std::string_view &pair) = 0;
+    virtual void operator()(const server::Trace<Book> &, const std::string_view &pair) = 0;
   };
 
   static bool dispatch(
