@@ -71,10 +71,13 @@ OrderEntry::OrderEntry(
       },
       profile_{
           .assets = create_metrics(name_, "assets"_sv),
+          .assets_ack = create_metrics(name_, "assets_ack"_sv),
           .asset_pairs = create_metrics(name_, "asset_pairs"_sv),
-          .balance = create_metrics(name_, "balance"_sv),
-          .open_positions = create_metrics(name_, "open_positions"_sv),
+          .asset_pairs_ack = create_metrics(name_, "asset_pairs_ack"_sv),
+          .positions = create_metrics(name_, "positions"_sv),
+          .positions_ack = create_metrics(name_, "positions_ack"_sv),
           .get_web_sockets_token = create_metrics(name_, "get_web_sockets_token"_sv),
+          .get_web_sockets_token_ack = create_metrics(name_, "get_web_sockets_token_ack"_sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"_sv),
@@ -101,10 +104,13 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
       .write(profile_.assets, metrics::PROFILE)
+      .write(profile_.assets_ack, metrics::PROFILE)
       .write(profile_.asset_pairs, metrics::PROFILE)
-      .write(profile_.balance, metrics::PROFILE)
-      .write(profile_.open_positions, metrics::PROFILE)
+      .write(profile_.asset_pairs_ack, metrics::PROFILE)
+      .write(profile_.positions, metrics::PROFILE)
+      .write(profile_.positions_ack, metrics::PROFILE)
       .write(profile_.get_web_sockets_token, metrics::PROFILE)
+      .write(profile_.get_web_sockets_token_ack, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY);
 }
@@ -154,228 +160,6 @@ void OrderEntry::operator()(ConnectionStatus status) {
   }
 }
 
-template <>
-void OrderEntry::get(std::function<void(const core::Promise<json::Assets> &)> &&callback) {
-  core::web::Request request{
-      .method = core::http::Method::GET,
-      .path = "/0/public/Assets"_sv,
-      .query = {},
-      .accept = core::http::Accept::JSON,
-      .content_type = {},
-      .headers = {},
-      .body = {},
-      .quality_of_service = {},
-      .rate_limit_weight = 1,
-  };
-  connection_(
-      "assets"_sv,
-      request,
-      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
-        profile_.assets([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto assets = core::json::Parser::create<json::Assets>(response.body(), buffer);
-            if (assets.error.empty()) {
-              log::info<1>("assets={}"_sv, assets);
-              core::Promise<json::Assets> promise(assets);
-              callback(promise);
-            } else {
-              log::warn("assets={}"_sv, assets);
-              log::fatal("Unexpected"_sv);
-            }
-          } catch (core::NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-            core::Promise<json::Assets> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
-}
-
-template <>
-void OrderEntry::get(std::function<void(const core::Promise<json::AssetPairs> &)> &&callback) {
-  core::web::Request request{
-      .method = core::http::Method::GET,
-      .path = "/0/public/AssetPairs"_sv,
-      .query = {},
-      .accept = core::http::Accept::JSON,
-      .content_type = {},
-      .headers = {},
-      .body = {},
-      .quality_of_service = {},
-      .rate_limit_weight = 1,
-  };
-  connection_(
-      "asset_pairs"_sv,
-      request,
-      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
-        profile_.asset_pairs([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto asset_pairs =
-                core::json::Parser::create<json::AssetPairs>(response.body(), buffer);
-            if (asset_pairs.error.empty()) {
-              log::info<1>("asset_pairs={}"_sv, asset_pairs);
-              core::Promise<json::AssetPairs> promise(asset_pairs);
-              callback(promise);
-            } else {
-              log::warn("asset_pairs={}"_sv, asset_pairs);
-              log::fatal("Unexpected"_sv);
-            }
-          } catch (core::NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-            core::Promise<json::AssetPairs> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
-}
-
-/*
-template <>
-void OrderEntry::get(
-    std::function<void(const core::Promise<json::Balance>&)>&& callback) {
-  auto method = core::http::Method::POST;
-  auto path = "/0/private/Balance"_sv;
-  auto body = security_.create_body();
-  auto headers = security_.create_headers(
-      method,
-      path,
-      body);
-  auto rate_limit_weight = 1;
-  connection_.request(
-      method,
-      path,
-      {},  // query
-      headers,
-      body,
-      {},  // QoS
-      rate_limit_weight,
-      [this, callback{std::move(callback)}](auto& response) {
-    profile_.balance(
-        [&]() {
-      try {
-        response.expect(core::http::Status::OK);
-        core::json::Buffer buffer(decode_buffer_);
-        auto balance =
-          core::json::Parser::create<json::Balance>(
-              response.body(),
-              buffer);
-        if (balance.error.empty()) {
-          log::info<1>(
-              "balance={}"_sv,
-              balance);
-          handler_(balance);
-        } else {
-          log::warn(
-              "balance={}"_sv,
-              balance);
-          log::fatal("Unexpected"_sv);
-        }
-      } catch (core::NetworkError& e) {
-        log::warn(
-            R"(Exception type={}, what="{}")"_sv,
-            typeid(e).name(),
-            e.what());
-        core::Promise<json::Products> promise(std::current_exception());
-        callback(promise);
-      }
-    });
-  });
-}
-*/
-
-template <>
-void OrderEntry::get(std::function<void(const core::Promise<json::Positions> &)> &&callback) {
-  auto method = core::http::Method::POST;
-  auto path = "/0/private/OpenPositions"_sv;
-  auto body = security_.create_body();
-  auto headers = security_.create_headers(method, path, body);
-  core::web::Request request{
-      .method = method,
-      .path = path,
-      .query = {},
-      .accept = core::http::Accept::JSON,
-      .content_type = core::http::ContentType::FORM,
-      .headers = headers,
-      .body = body,
-      .quality_of_service = {},
-      .rate_limit_weight = 1,
-  };
-  connection_(
-      "positions"_sv,
-      request,
-      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
-        profile_.open_positions([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            auto positions = core::json::Parser::create<json::Positions>(response.body(), buffer);
-            if (positions.error.empty()) {
-              log::info<1>("positions={}"_sv, positions);
-              core::Promise<json::Positions> promise(positions);
-              callback(promise);
-            } else {
-              log::warn("positions={}"_sv, positions);
-              log::fatal("Unexpected"_sv);
-            }
-          } catch (core::NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-            core::Promise<json::Positions> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
-}
-
-template <>
-void OrderEntry::get(std::function<void(const core::Promise<json::Token> &)> &&callback) {
-  auto method = core::http::Method::POST;
-  auto path = "/0/private/GetWebSocketsToken"_sv;
-  auto body = security_.create_body();
-  auto headers = security_.create_headers(method, path, body);
-  core::web::Request request{
-      .method = method,
-      .path = path,
-      .query = {},
-      .accept = core::http::Accept::JSON,
-      .content_type = core::http::ContentType::FORM,
-      .headers = headers,
-      .body = body,
-      .quality_of_service = {},
-      .rate_limit_weight = 1,
-  };
-  connection_(
-      "token"_sv,
-      request,
-      [this, callback{std::move(callback)}]([[maybe_unused]] auto &request_id, auto &response) {
-        profile_.get_web_sockets_token([&]() {
-          try {
-            response.expect(core::http::Status::OK);
-            core::json::Buffer buffer(decode_buffer_);
-            json::Result::dispatch<json::Token>(
-                response.body(),
-                buffer,
-                [](const roq::span<std::string_view> &e) {
-                  log::warn("error=[{}]"_sv, fmt::join(e, ","_sv));
-                  log::fatal("Unexpected"_sv);
-                },
-                [&](const json::Token &token) {
-                  log::info<1>("token={}"_sv, token);
-                  core::Promise<json::Token> promise(token);
-                  callback(promise);
-                });
-          } catch (core::NetworkError &e) {
-            log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
-            core::Promise<json::Token> promise(std::current_exception());
-            callback(promise);
-          }
-        });
-      });
-}
-
 void OrderEntry::operator()(const core::web::Client::Connected &) {
   if (download_.downloading()) {
     download_.bump();
@@ -408,28 +192,24 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       assert(false);
       break;
     case OrderEntryState::TOKEN:
-      download_token();
+      get_token();
       return 1;
     case OrderEntryState::ASSETS:
       if (master_) {
-        download_assets();
+        get_assets();
         return 1;
       } else {
         return {};
       }
     case OrderEntryState::ASSET_PAIRS:
       if (master_) {
-        download_asset_pairs();
+        get_asset_pairs();
         return 1;
       } else {
         return {};
       }
-    case OrderEntryState::BALANCE:
-      download_balance();
-      // return 1;
-      return {};
-    case OrderEntryState::OPEN_POSITIONS:
-      download_open_positions();
+    case OrderEntryState::POSITIONS:
+      get_positions();
       return 1;
     case OrderEntryState::DONE:
       (*this)(ConnectionStatus::READY);
@@ -439,78 +219,58 @@ uint32_t OrderEntry::download(OrderEntryState state) {
   return {};
 }
 
-void OrderEntry::download_token() {
-  constexpr auto state = OrderEntryState::TOKEN;
-  auto sequence = download_.sequence();
-  get<json::Token>([this, sequence](auto &promise) {
-    try {
-      if (download_.skip(sequence, state))
-        return;
-      (*this)(promise.get());
-      download_.check(state);
-    } catch (core::NetworkError &) {
-      download_.retry(state);
-    }
-  });
-}
-void OrderEntry::download_assets() {
-  constexpr auto state = OrderEntryState::ASSETS;
-  auto sequence = download_.sequence();
-  get<json::Assets>([this, sequence](auto &promise) {
-    try {
-      if (download_.skip(sequence, state))
-        return;
-      (*this)(promise.get());
-      download_.check(state);
-    } catch (core::NetworkError &) {
-      download_.retry(state);
-    }
+// token
+
+void OrderEntry::get_token() {
+  profile_.get_web_sockets_token([&]() {
+    auto method = core::http::Method::POST;
+    auto path = "/0/private/GetWebSocketsToken"_sv;
+    auto body = security_.create_body();
+    auto headers = security_.create_headers(method, path, body);
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = {},
+        .accept = core::http::Accept::JSON,
+        .content_type = core::http::ContentType::FORM,
+        .headers = headers,
+        .body = body,
+        .quality_of_service = {},
+        .rate_limit_weight = 1,
+    };
+    connection_("token"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+      server::TraceInfo trace_info;
+      server::Trace event(trace_info, response);
+      get_token_ack(event);
+    });
   });
 }
 
-void OrderEntry::download_asset_pairs() {
-  constexpr auto state = OrderEntryState::ASSET_PAIRS;
-  auto sequence = download_.sequence();
-  get<json::AssetPairs>([this, sequence](auto &promise) {
+void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event) {
+  profile_.get_web_sockets_token([&]() {
+    // auto &[trace_info, response] = event;
+    auto &trace_info = event.trace_info;
+    auto &response = event.value;
+    auto state = OrderEntryState::TOKEN;
     try {
-      if (download_.skip(sequence, state))
-        return;
-      (*this)(promise.get());
+      response.expect(core::http::Status::OK);
+      auto body = response.body();
+      core::json::Buffer buffer(decode_buffer_);
+      json::Result::dispatch<json::Token>(
+          body,
+          buffer,
+          [](const roq::span<std::string_view> &e) {  // error
+            log::warn("error=[{}]"_sv, fmt::join(e, ","_sv));
+            log::fatal("Unexpected"_sv);
+          },
+          [&](const json::Token &token) {  // success
+            log::info<1>("token={}"_sv, token);
+            server::Trace event(trace_info, token);
+            (*this)(event);
+          });
       download_.check(state);
-    } catch (core::NetworkError &) {
-      download_.retry(state);
-    }
-  });
-}
-
-void OrderEntry::download_balance() {
-  constexpr auto state = OrderEntryState::BALANCE;
-  std::ignore = state;
-  /*
-  auto sequence = download_.sequence();
-  get<json::Balance>(
-      [this, sequence](auto& promise) {
-    try {
-      if (download_.skip(sequence, state)) return;
-      (*this)(promise.get());
-      download_.check(state);
-    } catch (core::NetworkError&) {
-      download_.retry(state);
-    }
-  });
-  */
-}
-
-void OrderEntry::download_open_positions() {
-  constexpr auto state = OrderEntryState::OPEN_POSITIONS;
-  auto sequence = download_.sequence();
-  get<json::Positions>([this, sequence](auto &promise) {
-    try {
-      if (download_.skip(sequence, state))
-        return;
-      (*this)(promise.get());
-      download_.check(state);
-    } catch (core::NetworkError &) {
+    } catch (core::NetworkError &e) {
+      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
   });
@@ -525,7 +285,96 @@ void OrderEntry::operator()(const json::Token &token) {
   handler_(token_update);
 }
 
+// assets
+
+void OrderEntry::get_assets() {
+  profile_.assets([&]() {
+    auto method = core::http::Method::GET;
+    auto path = "/0/public/Assets"_sv;
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = {},
+        .accept = core::http::Accept::JSON,
+        .content_type = {},
+        .headers = {},
+        .body = {},
+        .quality_of_service = {},
+        .rate_limit_weight = 1,
+    };
+    connection_("assets"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+      server::TraceInfo trace_info;
+      server::Trace event(trace_info, response);
+      get_assets_ack(event);
+    });
+  });
+}
+
+void OrderEntry::get_assets_ack(const server::Trace<core::web::Response> &event) {
+  profile_.assets_ack([&]() {
+    auto &[trace_info, response] = event;
+    auto state = OrderEntryState::ASSETS;
+    try {
+      response.expect(core::http::Status::OK);
+      auto body = response.body();
+      core::json::Buffer buffer(decode_buffer_);
+      auto assets = core::json::Parser::create<json::Assets>(body, buffer);
+      server::Trace event(trace_info, assets);
+      (*this)(event);
+      download_.check(state);
+    } catch (core::NetworkError &e) {
+      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      download_.retry(state);
+    }
+  });
+}
+
 void OrderEntry::operator()(const json::Assets &) {
+}
+
+// asset-pairs
+
+void OrderEntry::get_asset_pairs() {
+  profile_.asset_pairs([&]() {
+    auto method = core::http::Method::GET;
+    auto path = "/0/public/AssetPairs"_sv;
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = {},
+        .accept = core::http::Accept::JSON,
+        .content_type = {},
+        .headers = {},
+        .body = {},
+        .quality_of_service = {},
+        .rate_limit_weight = 1,
+    };
+    connection_(
+        "asset_pairs"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+          server::TraceInfo trace_info;
+          server::Trace event(trace_info, response);
+          get_asset_pairs_ack(event);
+        });
+  });
+}
+
+void OrderEntry::get_asset_pairs_ack(const server::Trace<core::web::Response> &event) {
+  profile_.asset_pairs_ack([&]() {
+    auto &[trace_info, response] = event;
+    auto state = OrderEntryState::ASSET_PAIRS;
+    try {
+      response.expect(core::http::Status::OK);
+      auto body = response.body();
+      core::json::Buffer buffer(decode_buffer_);
+      auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
+      server::Trace event(trace_info, asset_pairs);
+      (*this)(event);
+      download_.check(state);
+    } catch (core::NetworkError &e) {
+      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      download_.retry(state);
+    }
+  });
 }
 
 void OrderEntry::operator()(const json::AssetPairs &asset_pairs) {
@@ -590,6 +439,52 @@ void OrderEntry::operator()(const json::AssetPairs &asset_pairs) {
     };
     handler_(symbols_update);
   }
+}
+
+// positions
+
+void OrderEntry::get_positions() {
+  profile_.positions([&]() {
+    auto method = core::http::Method::POST;
+    auto path = "/0/private/OpenPositions"_sv;
+    auto body = security_.create_body();
+    auto headers = security_.create_headers(method, path, body);
+    core::web::Request request{
+        .method = method,
+        .path = path,
+        .query = {},
+        .accept = core::http::Accept::JSON,
+        .content_type = core::http::ContentType::FORM,
+        .headers = headers,
+        .body = body,
+        .quality_of_service = {},
+        .rate_limit_weight = 1,
+    };
+    connection_("positions"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+      server::TraceInfo trace_info;
+      server::Trace event(trace_info, response);
+      get_positions_ack(event);
+    });
+  });
+}
+
+void OrderEntry::get_positions_ack(const server::Trace<core::web::Response> &event) {
+  profile_.positions_ack([&]() {
+    auto &[trace_info, response] = event;
+    auto state = OrderEntryState::POSITIONS;
+    try {
+      response.expect(core::http::Status::OK);
+      auto body = response.body();
+      core::json::Buffer buffer(decode_buffer_);
+      auto positions = core::json::Parser::create<json::Positions>(body, buffer);
+      server::Trace event(trace_info, positions);
+      (*this)(event);
+      download_.check(state);
+    } catch (core::NetworkError &e) {
+      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      download_.retry(state);
+    }
+  });
 }
 
 void OrderEntry::operator()(const json::Positions &positions) {

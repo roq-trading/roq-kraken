@@ -5,8 +5,7 @@
 	{ "name": "token" },
 	{ "name": "assets" },
 	{ "name": "asset_pairs" },
-	{ "name": "balance" },
-	{ "name": "open_positions" },
+	{ "name": "positions" },
 	{ "name": "done" }
 ]
 }

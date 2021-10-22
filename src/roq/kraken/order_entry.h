@@ -8,8 +8,6 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/core/promise.h"
-
 #include "roq/core/buffer.h"
 
 #include "roq/core/metrics/counter.h"
@@ -92,20 +90,22 @@ class OrderEntry final : public core::web::Client::Handler {
 
   void operator()(ConnectionStatus);
 
-  template <typename T>
-  void get(std::function<void(const core::Promise<T> &)> &&callback);
-
   uint32_t download(OrderEntryState);
 
-  void download_token();
-  void download_assets();
-  void download_asset_pairs();
-  void download_balance();
-  void download_open_positions();
-
+  void get_token();
+  void get_token_ack(const server::Trace<core::web::Response> &);
   void operator()(const json::Token &);
+
+  void get_assets();
+  void get_assets_ack(const server::Trace<core::web::Response> &);
   void operator()(const json::Assets &);
+
+  void get_asset_pairs();
+  void get_asset_pairs_ack(const server::Trace<core::web::Response> &);
   void operator()(const json::AssetPairs &);
+
+  void get_positions();
+  void get_positions_ack(const server::Trace<core::web::Response> &);
   void operator()(const json::Positions &);
 
  private:
@@ -123,7 +123,10 @@ class OrderEntry final : public core::web::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile assets, asset_pairs, balance, open_positions, get_web_sockets_token;
+    core::metrics::Profile assets, assets_ack,  //
+        asset_pairs, asset_pairs_ack,           //
+        positions, positions_ack,               //
+        get_web_sockets_token, get_web_sockets_token_ack;
   } profile_;
   struct {
     core::metrics::Latency ping;
