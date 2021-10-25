@@ -59,6 +59,7 @@ class DropCopy final : public core::web::Socket::Handler, public json::ParserPri
   void operator()(const core::web::Socket::Close &) override;
   void operator()(const core::web::Socket::Latency &) override;
   void operator()(const core::web::Socket::Text &) override;
+  void operator()(const core::web::Socket::Binary &) override;
 
   void operator()(ConnectionStatus);
 
