@@ -93,19 +93,19 @@ class OrderEntry final : public core::web::Client::Handler {
   uint32_t download(OrderEntryState);
 
   void get_token();
-  void get_token_ack(const server::Trace<core::web::Response> &);
+  void get_token_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
   void operator()(const json::Token &);
 
   void get_assets();
-  void get_assets_ack(const server::Trace<core::web::Response> &);
+  void get_assets_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
   void operator()(const json::Assets &);
 
   void get_asset_pairs();
-  void get_asset_pairs_ack(const server::Trace<core::web::Response> &);
+  void get_asset_pairs_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
   void operator()(const json::AssetPairs &);
 
   void get_positions();
-  void get_positions_ack(const server::Trace<core::web::Response> &);
+  void get_positions_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
   void operator()(const json::Positions &);
 
  private:

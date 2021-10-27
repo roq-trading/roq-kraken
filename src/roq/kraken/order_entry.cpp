@@ -238,21 +238,25 @@ void OrderEntry::get_token() {
         .quality_of_service = {},
         .rate_limit_weight = 1,
     };
-    connection_("token"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
-      server::TraceInfo trace_info;
-      server::Trace event(trace_info, response);
-      get_token_ack(event);
-    });
+    auto sequence = download_.sequence();
+    connection_(
+        "token"_sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+          server::TraceInfo trace_info;
+          server::Trace event(trace_info, response);
+          get_token_ack(event, sequence);
+        });
   });
 }
 
-void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event) {
+void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
+  auto state = OrderEntryState::TOKEN;
   profile_.get_web_sockets_token([&]() {
     // auto &[trace_info, response] = event;
     auto &trace_info = event.trace_info;
     auto &response = event.value;
-    auto state = OrderEntryState::TOKEN;
     try {
+      if (download_.skip(sequence, state))
+        return;
       response.expect(core::http::Status::OK);
       auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
@@ -302,19 +306,24 @@ void OrderEntry::get_assets() {
         .quality_of_service = {},
         .rate_limit_weight = 1,
     };
-    connection_("assets"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
-      server::TraceInfo trace_info;
-      server::Trace event(trace_info, response);
-      get_assets_ack(event);
-    });
+    auto sequence = download_.sequence();
+    connection_(
+        "assets"_sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+          server::TraceInfo trace_info;
+          server::Trace event(trace_info, response);
+          get_assets_ack(event, sequence);
+        });
   });
 }
 
-void OrderEntry::get_assets_ack(const server::Trace<core::web::Response> &event) {
+void OrderEntry::get_assets_ack(
+    const server::Trace<core::web::Response> &event, uint32_t sequence) {
+  auto state = OrderEntryState::ASSETS;
   profile_.assets_ack([&]() {
     auto &[trace_info, response] = event;
-    auto state = OrderEntryState::ASSETS;
     try {
+      if (download_.skip(sequence, state))
+        return;
       response.expect(core::http::Status::OK);
       auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
@@ -349,20 +358,26 @@ void OrderEntry::get_asset_pairs() {
         .quality_of_service = {},
         .rate_limit_weight = 1,
     };
+    auto sequence = download_.sequence();
     connection_(
-        "asset_pairs"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
+        "asset_pairs"_sv,
+        request,
+        [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           server::TraceInfo trace_info;
           server::Trace event(trace_info, response);
-          get_asset_pairs_ack(event);
+          get_asset_pairs_ack(event, sequence);
         });
   });
 }
 
-void OrderEntry::get_asset_pairs_ack(const server::Trace<core::web::Response> &event) {
+void OrderEntry::get_asset_pairs_ack(
+    const server::Trace<core::web::Response> &event, uint32_t sequence) {
+  auto state = OrderEntryState::ASSET_PAIRS;
   profile_.asset_pairs_ack([&]() {
     auto &[trace_info, response] = event;
-    auto state = OrderEntryState::ASSET_PAIRS;
     try {
+      if (download_.skip(sequence, state))
+        return;
       response.expect(core::http::Status::OK);
       auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
@@ -460,19 +475,26 @@ void OrderEntry::get_positions() {
         .quality_of_service = {},
         .rate_limit_weight = 1,
     };
-    connection_("positions"_sv, request, [this]([[maybe_unused]] auto &request_id, auto &response) {
-      server::TraceInfo trace_info;
-      server::Trace event(trace_info, response);
-      get_positions_ack(event);
-    });
+    auto sequence = download_.sequence();
+    connection_(
+        "positions"_sv,
+        request,
+        [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+          server::TraceInfo trace_info;
+          server::Trace event(trace_info, response);
+          get_positions_ack(event, sequence);
+        });
   });
 }
 
-void OrderEntry::get_positions_ack(const server::Trace<core::web::Response> &event) {
+void OrderEntry::get_positions_ack(
+    const server::Trace<core::web::Response> &event, uint32_t sequence) {
+  auto state = OrderEntryState::POSITIONS;
   profile_.positions_ack([&]() {
     auto &[trace_info, response] = event;
-    auto state = OrderEntryState::POSITIONS;
     try {
+      if (download_.skip(sequence, state))
+        return;
       response.expect(core::http::Status::OK);
       auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
