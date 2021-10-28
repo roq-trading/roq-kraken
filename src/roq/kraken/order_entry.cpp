@@ -249,16 +249,19 @@ void OrderEntry::get_token() {
 }
 
 void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
-  auto state = OrderEntryState::TOKEN;
   profile_.get_web_sockets_token([&]() {
     // auto &[trace_info, response] = event;
     auto &trace_info = event.trace_info;
     auto &response = event.value;
+    auto state = OrderEntryState::TOKEN;
     try {
-      if (download_.skip(sequence, state))
+      auto [status, category, body] = response.result();
+      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      if (download_.skip(sequence, state)) {
+        log::info("Download state={} has already been processed"_sv, state);
         return;
+      }
       response.expect(core::http::Status::OK);
-      auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
       json::Result::dispatch<json::Token>(
           body,
@@ -268,7 +271,6 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
             log::fatal("Unexpected"_sv);
           },
           [&](const json::Token &token) {  // success
-            log::info<1>("token={}"_sv, token);
             server::Trace event(trace_info, token);
             (*this)(event);
           });
@@ -280,8 +282,9 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
   });
 }
 
-void OrderEntry::operator()(const json::Token &token) {
-  log::info(R"(token={})"_sv, token);
+void OrderEntry::operator()(const server::Trace<json::Token> &event) {
+  auto &[trace_info, token] = event;
+  log::info<2>(R"(token={})"_sv, token);
   TokenUpdate token_update{
       .account = security_.get_account(),
       .token = token.token,
@@ -318,14 +321,17 @@ void OrderEntry::get_assets() {
 
 void OrderEntry::get_assets_ack(
     const server::Trace<core::web::Response> &event, uint32_t sequence) {
-  auto state = OrderEntryState::ASSETS;
   profile_.assets_ack([&]() {
     auto &[trace_info, response] = event;
+    auto state = OrderEntryState::ASSETS;
     try {
-      if (download_.skip(sequence, state))
+      auto [status, category, body] = response.result();
+      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      if (download_.skip(sequence, state)) {
+        log::info("Download state={} has already been processed"_sv, state);
         return;
+      }
       response.expect(core::http::Status::OK);
-      auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
       auto assets = core::json::Parser::create<json::Assets>(body, buffer);
       server::Trace event(trace_info, assets);
@@ -338,7 +344,10 @@ void OrderEntry::get_assets_ack(
   });
 }
 
-void OrderEntry::operator()(const json::Assets &) {
+void OrderEntry::operator()(const server::Trace<json::Assets> &event) {
+  auto &[trace_info, assets] = event;
+  log::info<4>("assets={}"_sv, assets);
+  // do nothing
 }
 
 // asset-pairs
@@ -372,14 +381,17 @@ void OrderEntry::get_asset_pairs() {
 
 void OrderEntry::get_asset_pairs_ack(
     const server::Trace<core::web::Response> &event, uint32_t sequence) {
-  auto state = OrderEntryState::ASSET_PAIRS;
   profile_.asset_pairs_ack([&]() {
     auto &[trace_info, response] = event;
+    auto state = OrderEntryState::ASSET_PAIRS;
     try {
-      if (download_.skip(sequence, state))
+      auto [status, category, body] = response.result();
+      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      if (download_.skip(sequence, state)) {
+        log::info("Download state={} has already been processed"_sv, state);
         return;
+      }
       response.expect(core::http::Status::OK);
-      auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
       auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
       server::Trace event(trace_info, asset_pairs);
@@ -392,14 +404,15 @@ void OrderEntry::get_asset_pairs_ack(
   });
 }
 
-void OrderEntry::operator()(const json::AssetPairs &asset_pairs) {
+void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
+  auto &[trace_info, asset_pairs] = event;
+  log::info<4>("asset_pairs={}"_sv, asset_pairs);
   assert(asset_pairs.error.empty());
-  server::TraceInfo trace_info;  // XXX not correct (*parsing* already done)
   std::vector<std::string> symbols;
   symbols.reserve(asset_pairs.result.size());
   size_t counter = {};
   for (auto &item : asset_pairs.result) {
-    log::info<1>("item={}"_sv, item);
+    log::info<2>("item={}"_sv, item);
     if (item.wsname.empty()) {
       log::info<1>(R"(Skipping altname="{}", reason: wsname is empty)"_sv, item.altname);
       continue;
@@ -489,14 +502,17 @@ void OrderEntry::get_positions() {
 
 void OrderEntry::get_positions_ack(
     const server::Trace<core::web::Response> &event, uint32_t sequence) {
-  auto state = OrderEntryState::POSITIONS;
   profile_.positions_ack([&]() {
     auto &[trace_info, response] = event;
+    auto state = OrderEntryState::POSITIONS;
     try {
-      if (download_.skip(sequence, state))
+      auto [status, category, body] = response.result();
+      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      if (download_.skip(sequence, state)) {
+        log::info("Download state={} has already been processed"_sv, state);
         return;
+      }
       response.expect(core::http::Status::OK);
-      auto body = response.body();
       core::json::Buffer buffer(decode_buffer_);
       auto positions = core::json::Parser::create<json::Positions>(body, buffer);
       server::Trace event(trace_info, positions);
@@ -509,7 +525,9 @@ void OrderEntry::get_positions_ack(
   });
 }
 
-void OrderEntry::operator()(const json::Positions &positions) {
+void OrderEntry::operator()(const server::Trace<json::Positions> &event) {
+  auto &[trace_info, positions] = event;
+  log::info<4>("positions={}"_sv, positions);
   assert(positions.error.empty());
 }
 
