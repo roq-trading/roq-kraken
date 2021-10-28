@@ -124,12 +124,12 @@ void DropCopy::operator()(const core::web::Socket::Close &) {
 }
 
 void DropCopy::operator()(const core::web::Socket::Latency &latency) {
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(trace_info, external_latency, handler_);
+  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -143,7 +143,7 @@ void DropCopy::operator()(const core::web::Socket::Binary &) {
 
 void DropCopy::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
-    server::TraceInfo trace_info;
+    auto trace_info = server::create_trace_info();
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -153,7 +153,7 @@ void DropCopy::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"_sv, stream_status);
-    server::create_trace_and_dispatch(trace_info, stream_status, handler_);
+    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -177,7 +177,7 @@ uint32_t DropCopy::download(DropCopyState state) {
 
 void DropCopy::parse(const std::string_view &message) {
   profile_.parse([&]() {
-    server::TraceInfo trace_info;
+    auto trace_info = server::create_trace_info();
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
     if (ROQ_UNLIKELY(!result))

@@ -68,7 +68,7 @@ TEST(json_book, parse_test_snapshot) {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -86,7 +86,7 @@ TEST(json_book, parse_test_update_bid_1) {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -104,7 +104,7 @@ TEST(json_book, parse_test_update_ask_1) {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -204,7 +204,7 @@ TEST(json_book, parse_test_update_complex) {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -277,7 +277,7 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   EXPECT_THROW(
       json::ParserPublic::dispatch(handler, message, buffer, trace_info),
       OutOfRange);  //  XXX maybe wrap as core::market::BadState?

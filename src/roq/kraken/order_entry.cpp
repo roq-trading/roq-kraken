@@ -146,7 +146,7 @@ uint16_t OrderEntry::operator()(
 
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
-    server::TraceInfo trace_info;
+    auto trace_info = server::create_trace_info();
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -156,7 +156,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"_sv, stream_status);
-    server::create_trace_and_dispatch(trace_info, stream_status, handler_);
+    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -177,12 +177,12 @@ void OrderEntry::operator()(const core::web::Client::Disconnected &) {
 }
 
 void OrderEntry::operator()(const core::web::Client::Latency &latency) {
-  server::TraceInfo trace_info;
+  auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(trace_info, external_latency, handler_);
+  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -241,7 +241,7 @@ void OrderEntry::get_token() {
     auto sequence = download_.sequence();
     connection_(
         "token"_sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-          server::TraceInfo trace_info;
+          auto trace_info = server::create_trace_info();
           server::Trace event(trace_info, response);
           get_token_ack(event, sequence);
         });
@@ -312,7 +312,7 @@ void OrderEntry::get_assets() {
     auto sequence = download_.sequence();
     connection_(
         "assets"_sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-          server::TraceInfo trace_info;
+          auto trace_info = server::create_trace_info();
           server::Trace event(trace_info, response);
           get_assets_ack(event, sequence);
         });
@@ -372,7 +372,7 @@ void OrderEntry::get_asset_pairs() {
         "asset_pairs"_sv,
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-          server::TraceInfo trace_info;
+          auto trace_info = server::create_trace_info();
           server::Trace event(trace_info, response);
           get_asset_pairs_ack(event, sequence);
         });
@@ -451,14 +451,14 @@ void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
     };
-    server::create_trace_and_dispatch(trace_info, reference_data, handler_, true);
+    server::create_trace_and_dispatch(handler_, trace_info, reference_data, true);
     MarketStatus market_status{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
     };
-    server::create_trace_and_dispatch(trace_info, market_status, handler_, true);
+    server::create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
   log::info("AssetPairs {} / {}"_sv, counter, asset_pairs.result.size());
   if (!symbols.empty()) {
@@ -493,7 +493,7 @@ void OrderEntry::get_positions() {
         "positions"_sv,
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-          server::TraceInfo trace_info;
+          auto trace_info = server::create_trace_info();
           server::Trace event(trace_info, response);
           get_positions_ack(event, sequence);
         });
