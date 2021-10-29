@@ -8,7 +8,7 @@
 
 #include "roq/kraken/flags.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken {
@@ -25,7 +25,7 @@ std::string Config::get_master_account() const {
 std::string Config::get_access_key(const std::string_view &account) const {
   auto iter = accounts.find(account);
   if (iter == accounts.end()) {
-    log::fatal(R"(Unknown account="{}")"_sv, account);
+    log::fatal(R"(Unknown account="{}")"sv, account);
   }
   return (*iter).second.login;
 }
@@ -33,7 +33,7 @@ std::string Config::get_access_key(const std::string_view &account) const {
 std::string Config::get_access_secret(const std::string_view &account) const {
   auto iter = accounts.find(account);
   if (iter == accounts.end()) {
-    log::fatal(R"(Unknown account="{}")"_sv, account);
+    log::fatal(R"(Unknown account="{}")"sv, account);
   }
   return (*iter).second.secret;
 }
@@ -41,7 +41,7 @@ std::string Config::get_access_secret(const std::string_view &account) const {
 std::string Config::get_access_password(const std::string_view &account) const {
   auto iter = accounts.find(account);
   if (iter == accounts.end()) {
-    log::fatal(R"(Unknown account="{}")"_sv, account);
+    log::fatal(R"(Unknown account="{}")"sv, account);
   }
   return (*iter).second.password;
 }
@@ -97,7 +97,7 @@ void Config::operator()(server::RateLimit &&rate_limit) {
 }
 
 void Config::operator()(const std::string_view &key, toml::node &) {
-  log::warn(R"(Unexpected: key="{}")"_sv, key);
+  log::warn(R"(Unexpected: key="{}")"sv, key);
 }
 
 }  // namespace kraken

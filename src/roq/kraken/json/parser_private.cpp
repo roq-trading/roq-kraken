@@ -8,7 +8,7 @@
 #include "roq/kraken/json/event.h"
 #include "roq/kraken/json/result_field.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken {
@@ -56,10 +56,10 @@ bool ParserPrivate::dispatch(
         auto event = Event(value);
         switch (event) {
           case Event::UNDEFINED:
-            log::fatal("Unexpected"_sv);
+            log::fatal("Unexpected"sv);
             break;
           case Event::UNKNOWN:
-            log::fatal(R"(Unknown key="{}")"_sv, key);
+            log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
@@ -137,18 +137,18 @@ static bool dispatch2(
     switch (channel) {
       case Channel::UNDEFINED:
       case Channel::UNKNOWN:
-        log::fatal("Unexpected"_sv);
+        log::fatal("Unexpected"sv);
         break;
       case Channel::TICKER: {
-        throw RuntimeErrorException("ticker not supported"_sv);
+        throw RuntimeErrorException("ticker not supported"sv);
         break;
       }
       case Channel::OHLC: {
-        throw RuntimeErrorException("ohlc not supported"_sv);
+        throw RuntimeErrorException("ohlc not supported"sv);
         break;
       }
       case Channel::TRADE: {
-        LOG_IF(FATAL, data_count != 1)("Unexpected"_sv);
+        LOG_IF(FATAL, data_count != 1)("Unexpected"sv);
         Trade trade(
             value,
             buffer);
@@ -157,14 +157,14 @@ static bool dispatch2(
         break;
       }
       case Channel::SPREAD: {
-        LOG_IF(FATAL, data_count != 1)("Unexpected"_sv);
+        LOG_IF(FATAL, data_count != 1)("Unexpected"sv);
         Spread spread(value);
         handler(spread, pair);
         dispatched = true;
         break;
       }
       case Channel::BOOK: {
-        LOG_IF(FATAL, data_count < 1 || data_count > 2)("Unexpected"_sv);
+        LOG_IF(FATAL, data_count < 1 || data_count > 2)("Unexpected"sv);
         switch (offset) {
           case 2:
             book_1 = Book(value, buffer);
@@ -173,16 +173,16 @@ static bool dispatch2(
             book_2 = Book(value, buffer);
             break;
           default:
-            log::fatal("Unexpected"_sv);
+            log::fatal("Unexpected"sv);
         }
         break;
       }
       case Channel::OWN_TRADES: {
-        throw RuntimeErrorException("ownTrades not supported"_sv);
+        throw RuntimeErrorException("ownTrades not supported"sv);
         break;
       }
       case Channel::OPEN_ORDERS: {
-        throw RuntimeErrorException("openOrders not supported"_sv);
+        throw RuntimeErrorException("openOrders not supported"sv);
         break;
       }
     }
@@ -190,13 +190,13 @@ static bool dispatch2(
   if (!dispatched && channel == Channel::BOOK) {
     if (data_count == 2) {
       if (!book_2.a.empty()) {
-        LOG_IF(FATAL, !book_1.a.empty())("Unexpected"_sv);
+        LOG_IF(FATAL, !book_1.a.empty())("Unexpected"sv);
         book_1.a = book_2.a;
       } else if (!book_2.b.empty()) {
-        LOG_IF(FATAL, !book_1.b.empty())("Unexpected"_sv);
+        LOG_IF(FATAL, !book_1.b.empty())("Unexpected"sv);
         book_1.b = book_2.b;
       } else {
-        log::fatal("Unexpected"_sv);
+        log::fatal("Unexpected"sv);
       }
     }
     handler(book_1, pair);
@@ -226,7 +226,7 @@ bool ParserPrivate::dispatch(
         channel = Channel(name);
 #if !defined(NDEBUG)
         if (ROQ_UNLIKELY(channel == Channel::UNKNOWN))
-          log::fatal(R"(Unknown channel="{}")"_sv, name);
+          log::fatal(R"(Unknown channel="{}")"sv, name);
 #endif
         break;
       }
@@ -236,7 +236,7 @@ bool ParserPrivate::dispatch(
     ++offset;
   }
   if (ROQ_UNLIKELY(offset < 3))
-    log::fatal(R"(Unexpected: message="{}")"_sv, message);
+    log::fatal(R"(Unexpected: message="{}")"sv, message);
   return dispatch2(handler, message, buffer, channel);
 }
 

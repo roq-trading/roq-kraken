@@ -12,6 +12,8 @@
 using namespace roq;
 using namespace roq::kraken;
 
+using namespace std::literals;
+
 namespace {
 struct Handler : public json::ParserPublic::Handler {
  protected:
@@ -64,7 +66,7 @@ TEST(json_book, parse_test_snapshot) {
                        R"(},)"
                        R"("book-10",)"
                        R"("EOS/USD")"
-                       R"(])"_sv;
+                       R"(])"sv;
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
@@ -82,7 +84,7 @@ TEST(json_book, parse_test_update_bid_1) {
                        R"(},)"
                        R"("book-10",)"
                        R"("EOS/USD")"
-                       R"(])"_sv;
+                       R"(])"sv;
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
@@ -100,7 +102,7 @@ TEST(json_book, parse_test_update_ask_1) {
                        R"(},)"
                        R"("book-10",)"
                        R"("EOS/USD")"
-                       R"(])"_sv;
+                       R"(])"sv;
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
@@ -200,7 +202,7 @@ TEST(json_book, parse_test_update_complex) {
                        R"(},)"
                        R"("book-10",)"
                        R"("EOS/USD")"
-                       R"(])"_sv;
+                       R"(])"sv;
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
@@ -273,7 +275,7 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
                        R"(},)"
                        R"("book-10",)"
                        R"("EOS/USD")"
-                       R"(])"_sv;
+                       R"(])"sv;
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);

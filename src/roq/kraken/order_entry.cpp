@@ -15,13 +15,13 @@
 
 #include "roq/kraken/json/result.h"
 
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken {
 
 namespace {
-static const auto NAME = "om"_sv;
+static const auto NAME = "om"sv;
 
 static const auto SUPPORTS = utils::Mask{
     SupportType::CREATE_ORDER,
@@ -50,7 +50,7 @@ OrderEntry::OrderEntry(
     Shared &shared,
     bool master)
     : handler_(handler), stream_id_(stream_id),
-      name_(fmt::format("{}:{}:{}"_sv, stream_id_, NAME, security.get_account())), master_(master),
+      name_(fmt::format("{}:{}:{}"sv, stream_id_, NAME, security.get_account())), master_(master),
       connection_(
           *this,
           context,
@@ -67,20 +67,20 @@ OrderEntry::OrderEntry(
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
       counter_{
-          .disconnect = create_metrics(name_, "disconnect"_sv),
+          .disconnect = create_metrics(name_, "disconnect"sv),
       },
       profile_{
-          .assets = create_metrics(name_, "assets"_sv),
-          .assets_ack = create_metrics(name_, "assets_ack"_sv),
-          .asset_pairs = create_metrics(name_, "asset_pairs"_sv),
-          .asset_pairs_ack = create_metrics(name_, "asset_pairs_ack"_sv),
-          .positions = create_metrics(name_, "positions"_sv),
-          .positions_ack = create_metrics(name_, "positions_ack"_sv),
-          .get_web_sockets_token = create_metrics(name_, "get_web_sockets_token"_sv),
-          .get_web_sockets_token_ack = create_metrics(name_, "get_web_sockets_token_ack"_sv),
+          .assets = create_metrics(name_, "assets"sv),
+          .assets_ack = create_metrics(name_, "assets_ack"sv),
+          .asset_pairs = create_metrics(name_, "asset_pairs"sv),
+          .asset_pairs_ack = create_metrics(name_, "asset_pairs_ack"sv),
+          .positions = create_metrics(name_, "positions"sv),
+          .positions_ack = create_metrics(name_, "positions_ack"sv),
+          .get_web_sockets_token = create_metrics(name_, "get_web_sockets_token"sv),
+          .get_web_sockets_token_ack = create_metrics(name_, "get_web_sockets_token_ack"sv),
       },
       latency_{
-          .ping = create_metrics(name_, "ping"_sv),
+          .ping = create_metrics(name_, "ping"sv),
       },
       security_(security), shared_(shared),
       download_(Flags::rest_request_timeout(), [this](auto state) { return download(state); }) {
@@ -140,7 +140,7 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     const Event<CancelAllOrders> &, [[maybe_unused]] const std::string_view &request_id) {
-  log::warn("*** CANCEL ALL ORDERS *NOT* SUPPORTED ***"_sv);
+  log::warn("*** CANCEL ALL ORDERS *NOT* SUPPORTED ***"sv);
   return stream_id_;
 }
 
@@ -155,7 +155,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .type = StreamType::REST,
         .priority = Priority::PRIMARY,
     };
-    log::info("stream_status={}"_sv, stream_status);
+    log::info("stream_status={}"sv, stream_status);
     server::create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
@@ -224,7 +224,7 @@ uint32_t OrderEntry::download(OrderEntryState state) {
 void OrderEntry::get_token() {
   profile_.get_web_sockets_token([&]() {
     auto method = core::http::Method::POST;
-    auto path = "/0/private/GetWebSocketsToken"_sv;
+    auto path = "/0/private/GetWebSocketsToken"sv;
     auto body = security_.create_body();
     auto headers = security_.create_headers(method, path, body);
     core::web::Request request{
@@ -240,7 +240,7 @@ void OrderEntry::get_token() {
     };
     auto sequence = download_.sequence();
     connection_(
-        "token"_sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+        "token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
           server::Trace event(trace_info, response);
           get_token_ack(event, sequence);
@@ -256,9 +256,9 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
     auto state = OrderEntryState::TOKEN;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       if (download_.skip(sequence, state)) {
-        log::info("Download state={} has already been processed"_sv, state);
+        log::info("Download state={} has already been processed"sv, state);
         return;
       }
       response.expect(core::http::Status::OK);
@@ -267,8 +267,8 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
           body,
           buffer,
           [](const roq::span<std::string_view> &e) {  // error
-            log::warn("error=[{}]"_sv, fmt::join(e, ","_sv));
-            log::fatal("Unexpected"_sv);
+            log::warn("error=[{}]"sv, fmt::join(e, ","sv));
+            log::fatal("Unexpected"sv);
           },
           [&](const json::Token &token) {  // success
             server::Trace event(trace_info, token);
@@ -276,7 +276,7 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
           });
       download_.check(state);
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
   });
@@ -284,7 +284,7 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
 
 void OrderEntry::operator()(const server::Trace<json::Token> &event) {
   auto &[trace_info, token] = event;
-  log::info<2>(R"(token={})"_sv, token);
+  log::info<2>(R"(token={})"sv, token);
   TokenUpdate token_update{
       .account = security_.get_account(),
       .token = token.token,
@@ -297,7 +297,7 @@ void OrderEntry::operator()(const server::Trace<json::Token> &event) {
 void OrderEntry::get_assets() {
   profile_.assets([&]() {
     auto method = core::http::Method::GET;
-    auto path = "/0/public/Assets"_sv;
+    auto path = "/0/public/Assets"sv;
     core::web::Request request{
         .method = method,
         .path = path,
@@ -311,7 +311,7 @@ void OrderEntry::get_assets() {
     };
     auto sequence = download_.sequence();
     connection_(
-        "assets"_sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+        "assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
           server::Trace event(trace_info, response);
           get_assets_ack(event, sequence);
@@ -326,9 +326,9 @@ void OrderEntry::get_assets_ack(
     auto state = OrderEntryState::ASSETS;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       if (download_.skip(sequence, state)) {
-        log::info("Download state={} has already been processed"_sv, state);
+        log::info("Download state={} has already been processed"sv, state);
         return;
       }
       response.expect(core::http::Status::OK);
@@ -338,7 +338,7 @@ void OrderEntry::get_assets_ack(
       (*this)(event);
       download_.check(state);
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
   });
@@ -346,7 +346,7 @@ void OrderEntry::get_assets_ack(
 
 void OrderEntry::operator()(const server::Trace<json::Assets> &event) {
   auto &[trace_info, assets] = event;
-  log::info<4>("assets={}"_sv, assets);
+  log::info<4>("assets={}"sv, assets);
   // do nothing
 }
 
@@ -355,7 +355,7 @@ void OrderEntry::operator()(const server::Trace<json::Assets> &event) {
 void OrderEntry::get_asset_pairs() {
   profile_.asset_pairs([&]() {
     auto method = core::http::Method::GET;
-    auto path = "/0/public/AssetPairs"_sv;
+    auto path = "/0/public/AssetPairs"sv;
     core::web::Request request{
         .method = method,
         .path = path,
@@ -369,7 +369,7 @@ void OrderEntry::get_asset_pairs() {
     };
     auto sequence = download_.sequence();
     connection_(
-        "asset_pairs"_sv,
+        "asset_pairs"sv,
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
@@ -386,9 +386,9 @@ void OrderEntry::get_asset_pairs_ack(
     auto state = OrderEntryState::ASSET_PAIRS;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       if (download_.skip(sequence, state)) {
-        log::info("Download state={} has already been processed"_sv, state);
+        log::info("Download state={} has already been processed"sv, state);
         return;
       }
       response.expect(core::http::Status::OK);
@@ -398,7 +398,7 @@ void OrderEntry::get_asset_pairs_ack(
       (*this)(event);
       download_.check(state);
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
   });
@@ -406,15 +406,15 @@ void OrderEntry::get_asset_pairs_ack(
 
 void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
   auto &[trace_info, asset_pairs] = event;
-  log::info<4>("asset_pairs={}"_sv, asset_pairs);
+  log::info<4>("asset_pairs={}"sv, asset_pairs);
   assert(asset_pairs.error.empty());
   std::vector<std::string> symbols;
   symbols.reserve(asset_pairs.result.size());
   size_t counter = {};
   for (auto &item : asset_pairs.result) {
-    log::info<2>("item={}"_sv, item);
+    log::info<2>("item={}"sv, item);
     if (item.wsname.empty()) {
-      log::info<1>(R"(Skipping altname="{}", reason: wsname is empty)"_sv, item.altname);
+      log::info<1>(R"(Skipping altname="{}", reason: wsname is empty)"sv, item.altname);
       continue;
     }
     std::string symbol(item.wsname);
@@ -460,7 +460,7 @@ void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
     };
     server::create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
-  log::info("AssetPairs {} / {}"_sv, counter, asset_pairs.result.size());
+  log::info("AssetPairs {} / {}"sv, counter, asset_pairs.result.size());
   if (!symbols.empty()) {
     SymbolsUpdate symbols_update{
         .symbols = symbols,
@@ -474,7 +474,7 @@ void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
 void OrderEntry::get_positions() {
   profile_.positions([&]() {
     auto method = core::http::Method::POST;
-    auto path = "/0/private/OpenPositions"_sv;
+    auto path = "/0/private/OpenPositions"sv;
     auto body = security_.create_body();
     auto headers = security_.create_headers(method, path, body);
     core::web::Request request{
@@ -490,7 +490,7 @@ void OrderEntry::get_positions() {
     };
     auto sequence = download_.sequence();
     connection_(
-        "positions"_sv,
+        "positions"sv,
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
@@ -507,9 +507,9 @@ void OrderEntry::get_positions_ack(
     auto state = OrderEntryState::POSITIONS;
     try {
       auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"_sv, status, category, body);
+      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
       if (download_.skip(sequence, state)) {
-        log::info("Download state={} has already been processed"_sv, state);
+        log::info("Download state={} has already been processed"sv, state);
         return;
       }
       response.expect(core::http::Status::OK);
@@ -519,7 +519,7 @@ void OrderEntry::get_positions_ack(
       (*this)(event);
       download_.check(state);
     } catch (core::NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"_sv, typeid(e).name(), e.what());
+      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
   });
@@ -527,7 +527,7 @@ void OrderEntry::get_positions_ack(
 
 void OrderEntry::operator()(const server::Trace<json::Positions> &event) {
   auto &[trace_info, positions] = event;
-  log::info<4>("positions={}"_sv, positions);
+  log::info<4>("positions={}"sv, positions);
   assert(positions.error.empty());
 }
 

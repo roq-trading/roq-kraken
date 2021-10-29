@@ -14,7 +14,7 @@
 #include "roq/core/crypto/sha.h"
 
 using namespace std::literals;
-using namespace roq::literals;
+using namespace std::literals;
 
 namespace roq {
 namespace kraken {
@@ -38,18 +38,18 @@ std::string Hasher::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = now - nonce_;
   if (ROQ_UNLIKELY(diff < THRESHOLD))
-    log::fatal("Probably something wrong... diff={})"_sv, diff);
+    log::fatal("Probably something wrong... diff={})"sv, diff);
   if (diff.count() < 0)  // XXX shouldn't this be <= ?
     ++nonce_;
   else
     nonce_ = now;
   if (passphrase_.empty()) {
-    return fmt::format(R"(nonce={})"_sv, nonce_.count());
+    return fmt::format(R"(nonce={})"sv, nonce_.count());
   } else {
     // XXX something weird with the quotes here... review
     return fmt::format(
         R"("nonce={}&)"
-        R"("opt={}")"_sv,
+        R"("opt={}")"sv,
         nonce_.count(),
         passphrase_);
   }
@@ -59,7 +59,7 @@ std::string Hasher::create_headers(
     core::http::Method method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
   assert(!body.empty());
-  auto nonce = fmt::format("{}"_sv, nonce_.count());
+  auto nonce = fmt::format("{}"sv, nonce_.count());
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
@@ -75,7 +75,7 @@ std::string Hasher::create_headers(
   auto sign_2 = core::binascii::Base64::encode(buffer_2, false);
   return fmt::format(
       "API-Key: {}\r\n"
-      "API-Sign: {}\r\n"_sv,
+      "API-Sign: {}\r\n"sv,
       key_,
       sign_2);
 }

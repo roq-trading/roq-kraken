@@ -9,6 +9,8 @@
 using namespace roq;
 using namespace roq::kraken;
 
+using namespace std::literals;
+
 TEST(json_token, parse) {
   const auto message = R"({)"
                        R"("error":[],)"
@@ -16,7 +18,7 @@ TEST(json_token, parse) {
                        R"("token":"abc",)"
                        R"("expires":123)"
                        R"(})"
-                       R"(})"_sv;
+                       R"(})"sv;
   core::Buffer buffer_(8192u);
   core::json::Buffer buffer(buffer_);
   json::Result::dispatch<json::Token>(
