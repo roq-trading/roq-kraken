@@ -61,8 +61,6 @@ OrderEntry::OrderEntry(
           core::http::Connection::KEEP_ALIVE,
           ALLOW_PIPELINING,
           Flags::rest_request_timeout(),
-          Flags::rest_rate_limit_interval(),
-          Flags::rest_rate_limit_max_requests(),
           Flags::rest_ping_freq(),
           Flags::rest_ping_path()),
       decode_buffer_(Flags::decode_buffer_size()),
@@ -236,7 +234,6 @@ void OrderEntry::get_token() {
         .headers = headers,
         .body = body,
         .quality_of_service = {},
-        .rate_limit_weight = 1,
     };
     auto sequence = download_.sequence();
     connection_(
@@ -307,7 +304,6 @@ void OrderEntry::get_assets() {
         .headers = {},
         .body = {},
         .quality_of_service = {},
-        .rate_limit_weight = 1,
     };
     auto sequence = download_.sequence();
     connection_(
@@ -365,7 +361,6 @@ void OrderEntry::get_asset_pairs() {
         .headers = {},
         .body = {},
         .quality_of_service = {},
-        .rate_limit_weight = 1,
     };
     auto sequence = download_.sequence();
     connection_(
@@ -486,7 +481,6 @@ void OrderEntry::get_positions() {
         .headers = headers,
         .body = body,
         .quality_of_service = {},
-        .rate_limit_weight = 1,
     };
     auto sequence = download_.sequence();
     connection_(
