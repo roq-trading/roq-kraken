@@ -392,7 +392,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event, const std::s
     };
     try {
       server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true, false);
-    } catch (market::BadState &) {
+    } catch (BadState &) {
       resubscribe(trace_info, pair);
     }
   }

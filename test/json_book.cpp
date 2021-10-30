@@ -5,8 +5,6 @@
 
 #include "roq/core/datetime.h"
 
-#include "roq/market/exceptions.h"
-
 #include "roq/kraken/json/parser_public.h"
 
 using namespace roq;
@@ -282,5 +280,5 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   auto trace_info = server::create_trace_info();
   EXPECT_THROW(
       json::ParserPublic::dispatch(handler, message, buffer, trace_info),
-      OutOfRange);  //  XXX maybe wrap as core::market::BadState?
+      OutOfRange);  //  XXX maybe wrap as core::BadState?
 }
