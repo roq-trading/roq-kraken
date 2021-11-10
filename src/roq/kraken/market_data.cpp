@@ -391,6 +391,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event, const std::s
         .exchange_sequence = {},
         .price_decimals = {},
         .quantity_decimals = {},
+        .checksum = {},
     };
     try {
       server::create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true, false);
@@ -413,6 +414,7 @@ void MarketData::resubscribe(const server::TraceInfo &trace_info, const std::str
       .exchange_sequence = {},
       .price_decimals = {},
       .quantity_decimals = {},
+      .checksum = {},
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
   server::create_trace_and_dispatch(
