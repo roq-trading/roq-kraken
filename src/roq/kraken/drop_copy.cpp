@@ -103,11 +103,11 @@ void DropCopy::subscribe(const std::string_view &name) {
   connection_.send_text(message);
 }
 
-void DropCopy::operator()(const core::web::Socket::Connected &) {
+void DropCopy::operator()(const core::web::ClientSocket::Connected &) {
   // note! wait for upgrade
 }
 
-void DropCopy::operator()(const core::web::Socket::Disconnected &) {
+void DropCopy::operator()(const core::web::ClientSocket::Disconnected &) {
   ++counter_.disconnect;
   ready_ = false;
   next_heartbeat_ = {};
@@ -115,15 +115,15 @@ void DropCopy::operator()(const core::web::Socket::Disconnected &) {
   download_.reset();
 }
 
-void DropCopy::operator()(const core::web::Socket::Ready &) {
+void DropCopy::operator()(const core::web::ClientSocket::Ready &) {
   (*this)(ConnectionStatus::DOWNLOADING);
   download_.begin();
 }
 
-void DropCopy::operator()(const core::web::Socket::Close &) {
+void DropCopy::operator()(const core::web::ClientSocket::Close &) {
 }
 
-void DropCopy::operator()(const core::web::Socket::Latency &latency) {
+void DropCopy::operator()(const core::web::ClientSocket::Latency &latency) {
   auto trace_info = server::create_trace_info();
   ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -133,11 +133,11 @@ void DropCopy::operator()(const core::web::Socket::Latency &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void DropCopy::operator()(const core::web::Socket::Text &text) {
+void DropCopy::operator()(const core::web::ClientSocket::Text &text) {
   parse(text.payload);
 }
 
-void DropCopy::operator()(const core::web::Socket::Binary &) {
+void DropCopy::operator()(const core::web::ClientSocket::Binary &) {
   log::fatal("Unexpected"sv);
 }
 
