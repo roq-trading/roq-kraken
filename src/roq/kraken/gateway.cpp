@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken/gateway.h"
 
@@ -121,7 +121,7 @@ void Gateway::operator()(const Event<Disconnected> &event) {
 
 uint16_t Gateway::operator()(
     const Event<CreateOrder> &event, const oms::Order &order, const std::string_view &request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   return get_order_entry(event.value.account)(event, order, request_id);
 }
 
@@ -130,7 +130,7 @@ uint16_t Gateway::operator()(
     const oms::Order &order,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
@@ -140,14 +140,14 @@ uint16_t Gateway::operator()(
     const oms::Order &order,
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(
     const Event<CancelAllOrders> &event, const std::string_view &request_id) {
-  assert(!event.value.account.empty());
+  assert(!std::empty(event.value.account));
   return get_order_entry(event.value.account)(event, request_id);
 }
 
@@ -198,9 +198,9 @@ void Gateway::operator()(const server::Trace<TradeSummary> &event, bool is_last)
 
 void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   auto &account = token_update.account;
-  assert(!account.empty());
+  assert(!std::empty(account));
   auto iter = drop_copy_.find(account);
-  if (ROQ_UNLIKELY(iter == drop_copy_.end()))
+  if (ROQ_UNLIKELY(iter == std::end(drop_copy_)))
     log::fatal(R"(Unexpected: account="{}")"sv, account);
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"sv);
@@ -216,12 +216,12 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
 void Gateway::operator()(OrderEntry::SymbolsUpdate &symbols_update) {
   auto &symbols = symbols_update.symbols;
   for (auto &iter : market_data_) {
-    if (symbols.empty())
+    if (std::empty(symbols))
       break;
     (*iter).update_subscriptions(symbols);
   }
   for (;;) {
-    if (symbols.empty())
+    if (std::empty(symbols))
       break;
     log::info("Create market-data (ws-public)"sv);
     auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_);
@@ -235,7 +235,7 @@ void Gateway::operator()(OrderEntry::SymbolsUpdate &symbols_update) {
 
 OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
-  if (iter != order_entry_.end())
+  if (iter != std::end(order_entry_))
     return *(*iter).second;
   throw RuntimeErrorException(R"(Unknown account="{}")"sv, account);
 }

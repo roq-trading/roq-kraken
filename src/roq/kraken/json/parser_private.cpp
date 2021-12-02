@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken/json/parser_private.h"
 
@@ -189,11 +189,11 @@ static bool dispatch2(
   }
   if (!dispatched && channel == Channel::BOOK) {
     if (data_count == 2) {
-      if (!book_2.a.empty()) {
-        LOG_IF(FATAL, !book_1.a.empty())("Unexpected"sv);
+      if (!std::empty(book_2.a)) {
+        LOG_IF(FATAL, !std::empty(book_1.a))("Unexpected"sv);
         book_1.a = book_2.a;
-      } else if (!book_2.b.empty()) {
-        LOG_IF(FATAL, !book_1.b.empty())("Unexpected"sv);
+      } else if (!std::empty(book_2.b)) {
+        LOG_IF(FATAL, !std::empty(book_1.b))("Unexpected"sv);
         book_1.b = book_2.b;
       } else {
         log::fatal("Unexpected"sv);
@@ -222,7 +222,7 @@ bool ParserPrivate::dispatch(
         // for example "book-10" --> "book"
         auto pos = name.find_first_of('-');
         if (pos != name.npos)
-          name.remove_suffix(name.size() - pos);
+          name.remove_suffix(std::size(name) - pos);
         channel = Channel(name);
 #if !defined(NDEBUG)
         if (ROQ_UNLIKELY(channel == Channel::UNKNOWN))

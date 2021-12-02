@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken/drop_copy.h"
 
@@ -88,7 +88,7 @@ void DropCopy::subscribe() {
 
 void DropCopy::subscribe(const std::string_view &name) {
   log::info(R"(subscribe name="{}", token="{}")"sv, name, token_);
-  assert(!token_.empty());
+  assert(!std::empty(token_));
   auto message = fmt::format(
       R"({{)"
       R"("event":"subscribe",)"

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken/tools/hasher.h"
 
@@ -43,7 +43,7 @@ std::string Hasher::create_body() {
     ++nonce_;
   else
     nonce_ = now;
-  if (passphrase_.empty()) {
+  if (std::empty(passphrase_)) {
     return fmt::format(R"(nonce={})"sv, nonce_.count());
   } else {
     // XXX something weird with the quotes here... review
@@ -58,20 +58,20 @@ std::string Hasher::create_body() {
 std::string Hasher::create_headers(
     core::http::Method method, const std::string_view &path, const std::string_view &body) {
   assert(method == core::http::Method::POST);
-  assert(!body.empty());
+  assert(!std::empty(body));
   auto nonce = fmt::format("{}"sv, nonce_.count());
   sha_.clear();
   sha_.update(nonce);
   sha_.update(body);
   std::array<char, 32> buffer_1;
   auto length_1 = sha_.digest(buffer_1);
-  assert(length_1 == buffer_1.size());
+  assert(length_1 == std::size(buffer_1));
   hmac_.clear();
-  hmac_.update(path.data(), path.length());
-  hmac_.update(buffer_1.data(), buffer_1.size());
+  hmac_.update(std::data(path), std::size(path));
+  hmac_.update(std::data(buffer_1), std::size(buffer_1));
   std::array<char, 64> buffer_2;
   auto length_2 = hmac_.digest(buffer_2);
-  assert(length_2 == buffer_2.size());
+  assert(length_2 == std::size(buffer_2));
   auto sign_2 = core::binascii::Base64::encode(buffer_2, false);
   return fmt::format(
       "API-Key: {}\r\n"

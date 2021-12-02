@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken/market_data.h"
 
@@ -109,19 +109,19 @@ void MarketData::operator()(metrics::Writer &writer) {
 void MarketData::update_subscriptions(std::vector<std::string> &symbols) {
   assert(&symbols != &symbols_);
   auto max_size = Flags::ws_public_max_subscriptions_per_stream();
-  auto offset = symbols_.size();
+  auto offset = std::size(symbols_);
   if (max_size <= offset)
     return;
-  if (symbols.empty())
+  if (std::empty(symbols))
     return;
   symbols_.reserve(max_size);
-  auto length = std::min(max_size - offset, symbols.size());
+  auto length = std::min(max_size - offset, std::size(symbols));
   assert(length > 0);
-  for (size_t i = {}; i < length; ++i) {
+  for (size_t i = 0; i < length; ++i) {
     symbols_.emplace_back(symbols.back());
     symbols.pop_back();
   }
-  assert(length == (symbols_.size() - offset));
+  assert(length == (std::size(symbols_) - offset));
   if (ready_)
     subscribe({&symbols_[offset], length});
 }
@@ -313,7 +313,7 @@ void MarketData::operator()(const server::Trace<json::Trade> &event, const std::
     trades.emplace_back([&item](auto &result) { emplace(result, item); });
     utils::update_first(exchange_time_utc, item.time);
   }
-  if (!trades.empty()) {
+  if (!std::empty(trades)) {
     const TradeSummary trade_summary{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
@@ -348,9 +348,9 @@ void MarketData::operator()(
 void MarketData::operator()(const server::Trace<json::Book> &event, const std::string_view &pair) {
   auto &[trace_info, book] = event;
   log::info<3>(R"(book={}, pair="{}")"sv, book, pair);
-  bool snapshot = !book.bs.empty() && !book.as.empty();
+  bool snapshot = !std::empty(book.bs) && !std::empty(book.as);
   auto iter = latch_.find(pair);
-  if (ROQ_UNLIKELY(iter != latch_.end())) {
+  if (ROQ_UNLIKELY(iter != std::end(latch_))) {
     if (!snapshot) {
       return;  //  waiting for snapshot
     } else {
@@ -358,7 +358,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event, const std::s
       log::info(R"(DEBUG: unlatching symbol="{}")"sv, pair);
     }
   }
-  bool live = !book.b.empty() && !book.a.empty();
+  bool live = !std::empty(book.b) && !std::empty(book.a);
   if (ROQ_UNLIKELY(snapshot && live))
     log::fatal("Unexpected"sv);
   core::back_emplacer bids(shared_.bids), asks(shared_.asks);
@@ -379,7 +379,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event, const std::s
     asks.emplace_back([&item](auto &result) { emplace(result, item); });
     utils::update_first(exchange_time_utc, item.timestamp);
   }
-  if (!(bids.empty() && asks.empty())) {
+  if (!(std::empty(bids) && std::empty(asks))) {
     const MarketByPriceUpdate market_by_price_update{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),

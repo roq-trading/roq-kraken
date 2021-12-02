@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2021, Hans Erik Thrane */
+/* Copyright (c) 2017-2022, Hans Erik Thrane */
 
 #include "roq/kraken/order_entry.h"
 
@@ -402,19 +402,19 @@ void OrderEntry::get_asset_pairs_ack(
 void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
   auto &[trace_info, asset_pairs] = event;
   log::info<4>("asset_pairs={}"sv, asset_pairs);
-  assert(asset_pairs.error.empty());
+  assert(std::empty(asset_pairs.error));
   std::vector<std::string> symbols;
-  symbols.reserve(asset_pairs.result.size());
+  symbols.reserve(std::size(asset_pairs.result));
   size_t counter = {};
   for (auto &item : asset_pairs.result) {
     log::info<2>("item={}"sv, item);
-    if (item.wsname.empty()) {
+    if (std::empty(item.wsname)) {
       log::info<1>(R"(Skipping altname="{}", reason: wsname is empty)"sv, item.altname);
       continue;
     }
     std::string symbol(item.wsname);
     // remove escape
-    symbol.erase(std::remove(symbol.begin(), symbol.end(), '\\'), symbol.end());
+    symbol.erase(std::remove(std::begin(symbol), std::end(symbol), '\\'), std::end(symbol));
     if (shared_.discard_symbol(symbol))
       continue;
     if (all_symbols_.emplace(symbol).second)  // only include new
@@ -455,8 +455,8 @@ void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
     };
     server::create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
-  log::info("AssetPairs {} / {}"sv, counter, asset_pairs.result.size());
-  if (!symbols.empty()) {
+  log::info("AssetPairs {} / {}"sv, counter, std::size(asset_pairs.result));
+  if (!std::empty(symbols)) {
     SymbolsUpdate symbols_update{
         .symbols = symbols,
     };
@@ -522,7 +522,7 @@ void OrderEntry::get_positions_ack(
 void OrderEntry::operator()(const server::Trace<json::Positions> &event) {
   auto &[trace_info, positions] = event;
   log::info<4>("positions={}"sv, positions);
-  assert(positions.error.empty());
+  assert(std::empty(positions.error));
 }
 
 }  // namespace kraken
