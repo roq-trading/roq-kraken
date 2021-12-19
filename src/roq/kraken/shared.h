@@ -8,6 +8,7 @@
 #include "roq/server.h"
 
 #include "roq/core/memory.h"
+#include "roq/core/symbols.h"
 
 #include "roq/core/stack/buffer.h"
 
@@ -44,6 +45,9 @@ struct Shared final {
   server::Dispatcher &dispatcher_;
   uint32_t request_id_ = 0;
   core::stack::Buffer<char, 32> stack_buffer_;
+
+ public:
+  core::Symbols symbols;
 };
 
 }  // namespace kraken

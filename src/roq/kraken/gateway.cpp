@@ -206,7 +206,7 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
     log::info("Create drop-copy (ws-private)"sv);
     auto drop_copy = std::make_unique<DropCopy>(
         *this, context_, ++stream_id_, *security_[account], shared_, token_update.token);
-    MessageInfo message_info;  // XXX something sensible
+    MessageInfo message_info;
     Start start;
     create_event_and_dispatch(*drop_copy, message_info, start);
     (*iter).second = std::move(drop_copy);
@@ -214,25 +214,24 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
 }
 
 void Gateway::operator()(OrderEntry::SymbolsUpdate &symbols_update) {
-  auto &symbols = symbols_update.symbols;
-  for (auto &iter : market_data_) {
-    if (std::empty(symbols))
-      break;
-    (*iter).update_subscriptions(symbols);
-  }
-  for (;;) {
-    if (std::empty(symbols))
-      break;
-    log::info("Create market-data (ws-public)"sv);
-    auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_);
-    (*market_data).update_subscriptions(symbols);
-    MessageInfo message_info;  // XXX something sensible
+  auto [size, start_from] = shared_.symbols(symbols_update.symbols);
+  ensure_symbol_slices(size);
+  for (auto &iter : market_data_)
+    (*iter).subscribe(start_from);
+}
+
+void Gateway::ensure_symbol_slices(size_t size) {
+  while (std::size(market_data_) < size) {
+    auto stream_id = ++stream_id_;
+    auto index = std::size(market_data_);
+    log::debug("Create MarketData (stream_id={}, index={})"sv, stream_id, index);
+    auto market_data = std::make_unique<MarketData>(*this, context_, stream_id, shared_, index);
+    MessageInfo message_info;
     Start start;
     create_event_and_dispatch(*market_data, message_info, start);
     market_data_.emplace_back(std::move(market_data));
   }
 }
-
 OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != std::end(order_entry_))
