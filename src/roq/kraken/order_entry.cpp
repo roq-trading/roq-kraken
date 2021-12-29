@@ -430,6 +430,7 @@ void OrderEntry::operator()(const server::Trace<json::AssetPairs> &event) {
         .security_type = {},
         .base_currency = item.aclass_base,
         .quote_currency = item.aclass_quote,
+        .margin_currency = {},
         .commission_currency = item.aclass_base,
         .tick_size = tick_size,
         .multiplier = item.lot_multiplier,  // XXX check
