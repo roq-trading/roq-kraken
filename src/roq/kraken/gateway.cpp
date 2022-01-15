@@ -131,7 +131,7 @@ uint16_t Gateway::operator()(
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   assert(!std::empty(event.value.account));
-  assert(event.value.account == order.account);
+  assert(utils::compare(event.value.account, order.account) == 0);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
@@ -141,7 +141,7 @@ uint16_t Gateway::operator()(
     const std::string_view &request_id,
     const std::string_view &previous_request_id) {
   assert(!std::empty(event.value.account));
-  assert(event.value.account == order.account);
+  assert(utils::compare(event.value.account, order.account) == 0);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
@@ -236,7 +236,7 @@ OrderEntry &Gateway::get_order_entry(const std::string_view &account) {
   auto iter = order_entry_.find(account);
   if (iter != std::end(order_entry_))
     return *(*iter).second;
-  throw RuntimeErrorException(R"(Unknown account="{}")"sv, account);
+  throw RuntimeError(R"(Unknown account="{}")"sv, account);
 }
 
 }  // namespace kraken

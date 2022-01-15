@@ -213,25 +213,25 @@ void DropCopy::operator()(const server::Trace<json::SubscriptionStatus> &event) 
 void DropCopy::operator()(const server::Trace<json::AddOrderStatus> &event) {
   auto &[trace_info, add_order_status] = event;
   log::info("add_order_status={}"sv, add_order_status);
-  throw NotImplementedException();
+  throw NotImplemented("not implemented"sv);
 }
 
 void DropCopy::operator()(const server::Trace<json::CancelOrderStatus> &event) {
   auto &[trace_info, cancel_order_status] = event;
   log::info("cancel_order_status={}"sv, cancel_order_status);
-  throw NotImplementedException();
+  throw NotImplemented("not implemented"sv);
 }
 
 void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
   auto &[trace_info, open_orders] = event;
   log::info("open_orders={}"sv, open_orders);
-  throw NotImplementedException();
+  throw NotImplemented("not implemented"sv);
 }
 
 void DropCopy::operator()(const server::Trace<json::OwnTrades> &event) {
   auto &[trace_info, own_trades] = event;
   log::info("own_trades={}"sv, own_trades);
-  throw NotImplementedException();
+  throw NotImplemented("not implemented"sv);
 }
 
 }  // namespace kraken

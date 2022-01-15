@@ -140,11 +140,11 @@ static bool dispatch2(
         log::fatal("Unexpected"sv);
         break;
       case Channel::TICKER: {
-        throw RuntimeErrorException("ticker not supported"sv);
+        throw RuntimeError("ticker not supported"sv);
         break;
       }
       case Channel::OHLC: {
-        throw RuntimeErrorException("ohlc not supported"sv);
+        throw RuntimeError("ohlc not supported"sv);
         break;
       }
       case Channel::TRADE: {
@@ -178,11 +178,11 @@ static bool dispatch2(
         break;
       }
       case Channel::OWN_TRADES: {
-        throw RuntimeErrorException("ownTrades not supported"sv);
+        throw RuntimeError("ownTrades not supported"sv);
         break;
       }
       case Channel::OPEN_ORDERS: {
-        throw RuntimeErrorException("openOrders not supported"sv);
+        throw RuntimeError("openOrders not supported"sv);
         break;
       }
     }

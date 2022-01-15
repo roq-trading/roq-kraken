@@ -117,7 +117,7 @@ uint16_t OrderEntry::operator()(
     const Event<CreateOrder> &,
     const oms::Order &,
     [[maybe_unused]] const std::string_view &request_id) {
-  throw NotImplementedException();
+  throw NotImplemented("not implemented"sv);
 }
 
 uint16_t OrderEntry::operator()(
@@ -125,7 +125,7 @@ uint16_t OrderEntry::operator()(
     const oms::Order &,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
-  throw NotImplementedException();
+  throw NotImplemented("not implemented"sv);
 }
 
 uint16_t OrderEntry::operator()(
@@ -133,7 +133,7 @@ uint16_t OrderEntry::operator()(
     const oms::Order &,
     [[maybe_unused]] const std::string_view &request_id,
     [[maybe_unused]] const std::string_view &previous_request_id) {
-  throw NotImplementedException();
+  throw NotImplemented("not implemented"sv);
 }
 
 uint16_t OrderEntry::operator()(
