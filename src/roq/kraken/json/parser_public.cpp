@@ -149,7 +149,7 @@ static bool dispatch2(
         throw RuntimeError("ohlc not supported"sv);
       }
       case Channel::TRADE: {
-        if (ROQ_UNLIKELY(data_count != 1))
+        if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
         Trade trade(value, buffer);
         server::Trace event(trace_info, trade);
@@ -158,7 +158,7 @@ static bool dispatch2(
         break;
       }
       case Channel::SPREAD: {
-        if (ROQ_UNLIKELY(data_count != 1))
+        if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
         Spread spread(value);
         server::Trace event(trace_info, spread);
@@ -167,7 +167,7 @@ static bool dispatch2(
         break;
       }
       case Channel::BOOK: {
-        if (ROQ_UNLIKELY(data_count < 1 || data_count > 2))
+        if (data_count < 1 || data_count > 2) [[unlikely]]
           log::fatal("Unexpected"sv);
         switch (offset) {
           case 2:
@@ -192,11 +192,11 @@ static bool dispatch2(
   if (!dispatched && channel == Channel::BOOK) {
     if (data_count == 2) {
       if (!std::empty(book_2.a)) {
-        if (ROQ_UNLIKELY(!std::empty(book_1.a)))
+        if (!std::empty(book_1.a)) [[unlikely]]
           log::fatal("Unexpected"sv);
         book_1.a = book_2.a;
       } else if (!std::empty(book_2.b)) {
-        if (ROQ_UNLIKELY(!std::empty(book_1.b)))
+        if (!std::empty(book_1.b)) [[unlikely]]
           log::fatal("Unexpected"sv);
         book_1.b = book_2.b;
       } else {
@@ -237,7 +237,7 @@ bool ParserPublic::dispatch(
               name.remove_suffix(std::size(name) - pos);
             channel = Channel(name);
 #if !defined(NDEBUG)
-            if (ROQ_UNLIKELY(channel == Channel::UNKNOWN))
+            if (channel == Channel::UNKNOWN) [[unlikely]]
               log::fatal(R"(Unknown channel="{}")"sv, name);
 #endif
             break;
@@ -252,7 +252,7 @@ bool ParserPublic::dispatch(
       }
     }
   }
-  if (ROQ_UNLIKELY(offset != 3))
+  if (offset != 3) [[unlikely]]
     log::fatal(R"(message="{}")"sv, message);
   return dispatch2(handler, message, buffer, trace_info, channel_id, channel, pair, data_count);
 }

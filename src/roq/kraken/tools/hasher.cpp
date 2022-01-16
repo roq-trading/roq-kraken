@@ -37,7 +37,7 @@ Hasher::Hasher(
 std::string Hasher::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(core::get_realtime_clock());
   auto diff = now - nonce_;
-  if (ROQ_UNLIKELY(diff < THRESHOLD))
+  if (diff < THRESHOLD) [[unlikely]]
     log::fatal("Probably something wrong... diff={})"sv, diff);
   if (diff.count() < 0)  // XXX shouldn't this be <= ?
     ++nonce_;

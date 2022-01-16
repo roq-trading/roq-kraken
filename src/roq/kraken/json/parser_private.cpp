@@ -225,7 +225,7 @@ bool ParserPrivate::dispatch(
           name.remove_suffix(std::size(name) - pos);
         channel = Channel(name);
 #if !defined(NDEBUG)
-        if (ROQ_UNLIKELY(channel == Channel::UNKNOWN))
+        if (channel == Channel::UNKNOWN) [[unlikely]]
           log::fatal(R"(Unknown channel="{}")"sv, name);
 #endif
         break;
@@ -235,7 +235,7 @@ bool ParserPrivate::dispatch(
     }
     ++offset;
   }
-  if (ROQ_UNLIKELY(offset < 3))
+  if (offset < 3) [[unlikely]]
     log::fatal(R"(Unexpected: message="{}")"sv, message);
   return dispatch2(handler, message, buffer, channel);
 }

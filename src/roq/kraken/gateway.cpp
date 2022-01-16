@@ -200,7 +200,7 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   auto &account = token_update.account;
   assert(!std::empty(account));
   auto iter = drop_copy_.find(account);
-  if (ROQ_UNLIKELY(iter == std::end(drop_copy_)))
+  if (iter == std::end(drop_copy_)) [[unlikely]]
     log::fatal(R"(Unexpected: account="{}")"sv, account);
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"sv);

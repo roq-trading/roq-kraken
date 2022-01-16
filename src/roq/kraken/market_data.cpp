@@ -238,7 +238,7 @@ void MarketData::parse(const std::string_view &message) {
     auto trace_info = server::create_trace_info();
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
-    if (ROQ_UNLIKELY(!result))
+    if (!result) [[unlikely]]
       log::warn(R"(Unexpected: message="{}")"sv, message);
   });
 }
@@ -314,7 +314,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event, const std::s
   log::info<3>(R"(book={}, pair="{}")"sv, book, pair);
   bool snapshot = !std::empty(book.bs) && !std::empty(book.as);
   auto iter = latch_.find(pair);
-  if (ROQ_UNLIKELY(iter != std::end(latch_))) {
+  if (iter != std::end(latch_)) [[unlikely]] {
     if (!snapshot) {
       return;  //  waiting for snapshot
     } else {
@@ -323,7 +323,7 @@ void MarketData::operator()(const server::Trace<json::Book> &event, const std::s
     }
   }
   bool live = !std::empty(book.b) && !std::empty(book.a);
-  if (ROQ_UNLIKELY(snapshot && live))
+  if (snapshot && live) [[unlikely]]
     log::fatal("Unexpected"sv);
   core::back_emplacer bids(shared_.bids), asks(shared_.asks);
   std::chrono::nanoseconds exchange_time_utc = {};

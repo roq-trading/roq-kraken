@@ -180,7 +180,7 @@ void DropCopy::parse(const std::string_view &message) {
     auto trace_info = server::create_trace_info();
     core::json::Buffer buffer(decode_buffer_);
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
-    if (ROQ_UNLIKELY(!result))
+    if (!result) [[unlikely]]
       log::warn(R"(Unexpected: message="{}")"sv, message);
   });
 }
