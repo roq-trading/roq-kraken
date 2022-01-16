@@ -62,9 +62,9 @@ class MarketData final : public core::web::ClientSocket::Handler,
 
   void operator()(ConnectionStatus);
 
-  void subscribe(const roq::span<std::string const> &symbols);
+  void subscribe(const std::span<std::string const> &symbols);
 
-  void subscribe(const std::string_view &name, const roq::span<std::string const> &symbols);
+  void subscribe(const std::string_view &name, const std::span<std::string const> &symbols);
 
   void subscribe_book(const std::string_view &symbol);
   void unsubscribe_book(const std::string_view &symbol);

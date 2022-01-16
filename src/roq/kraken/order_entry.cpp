@@ -263,7 +263,7 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
       json::Result::dispatch<json::Token>(
           body,
           buffer,
-          [](const roq::span<std::string_view> &e) {  // error
+          [](const std::span<std::string_view> &e) {  // error
             log::warn("error=[{}]"sv, fmt::join(e, ","sv));
             log::fatal("Unexpected"sv);
           },
