@@ -16,6 +16,7 @@
 #include "roq/kraken/drop_copy.h"
 #include "roq/kraken/market_data.h"
 #include "roq/kraken/order_entry.h"
+#include "roq/kraken/rest.h"
 #include "roq/kraken/security.h"
 #include "roq/kraken/shared.h"
 
@@ -23,6 +24,7 @@ namespace roq {
 namespace kraken {
 
 class Gateway final : public server::Handler,
+                      public Rest::Handler,
                       public OrderEntry::Handler,
                       public MarketData::Handler,
                       public DropCopy::Handler {
@@ -64,7 +66,7 @@ class Gateway final : public server::Handler,
   void operator()(const server::Trace<TradeSummary> &, bool is_last) override;
 
   void operator()(OrderEntry::TokenUpdate &) override;
-  void operator()(OrderEntry::SymbolsUpdate &) override;
+  void operator()(Rest::SymbolsUpdate &) override;
 
   void ensure_symbol_slices(size_t size);
 
@@ -85,6 +87,7 @@ class Gateway final : public server::Handler,
   // seed
   uint16_t stream_id_ = {};
   // streams
+  Rest rest_;
   absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
   absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   std::vector<std::unique_ptr<MarketData>> market_data_;

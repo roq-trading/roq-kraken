@@ -26,14 +26,12 @@ static auto create_order_entry(
     core::io::Context &context,
     uint16_t &stream_id,
     T &security,
-    Shared &shared,
-    const std::string_view &master_account) {
+    Shared &shared) {
   absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> result;
   for (auto &iter : security) {
-    auto master = iter.first == master_account;
     result.try_emplace(
         iter.first,
-        std::make_unique<OrderEntry>(gateway, context, ++stream_id, *iter.second, shared, master));
+        std::make_unique<OrderEntry>(gateway, context, ++stream_id, *iter.second, shared));
   }
   return result;
 }
@@ -51,13 +49,14 @@ static auto create_drop_copy(T &security) {
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
     : dispatcher_(dispatcher), master_account_(config.get_master_account()),
       security_(create_security(config)), shared_(dispatcher),
-      order_entry_(
-          create_order_entry(*this, context_, stream_id_, security_, shared_, master_account_)),
+      rest_(*this, context_, ++stream_id_, shared_),
+      order_entry_(create_order_entry(*this, context_, stream_id_, security_, shared_)),
       drop_copy_(create_drop_copy(security_)) {
 }
 
 void Gateway::operator()(const Event<Start> &event) {
   log::info("Starting the gateway..."sv);
+  rest_(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -76,9 +75,11 @@ void Gateway::operator()(const Event<Stop> &event) {
       (*drop_copy)(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
+  rest_(event);
 }
 
 void Gateway::operator()(const Event<Timer> &event) {
+  rest_(event);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -152,6 +153,7 @@ uint16_t Gateway::operator()(
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
+  rest_(writer);
   for (auto &[_, order_entry] : order_entry_)
     (*order_entry)(writer);
   for (auto &[_, drop_copy] : drop_copy_)
@@ -213,7 +215,7 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   }
 }
 
-void Gateway::operator()(OrderEntry::SymbolsUpdate &symbols_update) {
+void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);
   ensure_symbol_slices(size);
   for (auto &iter : market_data_)

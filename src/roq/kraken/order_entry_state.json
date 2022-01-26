@@ -3,8 +3,6 @@
 "type": "enum",
 "values": [
 	{ "name": "token" },
-	{ "name": "assets" },
-	{ "name": "asset_pairs" },
 	{ "name": "positions" },
 	{ "name": "done" }
 ]

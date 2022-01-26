@@ -10,6 +10,7 @@ set(SOURCES
     gateway.cpp
     market_data.cpp
     order_entry.cpp
+    rest.cpp
     security.cpp
     shared.cpp
     main.cpp)
@@ -19,7 +20,7 @@ add_subdirectory("tools")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS order_entry_state.json drop_copy_state.json)
+set(AUTOGEN_SCHEMAS drop_copy_state.json order_entry_state.json rest_state.json)
 
 roq_autogen(
   OUTPUT
@@ -46,6 +47,15 @@ roq_autogen(
   "cpp"
   SOURCES
   ${AUTOGEN_SCHEMAS})
+
+set(GITIGNORE "${CMAKE_CURRENT_SOURCE_DIR}/.gitignore")
+
+file(WRITE "${GITIGNORE}" "")
+
+foreach(path ${AUTOGEN_SCHEMAS})
+  get_filename_component(name ${path} NAME_WE)
+  file(APPEND "${GITIGNORE}" "${name}.h\n${name}.cpp\n")
+endforeach()
 
 add_executable("${TARGET_NAME}" ${SOURCES} ${AUTOGEN_SOURCES})
 

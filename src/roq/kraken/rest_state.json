@@ -1,0 +1,9 @@
+{
+"name": "RestState",
+"type": "enum",
+"values": [
+	{ "name": "assets" },
+	{ "name": "asset_pairs" },
+	{ "name": "done" }
+]
+}

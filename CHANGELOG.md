@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Changed
+
+* Support market data feeds without requiring account credentials (#166)
+
 ## 0.8.1 &ndash; 2022-01-16
 
 ## 0.8.0 &ndash; 2022-01-12
