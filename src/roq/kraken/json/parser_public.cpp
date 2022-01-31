@@ -110,7 +110,7 @@ bool ParserPublic::dispatch(
 }
 
 namespace {
-static bool dispatch2(
+bool dispatch2(
     ParserPublic::Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,

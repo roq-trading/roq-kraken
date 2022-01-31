@@ -118,7 +118,7 @@ bool ParserPrivate::dispatch(
 }
 
 namespace {
-static bool dispatch2(
+bool dispatch2(
     [[maybe_unused]] ParserPrivate::Handler &handler,
     [[maybe_unused]] const std::string_view &message,
     [[maybe_unused]] core::json::Buffer &buffer,

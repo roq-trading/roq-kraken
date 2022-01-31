@@ -21,9 +21,9 @@ namespace kraken {
 namespace tools {
 
 namespace {
-static const constexpr auto THRESHOLD = -1000ms;
+const constexpr auto THRESHOLD = -1000ms;
 
-static auto create_hmac(const std::string_view &secret) {
+auto create_hmac(const std::string_view &secret) {
   auto raw_secret = core::binascii::Base64::decode(secret, true);
   return core::crypto::HMAC_SHA512(raw_secret);
 }

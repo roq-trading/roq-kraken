@@ -15,8 +15,8 @@ namespace roq {
 namespace kraken {
 
 namespace {
-static const auto NAME = "ex"sv;
-static const auto SUPPORTS = utils::Mask<SupportType>{};
+const auto NAME = "ex"sv;
+const auto SUPPORTS = utils::Mask<SupportType>{};
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
