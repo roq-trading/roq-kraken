@@ -11,7 +11,7 @@ using namespace roq::kraken;
 
 using namespace std::literals;
 
-TEST(json_spread, simple) {
+TEST(json_token, simple) {
   const auto message = R"({)"
                        R"("error":[],)"
                        R"("result":{)"
