@@ -11,22 +11,21 @@ using namespace roq::kraken;
 
 using namespace std::literals;
 
-TEST(json_token, parse) {
+TEST(json_spread, simple) {
   const auto message = R"({)"
                        R"("error":[],)"
                        R"("result":{)"
-                       R"("token":"abc",)"
-                       R"("expires":123)"
+                       R"("expires":900,)"
+                       R"("token":"zgJjbFFVjINqeU/vIu+XKGC0Mjh5z/frJdOaQpkTMkk")"
                        R"(})"
                        R"(})"sv;
-  core::Buffer buffer_(8192u);
+  bool found = false;
+  core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   json::Result::dispatch<json::Token>(
       message,
       buffer,
-      [](auto &) { ASSERT_FALSE(true); },
-      [](auto &token) {
-        EXPECT_EQ(token.token, "abc");
-        EXPECT_EQ(token.expires, 123);
-      });
+      [](const std::span<std::string_view> &errors) { FAIL(); },
+      [&](const json::Token &token) { found = true; });
+  EXPECT_EQ(found, true);
 }

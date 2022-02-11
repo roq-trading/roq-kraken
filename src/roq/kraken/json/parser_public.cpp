@@ -132,7 +132,8 @@ bool dispatch2(
   auto root = parser.root();
   size_t offset = 0;
   Book book_1, book_2;
-  for (auto value : std::get<core::json::array_t>(root)) {
+  auto &obj = std::get<core::json::array_t>(root);
+  for (auto value : obj) {
     if (++offset == 1)
       continue;
     if (offset > (1 + data_count))

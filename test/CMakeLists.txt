@@ -1,6 +1,6 @@
 set(TARGET_NAME "${PROJECT_NAME}-test")
 
-set(SOURCES json_book.cpp json_token.cpp main.cpp)
+set(SOURCES json_book.cpp json_spread.cpp json_token.cpp main.cpp)
 
 roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}")
 
