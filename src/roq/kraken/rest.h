@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "roq/core/buffer.h"
+#include "roq/core/download.h"
 
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
@@ -18,7 +19,6 @@
 
 #include "roq/core/web/client.h"
 
-#include "roq/download.h"
 #include "roq/server.h"
 
 #include "roq/kraken/rest_state.h"
@@ -101,7 +101,7 @@ class Rest final : public core::web::Client::Handler {
   // state
   bool ready_ = false;
   ConnectionStatus status_ = {};
-  server::Download<RestState> download_;
+  core::Download<RestState> download_;
 };
 
 }  // namespace kraken

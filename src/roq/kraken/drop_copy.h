@@ -6,6 +6,8 @@
 #include <string_view>
 #include <vector>
 
+#include "roq/core/download.h"
+
 #include "roq/core/metrics/counter.h"
 #include "roq/core/metrics/latency.h"
 #include "roq/core/metrics/profile.h"
@@ -14,7 +16,6 @@
 
 #include "roq/core/web/client_socket.h"
 
-#include "roq/download.h"
 #include "roq/server.h"
 
 #include "roq/kraken/drop_copy_state.h"
@@ -114,7 +115,7 @@ class DropCopy final : public core::web::ClientSocket::Handler,
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
-  server::Download<DropCopyState> download_;
+  core::Download<DropCopyState> download_;
 };
 
 }  // namespace kraken
