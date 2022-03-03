@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2020,
  Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/kraken/json/result.h"
 #include "roq/kraken/json/token.h"
@@ -11,7 +11,7 @@ using namespace roq::kraken;
 
 using namespace std::literals;
 
-TEST(json_token, simple) {
+TEST_CASE("json_token_simple", "json_token") {
   const auto message = R"({)"
                        R"("error":[],)"
                        R"("result":{)"
@@ -27,5 +27,5 @@ TEST(json_token, simple) {
       buffer,
       [](const std::span<std::string_view> &errors) { FAIL(); },
       [&](const json::Token &token) { found = true; });
-  EXPECT_EQ(found, true);
+  CHECK(found == true);
 }

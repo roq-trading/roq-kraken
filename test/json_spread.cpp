@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2020,
  Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/datetime.h"
 
@@ -43,7 +43,7 @@ struct Handler : public json::ParserPublic::Handler {
 };
 }  // namespace
 
-TEST(json_spread, simple) {
+TEST_CASE("json_spread_simple", "json_spread") {
   const auto message = R"([)"
                        R"(1061,)"
                        R"(["62.203000","62.436000","1644586454.291317","8.60138332","0.18317004"],)"
@@ -55,5 +55,5 @@ TEST(json_spread, simple) {
   core::json::Buffer buffer(buffer_);
   auto trace_info = server::create_trace_info();
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
-  EXPECT_EQ(handler.found, true);
+  CHECK(handler.found == true);
 }

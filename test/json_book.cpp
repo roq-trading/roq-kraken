@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2020,
  Hans Erik Thrane */
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "roq/core/datetime.h"
 
@@ -35,7 +35,7 @@ struct Handler : public json::ParserPublic::Handler {
 };
 }  // namespace
 
-TEST(json_book, parse_test_snapshot) {
+TEST_CASE("json_book_parse_test_snapshot", "json_book") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -72,7 +72,7 @@ TEST(json_book, parse_test_snapshot) {
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
-TEST(json_book, parse_test_update_bid_1) {
+TEST_CASE("json_book_parse_test_update_bid_1", "json_book") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -90,7 +90,7 @@ TEST(json_book, parse_test_update_bid_1) {
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
-TEST(json_book, parse_test_update_ask_1) {
+TEST_CASE("json_book_parse_test_update_ask_1", "json_book") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -108,7 +108,7 @@ TEST(json_book, parse_test_update_ask_1) {
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
-TEST(json_book, parse_test_update_complex) {
+TEST_CASE("json_book_parse_test_update_complex", "json_book") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -214,7 +214,7 @@ TEST(json_book, parse_test_update_complex) {
 // what: timestamps (3rd column) appears to be completely off
 // reason? did their server not synchronize NTP before allowing orders?
 
-TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
+TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "json_book") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -278,7 +278,7 @@ TEST(json_book, parse_bad_datetime_beta_20200502_180439_374940) {
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
   auto trace_info = server::create_trace_info();
-  EXPECT_THROW(
+  CHECK_THROWS_AS(
       json::ParserPublic::dispatch(handler, message, buffer, trace_info),
       OutOfRange);  //  XXX maybe wrap as core::BadState?
 }
