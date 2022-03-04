@@ -35,7 +35,7 @@ struct Handler : public json::ParserPublic::Handler {
 };
 }  // namespace
 
-TEST_CASE("json_book_parse_test_snapshot", "json_book") {
+TEST_CASE("json_book_parse_test_snapshot", "[json_book]") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -72,7 +72,7 @@ TEST_CASE("json_book_parse_test_snapshot", "json_book") {
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
-TEST_CASE("json_book_parse_test_update_bid_1", "json_book") {
+TEST_CASE("json_book_parse_test_update_bid_1", "[json_book]") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -90,7 +90,7 @@ TEST_CASE("json_book_parse_test_update_bid_1", "json_book") {
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
-TEST_CASE("json_book_parse_test_update_ask_1", "json_book") {
+TEST_CASE("json_book_parse_test_update_ask_1", "[json_book]") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -108,7 +108,7 @@ TEST_CASE("json_book_parse_test_update_ask_1", "json_book") {
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
-TEST_CASE("json_book_parse_test_update_complex", "json_book") {
+TEST_CASE("json_book_parse_test_update_complex", "[json_book]") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"
@@ -214,7 +214,7 @@ TEST_CASE("json_book_parse_test_update_complex", "json_book") {
 // what: timestamps (3rd column) appears to be completely off
 // reason? did their server not synchronize NTP before allowing orders?
 
-TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "json_book") {
+TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "[json_book]") {
   const auto message = R"([)"
                        R"(1110,)"
                        R"({)"

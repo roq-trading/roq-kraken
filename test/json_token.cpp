@@ -11,7 +11,7 @@ using namespace roq::kraken;
 
 using namespace std::literals;
 
-TEST_CASE("json_token_simple", "json_token") {
+TEST_CASE("json_token_simple", "[json_token]") {
   const auto message = R"({)"
                        R"("error":[],)"
                        R"("result":{)"

@@ -43,7 +43,7 @@ struct Handler : public json::ParserPublic::Handler {
 };
 }  // namespace
 
-TEST_CASE("json_spread_simple", "json_spread") {
+TEST_CASE("json_spread_simple", "[json_spread]") {
   const auto message = R"([)"
                        R"(1061,)"
                        R"(["62.203000","62.436000","1644586454.291317","8.60138332","0.18317004"],)"
