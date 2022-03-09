@@ -4,14 +4,14 @@
 
 #include <chrono>
 
-#include "roq/core/utility.h"
+#include "roq/core/utility.hpp"
 
-#include "roq/core/json/parser.h"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/core/charconv/datetime.h"
+#include "roq/core/charconv/datetime.hpp"
 
-#include "roq/kraken/json/order_type.h"
-#include "roq/kraken/json/side.h"
+#include "roq/kraken/json/order_type.hpp"
+#include "roq/kraken/json/side.hpp"
 
 namespace roq {
 namespace kraken {

@@ -1,10 +1,10 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken/application.h"
+#include "roq/kraken/application.hpp"
 
-#include "roq/kraken/config.h"
-#include "roq/kraken/flags.h"
-#include "roq/kraken/gateway.h"
+#include "roq/kraken/config.hpp"
+#include "roq/kraken/flags.hpp"
+#include "roq/kraken/gateway.hpp"
 
 using namespace std::literals;
 

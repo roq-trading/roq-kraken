@@ -3,9 +3,9 @@
 
 #include <catch2/catch.hpp>
 
-#include "roq/core/datetime.h"
+#include "roq/core/datetime.hpp"
 
-#include "roq/kraken/json/parser_public.h"
+#include "roq/kraken/json/parser_public.hpp"
 
 using namespace roq;
 using namespace roq::kraken;

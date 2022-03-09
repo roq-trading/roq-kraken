@@ -1,19 +1,19 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken/rest.h"
+#include "roq/kraken/rest.hpp"
 
 #include <utility>
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/json/parser.h"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/kraken/flags.h"
+#include "roq/kraken/flags.hpp"
 
-#include "roq/kraken/json/result.h"
+#include "roq/kraken/json/result.hpp"
 
 using namespace std::literals;
 

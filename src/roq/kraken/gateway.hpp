@@ -8,17 +8,17 @@
 #include <string>
 #include <vector>
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/core/io/context.h"
+#include "roq/core/io/context.hpp"
 
-#include "roq/kraken/config.h"
-#include "roq/kraken/drop_copy.h"
-#include "roq/kraken/market_data.h"
-#include "roq/kraken/order_entry.h"
-#include "roq/kraken/rest.h"
-#include "roq/kraken/security.h"
-#include "roq/kraken/shared.h"
+#include "roq/kraken/config.hpp"
+#include "roq/kraken/drop_copy.hpp"
+#include "roq/kraken/market_data.hpp"
+#include "roq/kraken/order_entry.hpp"
+#include "roq/kraken/rest.hpp"
+#include "roq/kraken/security.hpp"
+#include "roq/kraken/shared.hpp"
 
 namespace roq {
 namespace kraken {

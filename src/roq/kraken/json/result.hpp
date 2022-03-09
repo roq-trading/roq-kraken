@@ -5,9 +5,9 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "roq/core/json/array.h"
-#include "roq/core/json/buffer.h"
-#include "roq/core/json/parser.h"
+#include "roq/core/json/array.hpp"
+#include "roq/core/json/buffer.hpp"
+#include "roq/core/json/parser.hpp"
 
 namespace roq {
 namespace kraken {

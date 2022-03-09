@@ -1,8 +1,8 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken/shared.h"
+#include "roq/kraken/shared.hpp"
 
-#include "roq/kraken/flags.h"
+#include "roq/kraken/flags.hpp"
 
 using namespace std::literals;
 

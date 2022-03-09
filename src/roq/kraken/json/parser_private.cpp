@@ -1,12 +1,12 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken/json/parser_private.h"
+#include "roq/kraken/json/parser_private.hpp"
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/kraken/json/channel.h"
-#include "roq/kraken/json/event.h"
-#include "roq/kraken/json/result_field.h"
+#include "roq/kraken/json/channel.hpp"
+#include "roq/kraken/json/event.hpp"
+#include "roq/kraken/json/result_field.hpp"
 
 using namespace std::literals;
 

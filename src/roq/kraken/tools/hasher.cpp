@@ -1,17 +1,17 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken/tools/hasher.h"
+#include "roq/kraken/tools/hasher.hpp"
 
 #include <array>
 #include <random>
 
-#include "roq/logging.h"
+#include "roq/logging.hpp"
 
-#include "roq/core/clock.h"
+#include "roq/core/clock.hpp"
 
-#include "roq/core/binascii/base64.h"
+#include "roq/core/binascii/base64.hpp"
 
-#include "roq/core/crypto/sha.h"
+#include "roq/core/crypto/sha.hpp"
 
 using namespace std::literals;
 using namespace std::literals;

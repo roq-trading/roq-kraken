@@ -4,25 +4,27 @@
 
 #include <string_view>
 
-#include "roq/core/json/parser.h"
+#include "roq/core/json/parser.hpp"
 
-#include "roq/server.h"
+#include "roq/server.hpp"
 
-#include "roq/kraken/json/error.h"
-#include "roq/kraken/json/heartbeat.h"
-#include "roq/kraken/json/pong.h"
-#include "roq/kraken/json/subscription_status.h"
-#include "roq/kraken/json/system_status.h"
+#include "roq/kraken/json/error.hpp"
+#include "roq/kraken/json/heartbeat.hpp"
+#include "roq/kraken/json/pong.hpp"
+#include "roq/kraken/json/subscription_status.hpp"
+#include "roq/kraken/json/system_status.hpp"
 
-#include "roq/kraken/json/book.h"
-#include "roq/kraken/json/spread.h"
-#include "roq/kraken/json/trade.h"
+#include "roq/kraken/json/add_order_status.hpp"
+#include "roq/kraken/json/cancel_order_status.hpp"
+
+#include "roq/kraken/json/open_orders.hpp"
+#include "roq/kraken/json/own_trades.hpp"
 
 namespace roq {
 namespace kraken {
 namespace json {
 
-struct ParserPublic final {
+struct ParserPrivate final {
   struct Handler {
     virtual void operator()(const server::Trace<Error> &) = 0;
     virtual void operator()(const server::Trace<SystemStatus> &) = 0;
@@ -30,9 +32,11 @@ struct ParserPublic final {
     virtual void operator()(const server::Trace<Heartbeat> &) = 0;
     virtual void operator()(const server::Trace<SubscriptionStatus> &) = 0;
 
-    virtual void operator()(const server::Trace<Trade> &, const std::string_view &pair) = 0;
-    virtual void operator()(const server::Trace<Spread> &, const std::string_view &pair) = 0;
-    virtual void operator()(const server::Trace<Book> &, const std::string_view &pair) = 0;
+    virtual void operator()(const server::Trace<AddOrderStatus> &) = 0;
+    virtual void operator()(const server::Trace<CancelOrderStatus> &) = 0;
+
+    virtual void operator()(const server::Trace<OpenOrders> &) = 0;
+    virtual void operator()(const server::Trace<OwnTrades> &) = 0;
   };
 
   static bool dispatch(

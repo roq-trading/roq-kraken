@@ -5,11 +5,11 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/http/method.h"
+#include "roq/core/http/method.hpp"
 
-#include "roq/kraken/config.h"
+#include "roq/kraken/config.hpp"
 
-#include "roq/kraken/tools/hasher.h"
+#include "roq/kraken/tools/hasher.hpp"
 
 namespace roq {
 namespace kraken {

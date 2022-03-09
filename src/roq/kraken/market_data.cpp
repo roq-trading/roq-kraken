@@ -1,19 +1,19 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken/market_data.h"
+#include "roq/kraken/market_data.hpp"
 
 #include <algorithm>
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/back_emplacer.h"
+#include "roq/core/back_emplacer.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/kraken/flags.h"
+#include "roq/kraken/flags.hpp"
 
-#include "roq/kraken/json/utils.h"
+#include "roq/kraken/json/utils.hpp"
 
 using namespace std::literals;
 

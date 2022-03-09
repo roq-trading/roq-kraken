@@ -3,8 +3,8 @@
 
 #include <catch2/catch.hpp>
 
-#include "roq/kraken/json/result.h"
-#include "roq/kraken/json/token.h"
+#include "roq/kraken/json/result.hpp"
+#include "roq/kraken/json/token.hpp"
 
 using namespace roq;
 using namespace roq::kraken;

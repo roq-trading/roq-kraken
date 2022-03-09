@@ -1,13 +1,13 @@
 /* Copyright (c) 2017-2022, Hans Erik Thrane */
 
-#include "roq/kraken/drop_copy.h"
+#include "roq/kraken/drop_copy.hpp"
 
-#include "roq/utils/mask.h"
-#include "roq/utils/update.h"
+#include "roq/utils/mask.hpp"
+#include "roq/utils/update.hpp"
 
-#include "roq/core/metrics/factory.h"
+#include "roq/core/metrics/factory.hpp"
 
-#include "roq/kraken/flags.h"
+#include "roq/kraken/flags.hpp"
 
 using namespace std::literals;
 

@@ -49,7 +49,7 @@ roq_autogen(
   OUTPUT_TYPE
   "json"
   FILE_TYPE
-  "h"
+  "hpp"
   SOURCES
   ${AUTOGEN_SCHEMAS})
 

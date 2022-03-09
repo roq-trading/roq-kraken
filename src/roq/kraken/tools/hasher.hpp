@@ -6,12 +6,12 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/crypto/hmac.h"
-#include "roq/core/crypto/sha.h"
+#include "roq/core/crypto/hmac.hpp"
+#include "roq/core/crypto/sha.hpp"
 
-#include "roq/core/http/method.h"
+#include "roq/core/http/method.hpp"
 
-#include "roq/kraken/config.h"
+#include "roq/kraken/config.hpp"
 
 namespace roq {
 namespace kraken {
