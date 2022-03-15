@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-#include "roq/utils/mask.hpp"
+#include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/core/back_emplacer.hpp"
@@ -22,7 +22,7 @@ namespace kraken {
 
 namespace {
 const auto NAME = "md"sv;
-const auto SUPPORTS = utils::Mask{
+const auto SUPPORTS = Mask{
     SupportType::TOP_OF_BOOK,
     SupportType::MARKET_BY_PRICE,
     SupportType::TRADE_SUMMARY,

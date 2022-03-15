@@ -4,7 +4,7 @@
 
 #include <utility>
 
-#include "roq/utils/mask.hpp"
+#include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/core/json/parser.hpp"
@@ -23,7 +23,7 @@ namespace kraken {
 namespace {
 const auto NAME = "om"sv;
 
-const auto SUPPORTS = utils::Mask{
+const auto SUPPORTS = Mask{
     SupportType::CREATE_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,

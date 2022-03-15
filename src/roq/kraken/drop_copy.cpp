@@ -2,7 +2,7 @@
 
 #include "roq/kraken/drop_copy.hpp"
 
-#include "roq/utils/mask.hpp"
+#include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/core/metrics/factory.hpp"
@@ -16,7 +16,7 @@ namespace kraken {
 
 namespace {
 const auto NAME = "ex"sv;
-const auto SUPPORTS = utils::Mask<SupportType>{};
+const auto SUPPORTS = Mask<SupportType>{};
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
