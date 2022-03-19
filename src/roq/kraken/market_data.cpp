@@ -167,14 +167,13 @@ void MarketData::operator()(ConnectionStatus status) {
   }
 }
 
-void MarketData::subscribe(const std::span<std::string const> &symbols) {
+void MarketData::subscribe(const std::span<Symbol const> &symbols) {
   subscribe("trade"sv, symbols);
   subscribe("spread"sv, symbols);
   subscribe("book"sv, symbols);
 }
 
-void MarketData::subscribe(
-    const std::string_view &name, const std::span<std::string const> &symbols) {
+void MarketData::subscribe(const std::string_view &name, const std::span<Symbol const> &symbols) {
   log::info(R"(subscribe name="{}", len(symbols)={})"sv, name, std::size(symbols));
   if (Flags::ws_public_subscribe_book_depth() && name.compare("book"sv) == 0) {
     auto message = fmt::format(

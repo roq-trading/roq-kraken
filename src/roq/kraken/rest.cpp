@@ -270,7 +270,7 @@ void Rest::operator()(const server::Trace<json::AssetPairs> &event) {
   auto &[trace_info, asset_pairs] = event;
   log::info<4>("asset_pairs={}"sv, asset_pairs);
   assert(std::empty(asset_pairs.error));
-  std::vector<std::string> symbols;
+  std::vector<Symbol> symbols;
   symbols.reserve(std::size(asset_pairs.result));
   size_t counter = {};
   for (auto &item : asset_pairs.result) {

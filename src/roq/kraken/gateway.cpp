@@ -12,46 +12,45 @@ namespace roq {
 namespace kraken {
 
 namespace {
+template <typename R>
 auto create_security(const Config &config) {
-  absl::flat_hash_map<std::string, std::unique_ptr<Security>> result;
-  for (auto &[_, iter] : config.accounts) {
+  R result;
+  for (auto &[_, iter] : config.accounts)
     result.try_emplace(iter.name, std::make_unique<Security>(config, iter.name));
-  }
   return result;
 }
 
-template <typename T>
+template <typename R, typename T>
 auto create_order_entry(
     Gateway &gateway,
     core::io::Context &context,
     uint16_t &stream_id,
     T &security,
     Shared &shared) {
-  absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> result;
-  for (auto &iter : security) {
+  R result;
+  for (auto &iter : security)
     result.try_emplace(
         iter.first,
         std::make_unique<OrderEntry>(gateway, context, ++stream_id, *iter.second, shared));
-  }
   return result;
 }
 
-template <typename T>
+template <typename R, typename T>
 auto create_drop_copy(T &security) {
-  absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> result;
-  for (auto &iter : security) {
+  R result;
+  for (auto &iter : security)
     result.try_emplace(iter.first, nullptr);
-  }
   return result;
 }
 }  // namespace
 
 Gateway::Gateway(server::Dispatcher &dispatcher, const Config &config)
     : dispatcher_(dispatcher), master_account_(config.get_master_account()),
-      security_(create_security(config)), shared_(dispatcher),
+      security_(create_security<decltype(security_)>(config)), shared_(dispatcher),
       rest_(*this, context_, ++stream_id_, shared_),
-      order_entry_(create_order_entry(*this, context_, stream_id_, security_, shared_)),
-      drop_copy_(create_drop_copy(security_)) {
+      order_entry_(create_order_entry<decltype(order_entry_)>(
+          *this, context_, stream_id_, security_, shared_)),
+      drop_copy_(create_drop_copy<decltype(drop_copy_)>(security_)) {
 }
 
 void Gateway::operator()(const Event<Start> &event) {

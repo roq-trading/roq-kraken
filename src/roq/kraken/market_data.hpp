@@ -63,9 +63,9 @@ class MarketData final : public core::web::ClientSocket::Handler,
 
   void operator()(ConnectionStatus);
 
-  void subscribe(const std::span<std::string const> &symbols);
+  void subscribe(const std::span<Symbol const> &symbols);
 
-  void subscribe(const std::string_view &name, const std::span<std::string const> &symbols);
+  void subscribe(const std::string_view &name, const std::span<Symbol const> &symbols);
 
   void subscribe_book(const std::string_view &symbol);
   void unsubscribe_book(const std::string_view &symbol);
@@ -115,7 +115,7 @@ class MarketData final : public core::web::ClientSocket::Handler,
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   // experimental
-  absl::flat_hash_set<std::string> latch_;
+  absl::flat_hash_set<Symbol> latch_;
 };
 
 }  // namespace kraken
