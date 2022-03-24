@@ -24,8 +24,7 @@ struct Handler : public json::ParserPublic::Handler {
   void operator()(
       const Trace<json::Trade> &, [[maybe_unused]] const std::string_view &pair) override {}
   void operator()(
-      const Trace<json::Spread> &, [[maybe_unused]] const std::string_view &pair) override {
-  }
+      const Trace<json::Spread> &, [[maybe_unused]] const std::string_view &pair) override {}
   void operator()(
       const Trace<json::Book> &, [[maybe_unused]] const std::string_view &pair) override {}
 

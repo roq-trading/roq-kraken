@@ -294,8 +294,7 @@ void MarketData::operator()(const Trace<json::Trade> &event, const std::string_v
   }
 }
 
-void MarketData::operator()(
-    const Trace<json::Spread> &event, const std::string_view &pair) {
+void MarketData::operator()(const Trace<json::Spread> &event, const std::string_view &pair) {
   auto &[trace_info, spread] = event;
   log::info<3>(R"(spread={}, pair="{}")"sv, spread, pair);
   const TopOfBook top_of_book{

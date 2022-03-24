@@ -296,8 +296,7 @@ void OrderEntry::get_positions() {
   });
 }
 
-void OrderEntry::get_positions_ack(
-    const Trace<core::web::Response> &event, uint32_t sequence) {
+void OrderEntry::get_positions_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
   profile_.positions_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = OrderEntryState::POSITIONS;
