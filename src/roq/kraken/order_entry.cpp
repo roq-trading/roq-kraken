@@ -144,7 +144,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"sv, stream_status);
-    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -171,7 +171,7 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
       .account = security_.get_account(),
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -216,13 +216,13 @@ void OrderEntry::get_token() {
     connection_(
         "token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           get_token_ack(event, sequence);
         });
   });
 }
 
-void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
+void OrderEntry::get_token_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
   profile_.get_web_sockets_token([&]() {
     // auto &[trace_info, response] = event;
     auto &trace_info = event.trace_info;
@@ -245,7 +245,7 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
             log::fatal("Unexpected"sv);
           },
           [&](const json::Token &token) {  // success
-            server::Trace event(trace_info, token);
+            Trace event(trace_info, token);
             (*this)(event);
           });
       download_.check(state);
@@ -256,7 +256,7 @@ void OrderEntry::get_token_ack(const server::Trace<core::web::Response> &event, 
   });
 }
 
-void OrderEntry::operator()(const server::Trace<json::Token> &event) {
+void OrderEntry::operator()(const Trace<json::Token> &event) {
   auto &[trace_info, token] = event;
   log::info<2>(R"(token={})"sv, token);
   TokenUpdate token_update{
@@ -290,14 +290,14 @@ void OrderEntry::get_positions() {
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           get_positions_ack(event, sequence);
         });
   });
 }
 
 void OrderEntry::get_positions_ack(
-    const server::Trace<core::web::Response> &event, uint32_t sequence) {
+    const Trace<core::web::Response> &event, uint32_t sequence) {
   profile_.positions_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = OrderEntryState::POSITIONS;
@@ -311,7 +311,7 @@ void OrderEntry::get_positions_ack(
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       auto positions = core::json::Parser::create<json::Positions>(body, buffer);
-      server::Trace event(trace_info, positions);
+      Trace event(trace_info, positions);
       (*this)(event);
       download_.check(state);
     } catch (core::NetworkError &e) {
@@ -321,7 +321,7 @@ void OrderEntry::get_positions_ack(
   });
 }
 
-void OrderEntry::operator()(const server::Trace<json::Positions> &event) {
+void OrderEntry::operator()(const Trace<json::Positions> &event) {
   auto &[trace_info, positions] = event;
   log::info<4>("positions={}"sv, positions);
   assert(std::empty(positions.error));

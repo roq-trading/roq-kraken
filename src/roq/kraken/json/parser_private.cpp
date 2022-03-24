@@ -18,7 +18,7 @@ bool ParserPrivate::dispatch(
     Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -44,7 +44,7 @@ bool ParserPrivate::dispatch(
     const std::string_view &message,
     core::json::Buffer &,
     core::json::object_t &root,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -63,49 +63,49 @@ bool ParserPrivate::dispatch(
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
-            server::Trace event(trace_info, error);
+            Trace event(trace_info, error);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::SYSTEM_STATUS: {
             auto system_status = core::json::Parser::create<SystemStatus>(message);
-            server::Trace event(trace_info, system_status);
+            Trace event(trace_info, system_status);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
-            server::Trace event(trace_info, pong);
+            Trace event(trace_info, pong);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::HEARTBEAT: {
             auto heartbeat = core::json::Parser::create<Heartbeat>(message);
-            server::Trace event(trace_info, heartbeat);
+            Trace event(trace_info, heartbeat);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
-            server::Trace event(trace_info, subscription_status);
+            Trace event(trace_info, subscription_status);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::ADD_ORDER_STATUS: {
             auto add_order_status = core::json::Parser::create<AddOrderStatus>(message);
-            server::Trace event(trace_info, add_order_status);
+            Trace event(trace_info, add_order_status);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::CANCEL_ORDER_STATUS:
             auto cancel_order_status = core::json::Parser::create<CancelOrderStatus>(message);
-            server::Trace event(trace_info, cancel_order_status);
+            Trace event(trace_info, cancel_order_status);
             handler(event);
             dispatched = true;
             break;
@@ -212,7 +212,7 @@ bool ParserPrivate::dispatch(
     const std::string_view &message,
     core::json::Buffer &buffer,
     core::json::array_t &root,
-    const server::TraceInfo &) {
+    const TraceInfo &) {
   Channel channel = Channel::UNDEFINED;
   size_t offset = 0;
   for (auto value : root) {

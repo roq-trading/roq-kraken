@@ -108,7 +108,7 @@ void Rest::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"sv, stream_status);
-    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -135,7 +135,7 @@ void Rest::operator()(const core::web::Client::Latency &latency) {
       .account = {},
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -178,13 +178,13 @@ void Rest::get_assets() {
     connection_(
         "assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           get_assets_ack(event, sequence);
         });
   });
 }
 
-void Rest::get_assets_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
+void Rest::get_assets_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
   profile_.assets_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSETS;
@@ -198,7 +198,7 @@ void Rest::get_assets_ack(const server::Trace<core::web::Response> &event, uint3
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       auto assets = core::json::Parser::create<json::Assets>(body, buffer);
-      server::Trace event(trace_info, assets);
+      Trace event(trace_info, assets);
       (*this)(event);
       download_.check(state);
     } catch (core::NetworkError &e) {
@@ -208,7 +208,7 @@ void Rest::get_assets_ack(const server::Trace<core::web::Response> &event, uint3
   });
 }
 
-void Rest::operator()(const server::Trace<json::Assets> &event) {
+void Rest::operator()(const Trace<json::Assets> &event) {
   auto &[trace_info, assets] = event;
   log::info<4>("assets={}"sv, assets);
   // do nothing
@@ -236,13 +236,13 @@ void Rest::get_asset_pairs() {
         request,
         [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
           auto trace_info = server::create_trace_info();
-          server::Trace event(trace_info, response);
+          Trace event(trace_info, response);
           get_asset_pairs_ack(event, sequence);
         });
   });
 }
 
-void Rest::get_asset_pairs_ack(const server::Trace<core::web::Response> &event, uint32_t sequence) {
+void Rest::get_asset_pairs_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
   profile_.asset_pairs_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSET_PAIRS;
@@ -256,7 +256,7 @@ void Rest::get_asset_pairs_ack(const server::Trace<core::web::Response> &event, 
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
-      server::Trace event(trace_info, asset_pairs);
+      Trace event(trace_info, asset_pairs);
       (*this)(event);
       download_.check(state);
     } catch (core::NetworkError &e) {
@@ -266,7 +266,7 @@ void Rest::get_asset_pairs_ack(const server::Trace<core::web::Response> &event, 
   });
 }
 
-void Rest::operator()(const server::Trace<json::AssetPairs> &event) {
+void Rest::operator()(const Trace<json::AssetPairs> &event) {
   auto &[trace_info, asset_pairs] = event;
   log::info<4>("asset_pairs={}"sv, asset_pairs);
   assert(std::empty(asset_pairs.error));
@@ -314,14 +314,14 @@ void Rest::operator()(const server::Trace<json::AssetPairs> &event) {
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
     };
-    server::create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+    create_trace_and_dispatch(handler_, trace_info, reference_data, true);
     MarketStatus market_status{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
         .trading_status = TradingStatus::OPEN,  // XXX doesn't exist?
     };
-    server::create_trace_and_dispatch(handler_, trace_info, market_status, true);
+    create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
   log::info("AssetPairs {} / {}"sv, counter, std::size(asset_pairs.result));
   if (!std::empty(symbols)) {

@@ -18,7 +18,7 @@ bool ParserPublic::dispatch(
     Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
@@ -44,7 +44,7 @@ bool ParserPublic::dispatch(
     const std::string_view &message,
     core::json::Buffer &,
     core::json::object_t &root,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -63,35 +63,35 @@ bool ParserPublic::dispatch(
             break;
           case Event::ERROR: {
             auto error = core::json::Parser::create<Error>(message);
-            server::Trace event(trace_info, error);
+            Trace event(trace_info, error);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::SYSTEM_STATUS: {
             auto system_status = core::json::Parser::create<SystemStatus>(message);
-            server::Trace event(trace_info, system_status);
+            Trace event(trace_info, system_status);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
-            server::Trace event(trace_info, pong);
+            Trace event(trace_info, pong);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::HEARTBEAT: {
             auto heartbeat = core::json::Parser::create<Heartbeat>(message);
-            server::Trace event(trace_info, heartbeat);
+            Trace event(trace_info, heartbeat);
             handler(event);
             dispatched = true;
             break;
           }
           case Event::SUBSCRIPTION_STATUS: {
             auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
-            server::Trace event(trace_info, subscription_status);
+            Trace event(trace_info, subscription_status);
             handler(event);
             dispatched = true;
             break;
@@ -114,7 +114,7 @@ bool dispatch2(
     ParserPublic::Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    const server::TraceInfo &trace_info,
+    const TraceInfo &trace_info,
     [[maybe_unused]] int64_t channel_id,
     Channel channel,
     const std::string_view &pair,
@@ -153,7 +153,7 @@ bool dispatch2(
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
         Trade trade(value, buffer);
-        server::Trace event(trace_info, trade);
+        Trace event(trace_info, trade);
         handler(event, pair);
         dispatched = true;
         break;
@@ -162,7 +162,7 @@ bool dispatch2(
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
         Spread spread(value);
-        server::Trace event(trace_info, spread);
+        Trace event(trace_info, spread);
         handler(event, pair);
         dispatched = true;
         break;
@@ -204,7 +204,7 @@ bool dispatch2(
         log::fatal("Unexpected"sv);
       }
     }
-    server::Trace event(trace_info, book_1);
+    Trace event(trace_info, book_1);
     handler(event, pair);
     dispatched = true;
   }
@@ -217,7 +217,7 @@ bool ParserPublic::dispatch(
     const std::string_view &message,
     core::json::Buffer &buffer,
     core::json::array_t &root,
-    const server::TraceInfo &trace_info) {
+    const TraceInfo &trace_info) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;
   std::string_view pair;

@@ -38,10 +38,10 @@ class Rest final : public core::web::Client::Handler {
   };
 
   struct Handler {
-    virtual void operator()(const server::Trace<StreamStatus> &) = 0;
-    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
-    virtual void operator()(const server::Trace<ReferenceData> &, bool is_last) = 0;
-    virtual void operator()(const server::Trace<MarketStatus> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StreamStatus> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const Trace<ReferenceData> &, bool is_last) = 0;
+    virtual void operator()(const Trace<MarketStatus> &, bool is_last) = 0;
     // cross-communication
     virtual void operator()(SymbolsUpdate &) = 0;
   };
@@ -69,12 +69,12 @@ class Rest final : public core::web::Client::Handler {
   uint32_t download(RestState);
 
   void get_assets();
-  void get_assets_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
-  void operator()(const server::Trace<json::Assets> &);
+  void get_assets_ack(const Trace<core::web::Response> &, uint32_t sequence);
+  void operator()(const Trace<json::Assets> &);
 
   void get_asset_pairs();
-  void get_asset_pairs_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
-  void operator()(const server::Trace<json::AssetPairs> &);
+  void get_asset_pairs_ack(const Trace<core::web::Response> &, uint32_t sequence);
+  void operator()(const Trace<json::AssetPairs> &);
 
  private:
   Handler &handler_;

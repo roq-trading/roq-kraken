@@ -24,22 +24,22 @@ namespace json {
 
 struct ParserPublic final {
   struct Handler {
-    virtual void operator()(const server::Trace<Error> &) = 0;
-    virtual void operator()(const server::Trace<SystemStatus> &) = 0;
-    virtual void operator()(const server::Trace<Pong> &) = 0;
-    virtual void operator()(const server::Trace<Heartbeat> &) = 0;
-    virtual void operator()(const server::Trace<SubscriptionStatus> &) = 0;
+    virtual void operator()(const Trace<Error> &) = 0;
+    virtual void operator()(const Trace<SystemStatus> &) = 0;
+    virtual void operator()(const Trace<Pong> &) = 0;
+    virtual void operator()(const Trace<Heartbeat> &) = 0;
+    virtual void operator()(const Trace<SubscriptionStatus> &) = 0;
 
-    virtual void operator()(const server::Trace<Trade> &, const std::string_view &pair) = 0;
-    virtual void operator()(const server::Trace<Spread> &, const std::string_view &pair) = 0;
-    virtual void operator()(const server::Trace<Book> &, const std::string_view &pair) = 0;
+    virtual void operator()(const Trace<Trade> &, const std::string_view &pair) = 0;
+    virtual void operator()(const Trace<Spread> &, const std::string_view &pair) = 0;
+    virtual void operator()(const Trace<Book> &, const std::string_view &pair) = 0;
   };
 
   static bool dispatch(
       Handler &handler,
       const std::string_view &message,
       core::json::Buffer &buffer,
-      const server::TraceInfo &trace_info);
+      const TraceInfo &trace_info);
 
  protected:
   static bool dispatch(
@@ -47,14 +47,14 @@ struct ParserPublic final {
       const std::string_view &message,
       core::json::Buffer &buffer,
       core::json::object_t &root,
-      const server::TraceInfo &trace_info);
+      const TraceInfo &trace_info);
 
   static bool dispatch(
       Handler &handler,
       const std::string_view &message,
       core::json::Buffer &buffer,
       core::json::array_t &root,
-      const server::TraceInfo &trace_info);
+      const TraceInfo &trace_info);
 };
 
 }  // namespace json

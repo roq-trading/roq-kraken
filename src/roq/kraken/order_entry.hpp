@@ -39,10 +39,10 @@ class OrderEntry final : public core::web::Client::Handler {
   };
 
   struct Handler {
-    virtual void operator()(const server::Trace<StreamStatus> &) = 0;
-    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
-    virtual void operator()(const server::Trace<ReferenceData> &, bool is_last) = 0;
-    virtual void operator()(const server::Trace<MarketStatus> &, bool is_last) = 0;
+    virtual void operator()(const Trace<StreamStatus> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const Trace<ReferenceData> &, bool is_last) = 0;
+    virtual void operator()(const Trace<MarketStatus> &, bool is_last) = 0;
     // cross-communication
     virtual void operator()(TokenUpdate &) = 0;
   };
@@ -85,12 +85,12 @@ class OrderEntry final : public core::web::Client::Handler {
   uint32_t download(OrderEntryState);
 
   void get_token();
-  void get_token_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
-  void operator()(const server::Trace<json::Token> &);
+  void get_token_ack(const Trace<core::web::Response> &, uint32_t sequence);
+  void operator()(const Trace<json::Token> &);
 
   void get_positions();
-  void get_positions_ack(const server::Trace<core::web::Response> &, uint32_t sequence);
-  void operator()(const server::Trace<json::Positions> &);
+  void get_positions_ack(const Trace<core::web::Response> &, uint32_t sequence);
+  void operator()(const Trace<json::Positions> &);
 
  private:
   Handler &handler_;

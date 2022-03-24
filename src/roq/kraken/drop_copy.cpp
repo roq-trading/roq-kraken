@@ -134,7 +134,7 @@ void DropCopy::operator()(const core::web::ClientSocket::Latency &latency) {
       .account = security_.get_account(),
       .latency = latency.sample,
   };
-  server::create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(handler_, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -158,7 +158,7 @@ void DropCopy::operator()(ConnectionStatus status) {
         .priority = Priority::PRIMARY,
     };
     log::info("stream_status={}"sv, stream_status);
-    server::create_trace_and_dispatch(handler_, trace_info, stream_status);
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
 }
 
@@ -190,50 +190,50 @@ void DropCopy::parse(const std::string_view &message) {
   });
 }
 
-void DropCopy::operator()(const server::Trace<json::Error> &event) {
+void DropCopy::operator()(const Trace<json::Error> &event) {
   auto &[trace_info, error] = event;
   log::fatal("error={}"sv, error);
 }
 
-void DropCopy::operator()(const server::Trace<json::SystemStatus> &event) {
+void DropCopy::operator()(const Trace<json::SystemStatus> &event) {
   auto &[trace_info, system_status] = event;
   log::info("system_status={}"sv, system_status);
 }
 
-void DropCopy::operator()(const server::Trace<json::Pong> &event) {
+void DropCopy::operator()(const Trace<json::Pong> &event) {
   auto &[trace_info, pong] = event;
   log::info<1>("pong={}"sv, pong);
 }
 
-void DropCopy::operator()(const server::Trace<json::Heartbeat> &event) {
+void DropCopy::operator()(const Trace<json::Heartbeat> &event) {
   auto &[trace_info, heartbeat] = event;
   log::info<1>("heartbeat={}"sv, heartbeat);
 }
 
-void DropCopy::operator()(const server::Trace<json::SubscriptionStatus> &event) {
+void DropCopy::operator()(const Trace<json::SubscriptionStatus> &event) {
   auto &[trace_info, subscription_status] = event;
   log::info("subscription_status={}"sv, subscription_status);
 }
 
-void DropCopy::operator()(const server::Trace<json::AddOrderStatus> &event) {
+void DropCopy::operator()(const Trace<json::AddOrderStatus> &event) {
   auto &[trace_info, add_order_status] = event;
   log::info("add_order_status={}"sv, add_order_status);
   throw NotImplemented("not implemented"sv);
 }
 
-void DropCopy::operator()(const server::Trace<json::CancelOrderStatus> &event) {
+void DropCopy::operator()(const Trace<json::CancelOrderStatus> &event) {
   auto &[trace_info, cancel_order_status] = event;
   log::info("cancel_order_status={}"sv, cancel_order_status);
   throw NotImplemented("not implemented"sv);
 }
 
-void DropCopy::operator()(const server::Trace<json::OpenOrders> &event) {
+void DropCopy::operator()(const Trace<json::OpenOrders> &event) {
   auto &[trace_info, open_orders] = event;
   log::info("open_orders={}"sv, open_orders);
   throw NotImplemented("not implemented"sv);
 }
 
-void DropCopy::operator()(const server::Trace<json::OwnTrades> &event) {
+void DropCopy::operator()(const Trace<json::OwnTrades> &event) {
   auto &[trace_info, own_trades] = event;
   log::info("own_trades={}"sv, own_trades);
   throw NotImplemented("not implemented"sv);

@@ -31,8 +31,8 @@ class DropCopy final : public core::web::ClientSocket::Handler,
                        public json::ParserPrivate::Handler {
  public:
   struct Handler {
-    virtual void operator()(const server::Trace<StreamStatus> &) = 0;
-    virtual void operator()(const server::Trace<ExternalLatency> &) = 0;
+    virtual void operator()(const Trace<StreamStatus> &) = 0;
+    virtual void operator()(const Trace<ExternalLatency> &) = 0;
   };
 
   DropCopy(
@@ -72,17 +72,17 @@ class DropCopy final : public core::web::ClientSocket::Handler,
 
   void parse(const std::string_view &message);
 
-  void operator()(const server::Trace<json::Error> &) override;
-  void operator()(const server::Trace<json::SystemStatus> &) override;
-  void operator()(const server::Trace<json::Pong> &) override;
-  void operator()(const server::Trace<json::Heartbeat> &) override;
-  void operator()(const server::Trace<json::SubscriptionStatus> &) override;
+  void operator()(const Trace<json::Error> &) override;
+  void operator()(const Trace<json::SystemStatus> &) override;
+  void operator()(const Trace<json::Pong> &) override;
+  void operator()(const Trace<json::Heartbeat> &) override;
+  void operator()(const Trace<json::SubscriptionStatus> &) override;
 
-  void operator()(const server::Trace<json::AddOrderStatus> &) override;
-  void operator()(const server::Trace<json::CancelOrderStatus> &) override;
+  void operator()(const Trace<json::AddOrderStatus> &) override;
+  void operator()(const Trace<json::CancelOrderStatus> &) override;
 
-  void operator()(const server::Trace<json::OpenOrders> &) override;
-  void operator()(const server::Trace<json::OwnTrades> &) override;
+  void operator()(const Trace<json::OpenOrders> &) override;
+  void operator()(const Trace<json::OwnTrades> &) override;
 
   void reset();
 
