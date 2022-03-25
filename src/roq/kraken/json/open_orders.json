@@ -1,8 +1,17 @@
 {
-"name": "OpenOrders",
-"type": "comp",
-"values": [
-	{ "name": "error", "type": "std::span<std::string_view>", "required": false },
-	{ "name": "result", "type": "std::span<OpenOrdersItem>", "map": true, "required": false }
-]
+  "name": "OpenOrders",
+  "type": "comp",
+  "values": [
+    {
+      "name": "error",
+      "type": "std::span<std::string_view>",
+      "required": false
+    },
+    {
+      "name": "result",
+      "type": "std::span<OpenOrdersItem>",
+      "map": true,
+      "required": false
+    }
+  ]
 }

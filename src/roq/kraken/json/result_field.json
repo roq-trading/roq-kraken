@@ -1,7 +1,9 @@
 {
-"name": "ResultField",
-"type": "enum2",
-"values": [
-	{ "name": "event" }
-]
+  "name": "ResultField",
+  "type": "enum2",
+  "values": [
+    {
+      "name": "event"
+    }
+  ]
 }

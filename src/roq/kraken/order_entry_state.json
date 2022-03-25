@@ -1,9 +1,15 @@
 {
-"name": "OrderEntryState",
-"type": "enum",
-"values": [
-	{ "name": "token" },
-	{ "name": "positions" },
-	{ "name": "done" }
-]
+  "name": "OrderEntryState",
+  "type": "enum",
+  "values": [
+    {
+      "name": "token"
+    },
+    {
+      "name": "positions"
+    },
+    {
+      "name": "done"
+    }
+  ]
 }

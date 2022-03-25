@@ -1,11 +1,26 @@
 {
-"name": "Spread",
-"type": "array_item",
-"values": [
-	{ "name": "bid", "type": "double" },
-	{ "name": "ask", "type": "double" },
-	{ "name": "timestamp", "type": "std::chrono::milliseconds" },
-	{ "name": "bidVolume", "type": "double" },
-	{ "name": "askVolume", "type": "double" }
-]
+  "name": "Spread",
+  "type": "array_item",
+  "values": [
+    {
+      "name": "bid",
+      "type": "double"
+    },
+    {
+      "name": "ask",
+      "type": "double"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "bidVolume",
+      "type": "double"
+    },
+    {
+      "name": "askVolume",
+      "type": "double"
+    }
+  ]
 }

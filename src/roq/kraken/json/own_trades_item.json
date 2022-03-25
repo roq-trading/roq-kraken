@@ -1,18 +1,54 @@
 {
-"name": "OwnTradesItem",
-"type": "item2",
-"values": [
-	{ "name": "ordertxid", "type": "std::string_view" },
-	{ "name": "postxid", "type": "std::string_view" },
-	{ "name": "pair", "type": "std::string_view" },
-	{ "name": "time", "type": "std::chrono::milliseconds" },
-	{ "name": "type", "type": "Side" },
-	{ "name": "ordertype", "type": "OrderType" },
-	{ "name": "price", "type": "double" },
-	{ "name": "cost", "type": "double" },
-	{ "name": "fee", "type": "double" },
-	{ "name": "vol", "type": "double" },
-	{ "name": "margin", "type": "double" },
-	{ "name": "reqid", "type": "int64_t" }
-]
+  "name": "OwnTradesItem",
+  "type": "item2",
+  "values": [
+    {
+      "name": "ordertxid",
+      "type": "std::string_view"
+    },
+    {
+      "name": "postxid",
+      "type": "std::string_view"
+    },
+    {
+      "name": "pair",
+      "type": "std::string_view"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "type",
+      "type": "Side"
+    },
+    {
+      "name": "ordertype",
+      "type": "OrderType"
+    },
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "cost",
+      "type": "double"
+    },
+    {
+      "name": "fee",
+      "type": "double"
+    },
+    {
+      "name": "vol",
+      "type": "double"
+    },
+    {
+      "name": "margin",
+      "type": "double"
+    },
+    {
+      "name": "reqid",
+      "type": "int64_t"
+    }
+  ]
 }

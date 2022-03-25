@@ -1,13 +1,27 @@
 {
-"name": "Channel",
-"type": "enum",
-"values": [
-	{ "name": "ticker" },
-	{ "name": "ohlc" },
-	{ "name": "trade" },
-	{ "name": "spread" },
-	{ "name": "book" },
-	{ "name": "ownTrades" },
-	{ "name": "openOrders" }
-]
+  "name": "Channel",
+  "type": "enum",
+  "values": [
+    {
+      "name": "ticker"
+    },
+    {
+      "name": "ohlc"
+    },
+    {
+      "name": "trade"
+    },
+    {
+      "name": "spread"
+    },
+    {
+      "name": "book"
+    },
+    {
+      "name": "ownTrades"
+    },
+    {
+      "name": "openOrders"
+    }
+  ]
 }

@@ -1,22 +1,69 @@
 {
-"name": "OpenOrdersItem",
-"type": "item2",
-"values": [
-	{ "name": "refid", "type": "std::string_view" },
-	{ "name": "userref", "type": "int64_t" },
-	{ "name": "status", "type": "std::string_view" },
-	{ "name": "opentm", "type": "std::chrono::milliseconds" },
-	{ "name": "starttm", "type": "std::chrono::milliseconds" },
-	{ "name": "expiretm", "type": "std::chrono::milliseconds" },
-	{ "name": "descr" },
-	{ "name": "vol", "type": "double" },
-	{ "name": "vol_exec", "type": "double" },
-	{ "name": "cost", "type": "double" },
-	{ "name": "fee", "type": "double" },
-	{ "name": "avg_price", "type": "double" },
-	{ "name": "stopprice", "type": "double" },
-	{ "name": "limitprice", "type": "double" },
-	{ "name": "misc", "type": "std::string_view" },
-	{ "name": "oflags", "type": "std::string_view" }
-]
+  "name": "OpenOrdersItem",
+  "type": "item2",
+  "values": [
+    {
+      "name": "refid",
+      "type": "std::string_view"
+    },
+    {
+      "name": "userref",
+      "type": "int64_t"
+    },
+    {
+      "name": "status",
+      "type": "std::string_view"
+    },
+    {
+      "name": "opentm",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "starttm",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "expiretm",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "descr"
+    },
+    {
+      "name": "vol",
+      "type": "double"
+    },
+    {
+      "name": "vol_exec",
+      "type": "double"
+    },
+    {
+      "name": "cost",
+      "type": "double"
+    },
+    {
+      "name": "fee",
+      "type": "double"
+    },
+    {
+      "name": "avg_price",
+      "type": "double"
+    },
+    {
+      "name": "stopprice",
+      "type": "double"
+    },
+    {
+      "name": "limitprice",
+      "type": "double"
+    },
+    {
+      "name": "misc",
+      "type": "std::string_view"
+    },
+    {
+      "name": "oflags",
+      "type": "std::string_view"
+    }
+  ]
 }

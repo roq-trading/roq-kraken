@@ -1,8 +1,17 @@
 {
-"name": "OwnTrades",
-"type": "comp",
-"values": [
-	{ "name": "error", "type": "std::span<std::string_view>", "required": false },
-	{ "name": "result", "type": "std::span<OwnTradesItem>", "map": true, "required": false }
-]
+  "name": "OwnTrades",
+  "type": "comp",
+  "values": [
+    {
+      "name": "error",
+      "type": "std::span<std::string_view>",
+      "required": false
+    },
+    {
+      "name": "result",
+      "type": "std::span<OwnTradesItem>",
+      "map": true,
+      "required": false
+    }
+  ]
 }

@@ -1,10 +1,22 @@
 {
-"name": "SystemStatus",
-"type": "item",
-"values": [
-	{ "name": "event", "type": "std::string_view" },
-	{ "name": "connectionID", "type": "int64_t" },
-	{ "name": "status", "type": "std::string_view" },
-	{ "name": "version", "type": "std::string_view" }
-]
+  "name": "SystemStatus",
+  "type": "item",
+  "values": [
+    {
+      "name": "event",
+      "type": "std::string_view"
+    },
+    {
+      "name": "connectionID",
+      "type": "int64_t"
+    },
+    {
+      "name": "status",
+      "type": "std::string_view"
+    },
+    {
+      "name": "version",
+      "type": "std::string_view"
+    }
+  ]
 }

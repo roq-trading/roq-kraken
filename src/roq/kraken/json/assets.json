@@ -1,8 +1,17 @@
 {
-"name": "Assets",
-"type": "comp",
-"values": [
-	{ "name": "error", "type": "std::span<std::string_view>", "required": false },
-	{ "name": "result", "type": "std::span<AssetsItem>", "map": true, "required": false }
-]
+  "name": "Assets",
+  "type": "comp",
+  "values": [
+    {
+      "name": "error",
+      "type": "std::span<std::string_view>",
+      "required": false
+    },
+    {
+      "name": "result",
+      "type": "std::span<AssetsItem>",
+      "map": true,
+      "required": false
+    }
+  ]
 }

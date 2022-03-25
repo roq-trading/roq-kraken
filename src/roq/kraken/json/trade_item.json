@@ -1,12 +1,30 @@
 {
-"name": "TradeItem",
-"type": "array_item",
-"values": [
-	{ "name": "price", "type": "double" },
-	{ "name": "volume", "type": "double"},
-	{ "name": "time", "type": "std::chrono::milliseconds"},
-	{ "name": "side", "type": "Side"},
-	{ "name": "orderType", "type": "OrderType"},
-	{ "name": "misc", "type": "std::string_view"}
-]
+  "name": "TradeItem",
+  "type": "array_item",
+  "values": [
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "volume",
+      "type": "double"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "name": "orderType",
+      "type": "OrderType"
+    },
+    {
+      "name": "misc",
+      "type": "std::string_view"
+    }
+  ]
 }

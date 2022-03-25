@@ -1,8 +1,16 @@
 {
-"name": "TradeBalance",
-"type": "comp",
-"values": [
-	{ "name": "error", "type": "std::span<std::string_view>", "required": false },
-	{ "name": "result", "type": "std::span<TradeBalanceItem>", "required": false }
-]
+  "name": "TradeBalance",
+  "type": "comp",
+  "values": [
+    {
+      "name": "error",
+      "type": "std::span<std::string_view>",
+      "required": false
+    },
+    {
+      "name": "result",
+      "type": "std::span<TradeBalanceItem>",
+      "required": false
+    }
+  ]
 }

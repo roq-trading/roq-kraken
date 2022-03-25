@@ -1,20 +1,60 @@
 {
-"name": "OpenPositions",
-"type": "item",
-"values": [
-	{ "name": "ordertxid", "type": "std::string_view" },
-	{ "name": "pair", "type": "std::string_view" },
-	{ "name": "time", "type": "std::chrono::milliseconds" },
-	{ "name": "type", "type": "Side" },
-	{ "name": "ordertype", "type": "std::string_view" },
-	{ "name": "cost", "type": "double" },
-	{ "name": "fee", "type": "double" },
-	{ "name": "vol", "type": "double" },
-	{ "name": "vol_closed", "type": "double" },
-	{ "name": "margin", "type": "double" },
-	{ "name": "value", "type": "double" },
-	{ "name": "net", "type": "double" },
-	{ "name": "misc" },
-	{ "name": "oflags" }
-]
+  "name": "OpenPositions",
+  "type": "item",
+  "values": [
+    {
+      "name": "ordertxid",
+      "type": "std::string_view"
+    },
+    {
+      "name": "pair",
+      "type": "std::string_view"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "type",
+      "type": "Side"
+    },
+    {
+      "name": "ordertype",
+      "type": "std::string_view"
+    },
+    {
+      "name": "cost",
+      "type": "double"
+    },
+    {
+      "name": "fee",
+      "type": "double"
+    },
+    {
+      "name": "vol",
+      "type": "double"
+    },
+    {
+      "name": "vol_closed",
+      "type": "double"
+    },
+    {
+      "name": "margin",
+      "type": "double"
+    },
+    {
+      "name": "value",
+      "type": "double"
+    },
+    {
+      "name": "net",
+      "type": "double"
+    },
+    {
+      "name": "misc"
+    },
+    {
+      "name": "oflags"
+    }
+  ]
 }

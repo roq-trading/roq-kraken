@@ -1,10 +1,23 @@
 {
-"name": "BookItem",
-"type": "array_item",
-"values": [
-	{ "name": "price", "type": "double" },
-	{ "name": "volume", "type": "double"},
-	{ "name": "timestamp", "type": "std::chrono::milliseconds"},
-	{ "name": "updateType", "type": "UpdateType", "required": false}
-]
+  "name": "BookItem",
+  "type": "array_item",
+  "values": [
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "volume",
+      "type": "double"
+    },
+    {
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "updateType",
+      "type": "UpdateType",
+      "required": false
+    }
+  ]
 }

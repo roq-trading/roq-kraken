@@ -1,11 +1,31 @@
 {
-"name": "Book",
-"type": "comp",
-"values": [
-	{ "name": "a", "type": "std::span<BookItem>", "required": false },
-	{ "name": "as", "type": "std::span<BookItem>", "required": false },
-	{ "name": "b", "type": "std::span<BookItem>", "required": false },
-	{ "name": "bs", "type": "std::span<BookItem>", "required": false },
-	{ "name": "c", "required": false, "undoc": true }
-]
+  "name": "Book",
+  "type": "comp",
+  "values": [
+    {
+      "name": "a",
+      "type": "std::span<BookItem>",
+      "required": false
+    },
+    {
+      "name": "as",
+      "type": "std::span<BookItem>",
+      "required": false
+    },
+    {
+      "name": "b",
+      "type": "std::span<BookItem>",
+      "required": false
+    },
+    {
+      "name": "bs",
+      "type": "std::span<BookItem>",
+      "required": false
+    },
+    {
+      "name": "c",
+      "required": false,
+      "undoc": true
+    }
+  ]
 }
