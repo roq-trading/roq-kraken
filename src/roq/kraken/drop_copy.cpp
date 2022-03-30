@@ -16,7 +16,7 @@ namespace kraken {
 
 namespace {
 const auto NAME = "ex"sv;
-const auto SUPPORTS = Mask<SupportType>{};
+const Mask<SupportType> SUPPORTS;
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
@@ -152,7 +152,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
-        .supports = SUPPORTS.get(),
+        .supports = SUPPORTS,
         .status = status_,
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,

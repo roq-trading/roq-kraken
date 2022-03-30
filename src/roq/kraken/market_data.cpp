@@ -22,7 +22,7 @@ namespace kraken {
 
 namespace {
 const auto NAME = "md"sv;
-const auto SUPPORTS = Mask{
+const Mask<SupportType> SUPPORTS{
     SupportType::TOP_OF_BOOK,
     SupportType::MARKET_BY_PRICE,
     SupportType::TRADE_SUMMARY,
@@ -157,7 +157,7 @@ void MarketData::operator()(ConnectionStatus status) {
     const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
-        .supports = SUPPORTS.get(),
+        .supports = SUPPORTS,
         .status = status_,
         .type = StreamType::WEB_SOCKET,
         .priority = Priority::PRIMARY,
