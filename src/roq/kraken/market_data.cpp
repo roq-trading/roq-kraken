@@ -22,7 +22,7 @@ namespace kraken {
 
 namespace {
 const auto NAME = "md"sv;
-const Mask<SupportType> SUPPORTS{
+const Mask SUPPORTS{
     SupportType::TOP_OF_BOOK,
     SupportType::MARKET_BY_PRICE,
     SupportType::TRADE_SUMMARY,

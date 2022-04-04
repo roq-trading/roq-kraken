@@ -16,7 +16,7 @@ namespace kraken {
 
 namespace {
 const auto NAME = "ex"sv;
-const Mask<SupportType> SUPPORTS;
+const Mask SUPPORTS;
 
 struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(const std::string_view &group, const std::string_view &function)
