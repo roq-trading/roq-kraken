@@ -47,17 +47,18 @@ inline void update(std::chrono::milliseconds &result, const core::json::value_t 
 
 inline roq::OrderType map(json::OrderType order_type) {
   switch (order_type) {
-    case json::OrderType::UNDEFINED:
+    using enum json::OrderType::type_t;
+    case UNDEFINED:
       break;
-    case json::OrderType::UNKNOWN:
+    case UNKNOWN:
       break;
-    case json::OrderType::L:
+    case L:
       return roq::OrderType::LIMIT;
-    case json::OrderType::LIMIT:
+    case LIMIT:
       return roq::OrderType::LIMIT;
-    case json::OrderType::M:
+    case M:
       return roq::OrderType::MARKET;
-    case json::OrderType::MARKET:
+    case MARKET:
       return roq::OrderType::MARKET;
   }
   return roq::OrderType::UNDEFINED;
@@ -65,17 +66,18 @@ inline roq::OrderType map(json::OrderType order_type) {
 
 inline roq::Side map(json::Side side) {
   switch (side) {
-    case json::Side::UNDEFINED:
+    using enum json::Side::type_t;
+    case UNDEFINED:
       break;
-    case json::Side::UNKNOWN:
+    case UNKNOWN:
       break;
-    case json::Side::B:
+    case B:
       return roq::Side::BUY;
-    case json::Side::BUY:
+    case BUY:
       return roq::Side::BUY;
-    case json::Side::S:
+    case S:
       return roq::Side::SELL;
-    case json::Side::SELL:
+    case SELL:
       return roq::Side::SELL;
   }
   return roq::Side::UNDEFINED;

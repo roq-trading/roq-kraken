@@ -177,16 +177,17 @@ void OrderEntry::operator()(const core::web::Client::Latency &latency) {
 
 uint32_t OrderEntry::download(OrderEntryState state) {
   switch (state) {
-    case OrderEntryState::UNDEFINED:
+    using enum OrderEntryState;
+    case UNDEFINED:
       assert(false);
       break;
-    case OrderEntryState::TOKEN:
+    case TOKEN:
       get_token();
       return 1;
-    case OrderEntryState::POSITIONS:
+    case POSITIONS:
       get_positions();
       return 1;
-    case OrderEntryState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       return {};
   }

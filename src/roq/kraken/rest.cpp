@@ -141,16 +141,17 @@ void Rest::operator()(const core::web::Client::Latency &latency) {
 
 uint32_t Rest::download(RestState state) {
   switch (state) {
-    case RestState::UNDEFINED:
+    using enum RestState;
+    case UNDEFINED:
       assert(false);
       break;
-    case RestState::ASSETS:
+    case ASSETS:
       get_assets();
       return 1;
-    case RestState::ASSET_PAIRS:
+    case ASSET_PAIRS:
       get_asset_pairs();
       return 1;
-    case RestState::DONE:
+    case DONE:
       (*this)(ConnectionStatus::READY);
       return {};
   }

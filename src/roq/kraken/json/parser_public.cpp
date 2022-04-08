@@ -49,57 +49,59 @@ bool ParserPublic::dispatch(
   for (auto [key, value] : root) {
     auto field = ResultField(key);
     switch (field) {
-      case ResultField::UNDEFINED:
-      case ResultField::UNKNOWN:
+      using enum ResultField::type_t;
+      case UNDEFINED:
+      case UNKNOWN:
         break;
-      case ResultField::EVENT: {
+      case EVENT: {
         auto event = Event(value);
         switch (event) {
-          case Event::UNDEFINED:
+          using enum Event::type_t;
+          case UNDEFINED:
             log::fatal("Unexpected"sv);
             break;
-          case Event::UNKNOWN:
+          case UNKNOWN:
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
-          case Event::ERROR: {
+          case ERROR: {
             auto error = core::json::Parser::create<Error>(message);
             Trace event(trace_info, error);
             handler(event);
             dispatched = true;
             break;
           }
-          case Event::SYSTEM_STATUS: {
+          case SYSTEM_STATUS: {
             auto system_status = core::json::Parser::create<SystemStatus>(message);
             Trace event(trace_info, system_status);
             handler(event);
             dispatched = true;
             break;
           }
-          case Event::PONG: {
+          case PONG: {
             auto pong = core::json::Parser::create<Pong>(message);
             Trace event(trace_info, pong);
             handler(event);
             dispatched = true;
             break;
           }
-          case Event::HEARTBEAT: {
+          case HEARTBEAT: {
             auto heartbeat = core::json::Parser::create<Heartbeat>(message);
             Trace event(trace_info, heartbeat);
             handler(event);
             dispatched = true;
             break;
           }
-          case Event::SUBSCRIPTION_STATUS: {
+          case SUBSCRIPTION_STATUS: {
             auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
             Trace event(trace_info, subscription_status);
             handler(event);
             dispatched = true;
             break;
           }
-          case Event::ADD_ORDER_STATUS: {
+          case ADD_ORDER_STATUS: {
             throw RuntimeError("addOrderStatus not supported"sv);
           }
-          case Event::CANCEL_ORDER_STATUS:
+          case CANCEL_ORDER_STATUS:
             throw RuntimeError("cancelOrderStatus not supported"sv);
         }
         break;
@@ -139,17 +141,18 @@ bool dispatch2(
     if (offset > (1 + data_count))
       break;
     switch (channel) {
-      case Channel::UNDEFINED:
-      case Channel::UNKNOWN:
+      using enum Channel::type_t;
+      case UNDEFINED:
+      case UNKNOWN:
         log::fatal("Unexpected"sv);
         break;
-      case Channel::TICKER: {
+      case TICKER: {
         throw RuntimeError("ticker not supported"sv);
       }
-      case Channel::OHLC: {
+      case OHLC: {
         throw RuntimeError("ohlc not supported"sv);
       }
-      case Channel::TRADE: {
+      case TRADE: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
         Trade trade(value, buffer);
@@ -158,7 +161,7 @@ bool dispatch2(
         dispatched = true;
         break;
       }
-      case Channel::SPREAD: {
+      case SPREAD: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
         Spread spread(value);
@@ -167,7 +170,7 @@ bool dispatch2(
         dispatched = true;
         break;
       }
-      case Channel::BOOK: {
+      case BOOK: {
         if (data_count < 1 || data_count > 2) [[unlikely]]
           log::fatal("Unexpected"sv);
         switch (offset) {
@@ -182,10 +185,10 @@ bool dispatch2(
         }
         break;
       }
-      case Channel::OWN_TRADES: {
+      case OWN_TRADES: {
         throw RuntimeError("ownTrades not supported"sv);
       }
-      case Channel::OPEN_ORDERS: {
+      case OPEN_ORDERS: {
         throw RuntimeError("openOrders not supported"sv);
       }
     }
