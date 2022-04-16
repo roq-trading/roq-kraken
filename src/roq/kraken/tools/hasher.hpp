@@ -6,8 +6,8 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/crypto/hmac.hpp"
-#include "roq/core/crypto/sha.hpp"
+#include "roq/core/crypto/hmac_sha512.hpp"
+#include "roq/core/crypto/sha256.hpp"
 
 #include "roq/core/http/method.hpp"
 
