@@ -240,7 +240,7 @@ bool ParserPublic::dispatch(
             if (pos != name.npos)
               name.remove_suffix(std::size(name) - pos);
             channel = Channel(name);
-#if !defined(NDEBUG)
+#ifndef NDEBUG
             if (channel == Channel::UNKNOWN) [[unlikely]]
               log::fatal(R"(Unknown channel="{}")"sv, name);
 #endif
