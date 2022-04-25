@@ -15,22 +15,22 @@ using namespace std::literals;
 namespace {
 struct Handler : public json::ParserPublic::Handler {
  protected:
-  void operator()(const Trace<json::Error> &) override { FAIL(); }
-  void operator()(const Trace<json::SystemStatus> &) override { FAIL(); }
-  void operator()(const Trace<json::Pong> &) override { FAIL(); }
-  void operator()(const Trace<json::Heartbeat> &) override { FAIL(); }
-  void operator()(const Trace<json::SubscriptionStatus> &) override { FAIL(); }
+  void operator()(const Trace<json::Error const> &) override { FAIL(); }
+  void operator()(const Trace<json::SystemStatus const> &) override { FAIL(); }
+  void operator()(const Trace<json::Pong const> &) override { FAIL(); }
+  void operator()(const Trace<json::Heartbeat const> &) override { FAIL(); }
+  void operator()(const Trace<json::SubscriptionStatus const> &) override { FAIL(); }
 
   void operator()(
-      const Trace<json::Trade> &, [[maybe_unused]] const std::string_view &pair) override {
+      const Trace<json::Trade const> &, [[maybe_unused]] const std::string_view &pair) override {
     FAIL();
   }
   void operator()(
-      const Trace<json::Spread> &, [[maybe_unused]] const std::string_view &pair) override {
+      const Trace<json::Spread const> &, [[maybe_unused]] const std::string_view &pair) override {
     found = true;
   }
   void operator()(
-      const Trace<json::Book> &, [[maybe_unused]] const std::string_view &pair) override {
+      const Trace<json::Book const> &, [[maybe_unused]] const std::string_view &pair) override {
     FAIL();
   }
 

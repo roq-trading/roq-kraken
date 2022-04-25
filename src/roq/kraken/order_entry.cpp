@@ -135,7 +135,7 @@ uint16_t OrderEntry::operator()(
 void OrderEntry::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    StreamStatus stream_status{
+    const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
         .supports = SUPPORTS,
@@ -168,7 +168,7 @@ void OrderEntry::operator()(const core::web::Client::Disconnected &) {
 
 void OrderEntry::operator()(const core::web::Client::Latency &latency) {
   auto trace_info = server::create_trace_info();
-  ExternalLatency external_latency{
+  const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
       .latency = latency.sample,
@@ -225,7 +225,7 @@ void OrderEntry::get_token() {
   });
 }
 
-void OrderEntry::get_token_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
+void OrderEntry::get_token_ack(const Trace<core::web::Response const> &event, uint32_t sequence) {
   profile_.get_web_sockets_token([&]() {
     // auto &[trace_info, response] = event;
     auto &trace_info = event.trace_info;
@@ -259,7 +259,7 @@ void OrderEntry::get_token_ack(const Trace<core::web::Response> &event, uint32_t
   });
 }
 
-void OrderEntry::operator()(const Trace<json::Token> &event) {
+void OrderEntry::operator()(const Trace<json::Token const> &event) {
   auto &[trace_info, token] = event;
   log::info<2>(R"(token={})"sv, token);
   TokenUpdate token_update{
@@ -299,7 +299,8 @@ void OrderEntry::get_positions() {
   });
 }
 
-void OrderEntry::get_positions_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
+void OrderEntry::get_positions_ack(
+    const Trace<core::web::Response const> &event, uint32_t sequence) {
   profile_.positions_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = OrderEntryState::POSITIONS;
@@ -312,7 +313,7 @@ void OrderEntry::get_positions_ack(const Trace<core::web::Response> &event, uint
       }
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
-      auto positions = core::json::Parser::create<json::Positions>(body, buffer);
+      const auto positions = core::json::Parser::create<json::Positions>(body, buffer);
       Trace event(trace_info, positions);
       (*this)(event);
       download_.check(state);
@@ -323,7 +324,7 @@ void OrderEntry::get_positions_ack(const Trace<core::web::Response> &event, uint
   });
 }
 
-void OrderEntry::operator()(const Trace<json::Positions> &event) {
+void OrderEntry::operator()(const Trace<json::Positions const> &event) {
   auto &[trace_info, positions] = event;
   log::info<4>("positions={}"sv, positions);
   assert(std::empty(positions.error));

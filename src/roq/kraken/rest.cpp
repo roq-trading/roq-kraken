@@ -99,7 +99,7 @@ void Rest::operator()(metrics::Writer &writer) {
 void Rest::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    StreamStatus stream_status{
+    const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -132,7 +132,7 @@ void Rest::operator()(const core::web::Client::Disconnected &) {
 
 void Rest::operator()(const core::web::Client::Latency &latency) {
   auto trace_info = server::create_trace_info();
-  ExternalLatency external_latency{
+  const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -187,7 +187,7 @@ void Rest::get_assets() {
   });
 }
 
-void Rest::get_assets_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
+void Rest::get_assets_ack(const Trace<core::web::Response const> &event, uint32_t sequence) {
   profile_.assets_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSETS;
@@ -200,7 +200,7 @@ void Rest::get_assets_ack(const Trace<core::web::Response> &event, uint32_t sequ
       }
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
-      auto assets = core::json::Parser::create<json::Assets>(body, buffer);
+      const auto assets = core::json::Parser::create<json::Assets>(body, buffer);
       Trace event(trace_info, assets);
       (*this)(event);
       download_.check(state);
@@ -211,7 +211,7 @@ void Rest::get_assets_ack(const Trace<core::web::Response> &event, uint32_t sequ
   });
 }
 
-void Rest::operator()(const Trace<json::Assets> &event) {
+void Rest::operator()(const Trace<json::Assets const> &event) {
   auto &[trace_info, assets] = event;
   log::info<4>("assets={}"sv, assets);
   // do nothing
@@ -245,7 +245,7 @@ void Rest::get_asset_pairs() {
   });
 }
 
-void Rest::get_asset_pairs_ack(const Trace<core::web::Response> &event, uint32_t sequence) {
+void Rest::get_asset_pairs_ack(const Trace<core::web::Response const> &event, uint32_t sequence) {
   profile_.asset_pairs_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSET_PAIRS;
@@ -258,7 +258,7 @@ void Rest::get_asset_pairs_ack(const Trace<core::web::Response> &event, uint32_t
       }
       response.expect(core::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
-      auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
+      const auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
       Trace event(trace_info, asset_pairs);
       (*this)(event);
       download_.check(state);
@@ -269,7 +269,7 @@ void Rest::get_asset_pairs_ack(const Trace<core::web::Response> &event, uint32_t
   });
 }
 
-void Rest::operator()(const Trace<json::AssetPairs> &event) {
+void Rest::operator()(const Trace<json::AssetPairs const> &event) {
   auto &[trace_info, asset_pairs] = event;
   log::info<4>("asset_pairs={}"sv, asset_pairs);
   assert(std::empty(asset_pairs.error));
@@ -292,7 +292,7 @@ void Rest::operator()(const Trace<json::AssetPairs> &event) {
     ++counter;
     auto tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals));
     auto min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals));
-    ReferenceData reference_data{
+    const ReferenceData reference_data{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
@@ -318,7 +318,7 @@ void Rest::operator()(const Trace<json::AssetPairs> &event) {
         .expiry_datetime_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
-    MarketStatus market_status{
+    const MarketStatus market_status{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,

@@ -64,35 +64,36 @@ bool ParserPublic::dispatch(
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case ERROR: {
-            auto error = core::json::Parser::create<Error>(message);
+            const auto error = core::json::Parser::create<Error>(message);
             Trace event(trace_info, error);
             handler(event);
             dispatched = true;
             break;
           }
           case SYSTEM_STATUS: {
-            auto system_status = core::json::Parser::create<SystemStatus>(message);
+            const auto system_status = core::json::Parser::create<SystemStatus>(message);
             Trace event(trace_info, system_status);
             handler(event);
             dispatched = true;
             break;
           }
           case PONG: {
-            auto pong = core::json::Parser::create<Pong>(message);
+            const auto pong = core::json::Parser::create<Pong>(message);
             Trace event(trace_info, pong);
             handler(event);
             dispatched = true;
             break;
           }
           case HEARTBEAT: {
-            auto heartbeat = core::json::Parser::create<Heartbeat>(message);
+            const auto heartbeat = core::json::Parser::create<Heartbeat>(message);
             Trace event(trace_info, heartbeat);
             handler(event);
             dispatched = true;
             break;
           }
           case SUBSCRIPTION_STATUS: {
-            auto subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
+            const auto subscription_status =
+                core::json::Parser::create<SubscriptionStatus>(message);
             Trace event(trace_info, subscription_status);
             handler(event);
             dispatched = true;
@@ -155,7 +156,7 @@ bool dispatch2(
       case TRADE: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
-        Trade trade(value, buffer);
+        const Trade trade(value, buffer);
         Trace event(trace_info, trade);
         handler(event, pair);
         dispatched = true;
@@ -164,7 +165,7 @@ bool dispatch2(
       case SPREAD: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
-        Spread spread(value);
+        const Spread spread(value);
         Trace event(trace_info, spread);
         handler(event, pair);
         dispatched = true;
@@ -207,7 +208,7 @@ bool dispatch2(
         log::fatal("Unexpected"sv);
       }
     }
-    Trace event(trace_info, book_1);
+    Trace event(trace_info, std::as_const(book_1));
     handler(event, pair);
     dispatched = true;
   }
