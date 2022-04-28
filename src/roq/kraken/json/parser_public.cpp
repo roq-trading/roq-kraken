@@ -24,15 +24,15 @@ bool ParserPublic::dispatch(
   auto root = parser.root();
   return std::visit(
       overloaded{
-          [](const core::json::null_t &) -> bool { throw std::bad_cast(); },
+          [](const core::json::Null &) -> bool { throw std::bad_cast(); },
           [](bool) -> bool { throw std::bad_cast(); },
           [](int64_t) -> bool { throw std::bad_cast(); },
           [](double) -> bool { throw std::bad_cast(); },
           [](const std::string_view &) -> bool { throw std::bad_cast(); },
-          [&](core::json::object_t &value) -> bool {
+          [&](core::json::Object &value) -> bool {
             return dispatch(handler, message, buffer, value, trace_info);
           },
-          [&](core::json::array_t &value) -> bool {
+          [&](core::json::Array &value) -> bool {
             return dispatch(handler, message, buffer, value, trace_info);
           },
       },
@@ -43,7 +43,7 @@ bool ParserPublic::dispatch(
     Handler &handler,
     const std::string_view &message,
     core::json::Buffer &,
-    core::json::object_t &root,
+    core::json::Object &root,
     const TraceInfo &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
@@ -135,7 +135,7 @@ bool dispatch2(
   auto root = parser.root();
   size_t offset = 0;
   Book book_1, book_2;
-  auto &obj = std::get<core::json::array_t>(root);
+  auto &obj = std::get<core::json::Array>(root);
   for (auto value : obj) {
     if (++offset == 1)
       continue;
@@ -220,7 +220,7 @@ bool ParserPublic::dispatch(
     Handler &handler,
     const std::string_view &message,
     core::json::Buffer &buffer,
-    core::json::array_t &root,
+    core::json::Array &root,
     const TraceInfo &trace_info) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;

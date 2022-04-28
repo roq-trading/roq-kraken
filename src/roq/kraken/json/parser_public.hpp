@@ -43,14 +43,14 @@ struct ParserPublic final {
       Handler &,
       const std::string_view &message,
       core::json::Buffer &,
-      core::json::object_t &root,
+      core::json::Object &root,
       const TraceInfo &);
 
   static bool dispatch(
       Handler &,
       const std::string_view &message,
       core::json::Buffer &,
-      core::json::array_t &root,
+      core::json::Array &root,
       const TraceInfo &trace_info);
 };
 
