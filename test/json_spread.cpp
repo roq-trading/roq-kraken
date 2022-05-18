@@ -15,24 +15,17 @@ using namespace std::literals;
 namespace {
 struct Handler : public json::ParserPublic::Handler {
  protected:
-  void operator()(const Trace<json::Error const> &) override { FAIL(); }
-  void operator()(const Trace<json::SystemStatus const> &) override { FAIL(); }
-  void operator()(const Trace<json::Pong const> &) override { FAIL(); }
-  void operator()(const Trace<json::Heartbeat const> &) override { FAIL(); }
-  void operator()(const Trace<json::SubscriptionStatus const> &) override { FAIL(); }
+  void operator()(Trace<json::Error const> const &) override { FAIL(); }
+  void operator()(Trace<json::SystemStatus const> const &) override { FAIL(); }
+  void operator()(Trace<json::Pong const> const &) override { FAIL(); }
+  void operator()(Trace<json::Heartbeat const> const &) override { FAIL(); }
+  void operator()(Trace<json::SubscriptionStatus const> const &) override { FAIL(); }
 
-  void operator()(
-      const Trace<json::Trade const> &, [[maybe_unused]] const std::string_view &pair) override {
-    FAIL();
-  }
-  void operator()(
-      const Trace<json::Spread const> &, [[maybe_unused]] const std::string_view &pair) override {
+  void operator()(Trace<json::Trade const> const &, [[maybe_unused]] std::string_view const &pair) override { FAIL(); }
+  void operator()(Trace<json::Spread const> const &, [[maybe_unused]] std::string_view const &pair) override {
     found = true;
   }
-  void operator()(
-      const Trace<json::Book const> &, [[maybe_unused]] const std::string_view &pair) override {
-    FAIL();
-  }
+  void operator()(Trace<json::Book const> const &, [[maybe_unused]] std::string_view const &pair) override { FAIL(); }
 
  private:
   json::Book _book;
@@ -44,7 +37,7 @@ struct Handler : public json::ParserPublic::Handler {
 }  // namespace
 
 TEST_CASE("json_spread_simple", "[json_spread]") {
-  const auto message = R"([)"
+  auto const message = R"([)"
                        R"(1061,)"
                        R"(["62.203000","62.436000","1644586454.291317","8.60138332","0.18317004"],)"
                        R"("spread",)"

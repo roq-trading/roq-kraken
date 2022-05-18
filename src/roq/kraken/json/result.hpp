@@ -15,11 +15,7 @@ namespace json {
 
 struct Result final {
   template <typename T, typename E, typename H>
-  static void dispatch(
-      const std::string_view &message,
-      core::json::Buffer &buffer,
-      E error_handler,
-      H result_handler) {
+  static void dispatch(std::string_view const &message, core::json::Buffer &buffer, E error_handler, H result_handler) {
     using namespace std::literals;
     core::json::Parser parser(message);
     auto root = parser.root();

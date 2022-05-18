@@ -12,7 +12,7 @@ using namespace roq::kraken;
 using namespace std::literals;
 
 TEST_CASE("json_token_simple", "[json_token]") {
-  const auto message = R"({)"
+  auto const message = R"({)"
                        R"("error":[],)"
                        R"("result":{)"
                        R"("expires":900,)"
@@ -25,7 +25,7 @@ TEST_CASE("json_token_simple", "[json_token]") {
   json::Result::dispatch<json::Token>(
       message,
       buffer,
-      [](const std::span<std::string_view> &errors) { FAIL(); },
-      [&](const json::Token &token) { found = true; });
+      [](std::span<std::string_view> const &errors) { FAIL(); },
+      [&](json::Token const &token) { found = true; });
   CHECK(found == true);
 }

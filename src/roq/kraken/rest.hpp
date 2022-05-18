@@ -38,10 +38,10 @@ class Rest final : public core::web::Client::Handler {
   };
 
   struct Handler {
-    virtual void operator()(const Trace<StreamStatus const> &) = 0;
-    virtual void operator()(const Trace<ExternalLatency const> &) = 0;
-    virtual void operator()(const Trace<ReferenceData const> &, bool is_last) = 0;
-    virtual void operator()(const Trace<MarketStatus const> &, bool is_last) = 0;
+    virtual void operator()(Trace<StreamStatus const> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
+    virtual void operator()(Trace<ReferenceData const> const &, bool is_last) = 0;
+    virtual void operator()(Trace<MarketStatus const> const &, bool is_last) = 0;
     // cross-communication
     virtual void operator()(SymbolsUpdate &) = 0;
   };
@@ -49,32 +49,32 @@ class Rest final : public core::web::Client::Handler {
   Rest(Handler &, core::io::Context &context, uint16_t stream_id, Shared &);
 
   Rest(Rest &&) = delete;
-  Rest(const Rest &) = delete;
+  Rest(Rest const &) = delete;
 
   bool ready() const { return status_ == ConnectionStatus::READY; }
 
-  void operator()(const Event<Start> &);
-  void operator()(const Event<Stop> &);
-  void operator()(const Event<Timer> &);
+  void operator()(Event<Start> const &);
+  void operator()(Event<Stop> const &);
+  void operator()(Event<Timer> const &);
 
   void operator()(metrics::Writer &);
 
  protected:
-  void operator()(const core::web::Client::Connected &) override;
-  void operator()(const core::web::Client::Disconnected &) override;
-  void operator()(const core::web::Client::Latency &) override;
+  void operator()(core::web::Client::Connected const &) override;
+  void operator()(core::web::Client::Disconnected const &) override;
+  void operator()(core::web::Client::Latency const &) override;
 
   void operator()(ConnectionStatus);
 
   uint32_t download(RestState);
 
   void get_assets();
-  void get_assets_ack(const Trace<core::web::Response const> &, uint32_t sequence);
-  void operator()(const Trace<json::Assets const> &);
+  void get_assets_ack(Trace<core::web::Response const> const &, uint32_t sequence);
+  void operator()(Trace<json::Assets const> const &);
 
   void get_asset_pairs();
-  void get_asset_pairs_ack(const Trace<core::web::Response const> &, uint32_t sequence);
-  void operator()(const Trace<json::AssetPairs const> &);
+  void get_asset_pairs_ack(Trace<core::web::Response const> const &, uint32_t sequence);
+  void operator()(Trace<json::AssetPairs const> const &);
 
  private:
   Handler &handler_;

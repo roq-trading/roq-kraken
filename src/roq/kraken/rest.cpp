@@ -21,7 +21,7 @@ namespace roq {
 namespace kraken {
 
 namespace {
-const auto NAME = "rest"sv;
+auto const NAME = "rest"sv;
 
 const Mask SUPPORTS{
     SupportType::REFERENCE_DATA,
@@ -29,7 +29,7 @@ const Mask SUPPORTS{
 };
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(const std::string_view &group, const std::string_view &function)
+  explicit create_metrics(std::string_view const &group, std::string_view const &function)
       : core::metrics::Factory(server::Flags::name(), group, function) {}
 };
 
@@ -67,19 +67,18 @@ Rest::Rest(Handler &handler, core::io::Context &context, uint16_t stream_id, Sha
       latency_{
           .ping = create_metrics(name_, "ping"sv),
       },
-      shared_(shared),
-      download_(Flags::rest_request_timeout(), [this](auto state) { return download(state); }) {
+      shared_(shared), download_(Flags::rest_request_timeout(), [this](auto state) { return download(state); }) {
 }
 
-void Rest::operator()(const Event<Start> &) {
+void Rest::operator()(Event<Start> const &) {
   connection_.start();
 }
 
-void Rest::operator()(const Event<Stop> &) {
+void Rest::operator()(Event<Stop> const &) {
   connection_.stop();
 }
 
-void Rest::operator()(const Event<Timer> &event) {
+void Rest::operator()(Event<Timer> const &event) {
   connection_.refresh(event.value.now);
 }
 
@@ -114,7 +113,7 @@ void Rest::operator()(ConnectionStatus status) {
   }
 }
 
-void Rest::operator()(const core::web::Client::Connected &) {
+void Rest::operator()(core::web::Client::Connected const &) {
   if (download_.downloading()) {
     download_.bump();
   } else {
@@ -123,14 +122,14 @@ void Rest::operator()(const core::web::Client::Connected &) {
   }
 }
 
-void Rest::operator()(const core::web::Client::Disconnected &) {
+void Rest::operator()(core::web::Client::Disconnected const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
   if (!download_.downloading())
     download_.reset();
 }
 
-void Rest::operator()(const core::web::Client::Latency &latency) {
+void Rest::operator()(core::web::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -178,16 +177,15 @@ void Rest::get_assets() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    connection_(
-        "assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-          auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
-          get_assets_ack(event, sequence);
-        });
+    connection_("assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+      auto trace_info = server::create_trace_info();
+      Trace event(trace_info, response);
+      get_assets_ack(event, sequence);
+    });
   });
 }
 
-void Rest::get_assets_ack(const Trace<core::web::Response const> &event, uint32_t sequence) {
+void Rest::get_assets_ack(Trace<core::web::Response const> const &event, uint32_t sequence) {
   profile_.assets_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSETS;
@@ -211,7 +209,7 @@ void Rest::get_assets_ack(const Trace<core::web::Response const> &event, uint32_
   });
 }
 
-void Rest::operator()(const Trace<json::Assets const> &event) {
+void Rest::operator()(Trace<json::Assets const> const &event) {
   auto &[trace_info, assets] = event;
   log::info<4>("assets={}"sv, assets);
   // do nothing
@@ -234,18 +232,15 @@ void Rest::get_asset_pairs() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    connection_(
-        "asset_pairs"sv,
-        request,
-        [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-          auto trace_info = server::create_trace_info();
-          Trace event(trace_info, response);
-          get_asset_pairs_ack(event, sequence);
-        });
+    connection_("asset_pairs"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+      auto trace_info = server::create_trace_info();
+      Trace event(trace_info, response);
+      get_asset_pairs_ack(event, sequence);
+    });
   });
 }
 
-void Rest::get_asset_pairs_ack(const Trace<core::web::Response const> &event, uint32_t sequence) {
+void Rest::get_asset_pairs_ack(Trace<core::web::Response const> const &event, uint32_t sequence) {
   profile_.asset_pairs_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSET_PAIRS;
@@ -269,7 +264,7 @@ void Rest::get_asset_pairs_ack(const Trace<core::web::Response const> &event, ui
   });
 }
 
-void Rest::operator()(const Trace<json::AssetPairs const> &event) {
+void Rest::operator()(Trace<json::AssetPairs const> const &event) {
   auto &[trace_info, asset_pairs] = event;
   log::info<4>("asset_pairs={}"sv, asset_pairs);
   assert(std::empty(asset_pairs.error));

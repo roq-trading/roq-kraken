@@ -15,18 +15,15 @@ using namespace std::literals;
 namespace {
 struct Handler : public json::ParserPublic::Handler {
  protected:
-  void operator()(const Trace<json::Error const> &) override {}
-  void operator()(const Trace<json::SystemStatus const> &) override {}
-  void operator()(const Trace<json::Pong const> &) override {}
-  void operator()(const Trace<json::Heartbeat const> &) override {}
-  void operator()(const Trace<json::SubscriptionStatus const> &) override {}
+  void operator()(Trace<json::Error const> const &) override {}
+  void operator()(Trace<json::SystemStatus const> const &) override {}
+  void operator()(Trace<json::Pong const> const &) override {}
+  void operator()(Trace<json::Heartbeat const> const &) override {}
+  void operator()(Trace<json::SubscriptionStatus const> const &) override {}
 
-  void operator()(
-      const Trace<json::Trade const> &, [[maybe_unused]] const std::string_view &pair) override {}
-  void operator()(
-      const Trace<json::Spread const> &, [[maybe_unused]] const std::string_view &pair) override {}
-  void operator()(
-      const Trace<json::Book const> &, [[maybe_unused]] const std::string_view &pair) override {}
+  void operator()(Trace<json::Trade const> const &, [[maybe_unused]] std::string_view const &pair) override {}
+  void operator()(Trace<json::Spread const> const &, [[maybe_unused]] std::string_view const &pair) override {}
+  void operator()(Trace<json::Book const> const &, [[maybe_unused]] std::string_view const &pair) override {}
 
  private:
   json::Book _book;
@@ -35,7 +32,7 @@ struct Handler : public json::ParserPublic::Handler {
 }  // namespace
 
 TEST_CASE("json_book_parse_test_snapshot", "[json_book]") {
-  const auto message = R"([)"
+  auto const message = R"([)"
                        R"(1110,)"
                        R"({)"
                        R"("as":[)"
@@ -72,7 +69,7 @@ TEST_CASE("json_book_parse_test_snapshot", "[json_book]") {
 }
 
 TEST_CASE("json_book_parse_test_update_bid_1", "[json_book]") {
-  const auto message = R"([)"
+  auto const message = R"([)"
                        R"(1110,)"
                        R"({)"
                        R"("b":[)"
@@ -90,7 +87,7 @@ TEST_CASE("json_book_parse_test_update_bid_1", "[json_book]") {
 }
 
 TEST_CASE("json_book_parse_test_update_ask_1", "[json_book]") {
-  const auto message = R"([)"
+  auto const message = R"([)"
                        R"(1110,)"
                        R"({)"
                        R"("a":[)"
@@ -108,7 +105,7 @@ TEST_CASE("json_book_parse_test_update_ask_1", "[json_book]") {
 }
 
 TEST_CASE("json_book_parse_test_update_complex", "[json_book]") {
-  const auto message = R"([)"
+  auto const message = R"([)"
                        R"(1110,)"
                        R"({)"
                        R"("a":[)"
@@ -214,7 +211,7 @@ TEST_CASE("json_book_parse_test_update_complex", "[json_book]") {
 // reason? did their server not synchronize NTP before allowing orders?
 
 TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "[json_book]") {
-  const auto message = R"([)"
+  auto const message = R"([)"
                        R"(1110,)"
                        R"({)"
                        R"("a":[)"

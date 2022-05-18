@@ -24,34 +24,29 @@ namespace json {
 
 struct ParserPublic final {
   struct Handler {
-    virtual void operator()(const Trace<Error const> &) = 0;
-    virtual void operator()(const Trace<SystemStatus const> &) = 0;
-    virtual void operator()(const Trace<Pong const> &) = 0;
-    virtual void operator()(const Trace<Heartbeat const> &) = 0;
-    virtual void operator()(const Trace<SubscriptionStatus const> &) = 0;
+    virtual void operator()(Trace<Error const> const &) = 0;
+    virtual void operator()(Trace<SystemStatus const> const &) = 0;
+    virtual void operator()(Trace<Pong const> const &) = 0;
+    virtual void operator()(Trace<Heartbeat const> const &) = 0;
+    virtual void operator()(Trace<SubscriptionStatus const> const &) = 0;
 
-    virtual void operator()(const Trace<Trade const> &, const std::string_view &pair) = 0;
-    virtual void operator()(const Trace<Spread const> &, const std::string_view &pair) = 0;
-    virtual void operator()(const Trace<Book const> &, const std::string_view &pair) = 0;
+    virtual void operator()(Trace<Trade const> const &, std::string_view const &pair) = 0;
+    virtual void operator()(Trace<Spread const> const &, std::string_view const &pair) = 0;
+    virtual void operator()(Trace<Book const> const &, std::string_view const &pair) = 0;
   };
 
-  static bool dispatch(
-      Handler &, const std::string_view &message, core::json::Buffer &, const TraceInfo &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::Buffer &, TraceInfo const &);
 
  protected:
   static bool dispatch(
-      Handler &,
-      const std::string_view &message,
-      core::json::Buffer &,
-      core::json::Object &root,
-      const TraceInfo &);
+      Handler &, std::string_view const &message, core::json::Buffer &, core::json::Object &root, TraceInfo const &);
 
   static bool dispatch(
       Handler &,
-      const std::string_view &message,
+      std::string_view const &message,
       core::json::Buffer &,
       core::json::Array &root,
-      const TraceInfo &trace_info);
+      TraceInfo const &trace_info);
 };
 
 }  // namespace json

@@ -15,36 +15,29 @@ namespace kraken {
 namespace json {
 
 bool ParserPublic::dispatch(
-    Handler &handler,
-    const std::string_view &message,
-    core::json::Buffer &buffer,
-    const TraceInfo &trace_info) {
+    Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser(message);
   auto root = parser.root();
   return std::visit(
       overloaded{
-          [](const core::json::Null &) -> bool { throw std::bad_cast(); },
+          [](core::json::Null const &) -> bool { throw std::bad_cast(); },
           [](bool) -> bool { throw std::bad_cast(); },
           [](int64_t) -> bool { throw std::bad_cast(); },
           [](double) -> bool { throw std::bad_cast(); },
-          [](const std::string_view &) -> bool { throw std::bad_cast(); },
-          [&](core::json::Object &value) -> bool {
-            return dispatch(handler, message, buffer, value, trace_info);
-          },
-          [&](core::json::Array &value) -> bool {
-            return dispatch(handler, message, buffer, value, trace_info);
-          },
+          [](std::string_view const &) -> bool { throw std::bad_cast(); },
+          [&](core::json::Object &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
+          [&](core::json::Array &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
       },
       root);
 }
 
 bool ParserPublic::dispatch(
     Handler &handler,
-    const std::string_view &message,
+    std::string_view const &message,
     core::json::Buffer &,
     core::json::Object &root,
-    const TraceInfo &trace_info) {
+    TraceInfo const &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField(key);
@@ -64,36 +57,35 @@ bool ParserPublic::dispatch(
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case ERROR: {
-            const auto error = core::json::Parser::create<Error>(message);
+            auto const error = core::json::Parser::create<Error>(message);
             Trace event(trace_info, error);
             handler(event);
             dispatched = true;
             break;
           }
           case SYSTEM_STATUS: {
-            const auto system_status = core::json::Parser::create<SystemStatus>(message);
+            auto const system_status = core::json::Parser::create<SystemStatus>(message);
             Trace event(trace_info, system_status);
             handler(event);
             dispatched = true;
             break;
           }
           case PONG: {
-            const auto pong = core::json::Parser::create<Pong>(message);
+            auto const pong = core::json::Parser::create<Pong>(message);
             Trace event(trace_info, pong);
             handler(event);
             dispatched = true;
             break;
           }
           case HEARTBEAT: {
-            const auto heartbeat = core::json::Parser::create<Heartbeat>(message);
+            auto const heartbeat = core::json::Parser::create<Heartbeat>(message);
             Trace event(trace_info, heartbeat);
             handler(event);
             dispatched = true;
             break;
           }
           case SUBSCRIPTION_STATUS: {
-            const auto subscription_status =
-                core::json::Parser::create<SubscriptionStatus>(message);
+            auto const subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
             Trace event(trace_info, subscription_status);
             handler(event);
             dispatched = true;
@@ -115,12 +107,12 @@ bool ParserPublic::dispatch(
 namespace {
 bool dispatch2(
     ParserPublic::Handler &handler,
-    const std::string_view &message,
+    std::string_view const &message,
     core::json::Buffer &buffer,
-    const TraceInfo &trace_info,
+    TraceInfo const &trace_info,
     [[maybe_unused]] int64_t channel_id,
     Channel channel,
-    const std::string_view &pair,
+    std::string_view const &pair,
     size_t data_count) {
   /*
   log::debug(
@@ -218,10 +210,10 @@ bool dispatch2(
 
 bool ParserPublic::dispatch(
     Handler &handler,
-    const std::string_view &message,
+    std::string_view const &message,
     core::json::Buffer &buffer,
     core::json::Array &root,
-    const TraceInfo &trace_info) {
+    TraceInfo const &trace_info) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED;
   std::string_view pair;

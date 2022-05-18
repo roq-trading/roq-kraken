@@ -21,14 +21,13 @@ namespace tools {
 namespace {
 const constexpr auto THRESHOLD = -1000ms;
 
-auto create_hmac(const std::string_view &secret) {
+auto create_hmac(std::string_view const &secret) {
   auto raw_secret = core::binascii::Base64::decode(secret, true);
   return core::crypto::HMAC_SHA512(raw_secret);
 }
 }  // namespace
 
-Hasher::Hasher(
-    const std::string_view &key, const std::string_view &secret, const std::string_view &passphrase)
+Hasher::Hasher(std::string_view const &key, std::string_view const &secret, std::string_view const &passphrase)
     : key_(key), passphrase_(passphrase), hmac_(create_hmac(secret)) {
 }
 
@@ -54,7 +53,7 @@ std::string Hasher::create_body() {
 }
 
 std::string Hasher::create_headers(
-    core::http::Method method, const std::string_view &path, const std::string_view &body) {
+    core::http::Method method, std::string_view const &path, std::string_view const &body) {
   assert(method == core::http::Method::POST);
   assert(!std::empty(body));
   auto nonce = fmt::format("{}"sv, nonce_.count());
