@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2020,
  Hans Erik Thrane */
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include "roq/kraken/json/result.hpp"
 #include "roq/kraken/json/token.hpp"
