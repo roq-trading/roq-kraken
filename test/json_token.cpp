@@ -25,7 +25,7 @@ TEST_CASE("json_token_simple", "[json_token]") {
   json::Result::dispatch<json::Token>(
       message,
       buffer,
-      [](std::span<std::string_view> const &errors) { FAIL(); },
-      [&](json::Token const &token) { found = true; });
+      []([[maybe_unused]] std::span<std::string_view> const &errors) { FAIL(); },
+      [&](json::Token const &) { found = true; });
   CHECK(found == true);
 }
