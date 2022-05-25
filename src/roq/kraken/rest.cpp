@@ -280,11 +280,7 @@ void Rest::operator()(Trace<json::AssetPairs const> const &event) {
     std::string symbol(item.wsname);
     // remove escape
     symbol.erase(std::remove(std::begin(symbol), std::end(symbol), '\\'), std::end(symbol));
-    if (shared_.discard_symbol(symbol))
-      continue;
-    if (all_symbols_.emplace(symbol).second)  // only include new
-      symbols.emplace_back(symbol);
-    ++counter;
+    auto discard = shared_.discard_symbol(symbol);
     auto tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals));
     auto min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals));
     const ReferenceData reference_data{
@@ -311,8 +307,14 @@ void Rest::operator()(Trace<json::AssetPairs const> const &event) {
         .settlement_date = {},
         .expiry_datetime = {},
         .expiry_datetime_utc = {},
+        .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+    if (discard)
+      continue;
+    if (all_symbols_.emplace(symbol).second)  // only include new
+      symbols.emplace_back(symbol);
+    ++counter;
     const MarketStatus market_status{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),

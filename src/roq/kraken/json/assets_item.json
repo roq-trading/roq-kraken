@@ -17,6 +17,10 @@
     {
       "name": "display_decimals",
       "type": "uint32_t"
+    },
+    {
+      "name": "collateral_value",
+      "type": "double"
     }
   ]
 }
