@@ -38,7 +38,7 @@ auto create_connection(auto &handler, auto &context) {
   core::web::ClientSocket::Config config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
-      .disconnect_on_idle_timeout = {},
+      .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
       .uris = {&uri, 1},
       .query = {},
@@ -279,6 +279,7 @@ void MarketData::operator()(Trace<json::SubscriptionStatus const> const &event) 
 void MarketData::operator()(Trace<json::Trade const> const &event, std::string_view const &pair) {
   auto &[trace_info, trade] = event;
   log::info<3>(R"(trade={}, pair="{}")"sv, trade, pair);
+  connection_.touch(trace_info.source_receive_time);
   core::back_emplacer trades(shared_.trades);
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
@@ -300,6 +301,7 @@ void MarketData::operator()(Trace<json::Trade const> const &event, std::string_v
 void MarketData::operator()(Trace<json::Spread const> const &event, std::string_view const &pair) {
   auto &[trace_info, spread] = event;
   log::info<3>(R"(spread={}, pair="{}")"sv, spread, pair);
+  connection_.touch(trace_info.source_receive_time);
   const TopOfBook top_of_book{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
@@ -320,6 +322,7 @@ void MarketData::operator()(Trace<json::Spread const> const &event, std::string_
 void MarketData::operator()(Trace<json::Book const> const &event, std::string_view const &pair) {
   auto &[trace_info, book] = event;
   log::info<3>(R"(book={}, pair="{}")"sv, book, pair);
+  connection_.touch(trace_info.source_receive_time);
   bool snapshot = !std::empty(book.bs) && !std::empty(book.as);
   auto iter = latch_.find(pair);
   if (iter != std::end(latch_)) [[unlikely]] {
