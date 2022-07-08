@@ -10,7 +10,7 @@
 
 #include "roq/server.hpp"
 
-#include "roq/core/io/context.hpp"
+#include "roq/core/io/event_context.hpp"
 
 #include "roq/kraken/config.hpp"
 #include "roq/kraken/drop_copy.hpp"
@@ -80,7 +80,7 @@ class Gateway final : public server::Handler,
   // security
   absl::flat_hash_map<Account, std::unique_ptr<Security>> security_;
   // io
-  std::unique_ptr<core::io::Context> context_;
+  core::io::EventContext context_;
   // shared
   Shared shared_;
   // seed
