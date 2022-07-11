@@ -23,14 +23,14 @@
     },
     {
       "name": "rest_uri",
-      "type": "roq::core::URI",
+      "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI<std::string>",
       "default": "https://api.kraken.com",
       "description": "REST end-point (URI)"
     },
     {
       "name": "rest_proxy",
-      "type": "roq::core::URI",
+      "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI<std::string>",
       "description": "proxy end-point (URI)"
     },
@@ -57,7 +57,7 @@
     },
     {
       "name": "ws_public_uri",
-      "type": "roq::core::URI",
+      "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI<std::string>",
       "default": "wss://beta-ws.kraken.com",
       "description": "WebSocket end-point (URI)"
@@ -92,7 +92,7 @@
     },
     {
       "name": "ws_private_uri",
-      "type": "roq::core::URI",
+      "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI<std::string>",
       "default": "wss://beta-ws-auth.kraken.com",
       "description": "WebSocket end-point (URI)"
