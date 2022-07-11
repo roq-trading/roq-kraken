@@ -15,7 +15,7 @@
 #include "roq/core/metrics/latency.hpp"
 #include "roq/core/metrics/profile.hpp"
 
-#include "roq/core/io/context.hpp"
+#include "roq/io/context.hpp"
 
 #include "roq/core/web/client.hpp"
 
@@ -46,7 +46,7 @@ class Rest final : public core::web::Client::Handler {
     virtual void operator()(SymbolsUpdate &) = 0;
   };
 
-  Rest(Handler &, core::io::Context &context, uint16_t stream_id, Shared &);
+  Rest(Handler &, io::Context &context, uint16_t stream_id, Shared &);
 
   Rest(Rest &&) = delete;
   Rest(Rest const &) = delete;

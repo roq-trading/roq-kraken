@@ -15,7 +15,7 @@
 #include "roq/core/metrics/latency.hpp"
 #include "roq/core/metrics/profile.hpp"
 
-#include "roq/core/io/context.hpp"
+#include "roq/io/context.hpp"
 
 #include "roq/core/web/client.hpp"
 
@@ -47,7 +47,7 @@ class OrderEntry final : public core::web::Client::Handler {
     virtual void operator()(TokenUpdate &) = 0;
   };
 
-  OrderEntry(Handler &, core::io::Context &context, uint16_t stream_id, Security &, Shared &);
+  OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Security &, Shared &);
 
   OrderEntry(OrderEntry &&) = delete;
   OrderEntry(OrderEntry const &) = delete;
