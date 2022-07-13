@@ -53,8 +53,8 @@ std::string Hasher::create_body() {
 }
 
 std::string Hasher::create_headers(
-    core::http::Method method, std::string_view const &path, std::string_view const &body) {
-  assert(method == core::http::Method::POST);
+    web::http::Method method, std::string_view const &path, std::string_view const &body) {
+  assert(method == web::http::Method::POST);
   assert(!std::empty(body));
   auto nonce = fmt::format("{}"sv, nonce_.count());
   sha_.clear();

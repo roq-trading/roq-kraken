@@ -11,6 +11,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/web/socket/client_factory.hpp"
+
 #include "roq/kraken/flags.hpp"
 
 #include "roq/kraken/json/utils.hpp"
@@ -35,7 +37,7 @@ struct create_metrics final : public core::metrics::Factory {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::ws_public_uri();
-  core::web::ClientSocket::Config config{
+  web::socket::Client::Config config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
       .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
@@ -46,7 +48,7 @@ auto create_connection(auto &handler, auto &context) {
       .read_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
-  return core::web::ClientSocket{handler, context, config, []() { return std::string(); }};
+  return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
 
 template <typename T>
@@ -89,15 +91,15 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
 }
 
 void MarketData::operator()(Event<Start> const &) {
-  connection_.start();
+  (*connection_).start();
 }
 
 void MarketData::operator()(Event<Stop> const &) {
-  connection_.stop();
+  (*connection_).stop();
 }
 
 void MarketData::operator()(Event<Timer> const &event) {
-  connection_.refresh(event.value.now);
+  (*connection_).refresh(event.value.now);
 }
 
 void MarketData::operator()(metrics::Writer &writer) {
@@ -116,25 +118,25 @@ void MarketData::subscribe(size_t start_from) {
     subscribe(shared_.symbols.get_slice(index_, start_from));
 }
 
-void MarketData::operator()(core::web::ClientSocket::Connected const &) {
+void MarketData::operator()(web::socket::Client::Connected const &) {
   // note! wait for upgrade
 }
 
-void MarketData::operator()(core::web::ClientSocket::Disconnected const &) {
+void MarketData::operator()(web::socket::Client::Disconnected const &) {
   ++counter_.disconnect;
   next_heartbeat_ = {};
   (*this)(ConnectionStatus::DISCONNECTED);
 }
 
-void MarketData::operator()(core::web::ClientSocket::Ready const &) {
+void MarketData::operator()(web::socket::Client::Ready const &) {
   (*this)(ConnectionStatus::READY);
   subscribe();
 }
 
-void MarketData::operator()(core::web::ClientSocket::Close const &) {
+void MarketData::operator()(web::socket::Client::Close const &) {
 }
 
-void MarketData::operator()(core::web::ClientSocket::Latency const &latency) {
+void MarketData::operator()(web::socket::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -145,11 +147,11 @@ void MarketData::operator()(core::web::ClientSocket::Latency const &latency) {
   latency_.ping.update(latency.sample);
 }
 
-void MarketData::operator()(core::web::ClientSocket::Text const &text) {
+void MarketData::operator()(web::socket::Client::Text const &text) {
   parse(text.payload);
 }
 
-void MarketData::operator()(core::web::ClientSocket::Binary const &) {
+void MarketData::operator()(web::socket::Client::Binary const &) {
   log::fatal("Unexpected"sv);
 }
 
@@ -193,7 +195,7 @@ void MarketData::subscribe(std::string_view const &name, std::span<Symbol const>
         name,
         Flags::ws_public_subscribe_book_depth());
     log::info<3>(R"(request="{}")"sv, message);
-    connection_.send_text(message);
+    (*connection_).send_text(message);
   } else {
     auto message = fmt::format(
         R"({{)"
@@ -206,7 +208,7 @@ void MarketData::subscribe(std::string_view const &name, std::span<Symbol const>
         fmt::join(symbols, R"(",")"sv),
         name);
     log::info<3>(R"(request="{}")"sv, message);
-    connection_.send_text(message);
+    (*connection_).send_text(message);
   }
 }
 
@@ -223,7 +225,7 @@ void MarketData::subscribe_book(std::string_view const &symbol) {
       symbol,
       Flags::ws_public_subscribe_book_depth());
   log::info<3>(R"(request="{}")"sv, message);
-  connection_.send_text(message);
+  (*connection_).send_text(message);
 }
 
 void MarketData::unsubscribe_book(std::string_view const &symbol) {
@@ -239,7 +241,7 @@ void MarketData::unsubscribe_book(std::string_view const &symbol) {
       symbol,
       Flags::ws_public_subscribe_book_depth());
   log::info<3>(R"(request="{}")"sv, message);
-  connection_.send_text(message);
+  (*connection_).send_text(message);
 }
 
 void MarketData::parse(std::string_view const &message) {
@@ -280,7 +282,7 @@ void MarketData::operator()(Trace<json::SubscriptionStatus const> const &event) 
 void MarketData::operator()(Trace<json::Trade const> const &event, std::string_view const &pair) {
   auto &[trace_info, trade] = event;
   log::info<3>(R"(trade={}, pair="{}")"sv, trade, pair);
-  connection_.touch(trace_info.source_receive_time);
+  (*connection_).touch(trace_info.source_receive_time);
   core::back_emplacer trades(shared_.trades);
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
@@ -302,7 +304,7 @@ void MarketData::operator()(Trace<json::Trade const> const &event, std::string_v
 void MarketData::operator()(Trace<json::Spread const> const &event, std::string_view const &pair) {
   auto &[trace_info, spread] = event;
   log::info<3>(R"(spread={}, pair="{}")"sv, spread, pair);
-  connection_.touch(trace_info.source_receive_time);
+  (*connection_).touch(trace_info.source_receive_time);
   const TopOfBook top_of_book{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
@@ -323,7 +325,7 @@ void MarketData::operator()(Trace<json::Spread const> const &event, std::string_
 void MarketData::operator()(Trace<json::Book const> const &event, std::string_view const &pair) {
   auto &[trace_info, book] = event;
   log::info<3>(R"(book={}, pair="{}")"sv, book, pair);
-  connection_.touch(trace_info.source_receive_time);
+  (*connection_).touch(trace_info.source_receive_time);
   bool snapshot = !std::empty(book.bs) && !std::empty(book.as);
   auto iter = latch_.find(pair);
   if (iter != std::end(latch_)) [[unlikely]] {

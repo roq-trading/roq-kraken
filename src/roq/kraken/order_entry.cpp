@@ -11,6 +11,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/web/rest/client_factory.hpp"
+
 #include "roq/kraken/flags.hpp"
 
 #include "roq/kraken/json/result.hpp"
@@ -36,20 +38,20 @@ struct create_metrics final : public core::metrics::Factory {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
-  core::web::Client::Config config{
+  web::rest::Client::Config config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
       .uris = {&uri, 1},
       .proxy = Flags::rest_proxy(),
       .user_agent = ROQ_PACKAGE_NAME,
-      .connection = core::http::Connection::KEEP_ALIVE,
+      .connection = web::http::Connection::KEEP_ALIVE,
       .allow_pipelining = true,
       .request_timeout = Flags::rest_request_timeout(),
       .ping_frequency = Flags::rest_ping_freq(),
       .ping_path = Flags::rest_ping_path(),
   };
-  return core::web::Client{handler, context, config};
+  return web::rest::ClientFactory::create(handler, context, config);
 }
 }  // namespace
 
@@ -74,15 +76,15 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
 }
 
 void OrderEntry::operator()(Event<Start> const &) {
-  connection_.start();
+  (*connection_).start();
 }
 
 void OrderEntry::operator()(Event<Stop> const &) {
-  connection_.stop();
+  (*connection_).stop();
 }
 
 void OrderEntry::operator()(Event<Timer> const &event) {
-  connection_.refresh(event.value.now);
+  (*connection_).refresh(event.value.now);
 }
 
 void OrderEntry::operator()(metrics::Writer &writer) {
@@ -142,7 +144,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
   }
 }
 
-void OrderEntry::operator()(core::web::Client::Connected const &) {
+void OrderEntry::operator()(web::rest::Client::Connected const &) {
   if (download_.downloading()) {
     download_.bump();
   } else {
@@ -151,14 +153,14 @@ void OrderEntry::operator()(core::web::Client::Connected const &) {
   }
 }
 
-void OrderEntry::operator()(core::web::Client::Disconnected const &) {
+void OrderEntry::operator()(web::rest::Client::Disconnected const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
   if (!download_.downloading())
     download_.reset();
 }
 
-void OrderEntry::operator()(core::web::Client::Latency const &latency) {
+void OrderEntry::operator()(web::rest::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -193,22 +195,22 @@ uint32_t OrderEntry::download(OrderEntryState state) {
 
 void OrderEntry::get_token() {
   profile_.get_web_sockets_token([&]() {
-    auto method = core::http::Method::POST;
+    auto method = web::http::Method::POST;
     auto path = "/0/private/GetWebSocketsToken"sv;
     auto body = security_.create_body();
     auto headers = security_.create_headers(method, path, body);
-    core::web::Request request{
+    web::rest::Request request{
         .method = method,
         .path = path,
         .query = {},
-        .accept = core::http::Accept::JSON,
-        .content_type = core::http::ContentType::FORM,
+        .accept = web::http::Accept::JSON,
+        .content_type = web::http::ContentType::FORM,
         .headers = headers,
         .body = body,
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    connection_("token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    (*connection_)("token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event(trace_info, response);
       get_token_ack(event, sequence);
@@ -216,7 +218,7 @@ void OrderEntry::get_token() {
   });
 }
 
-void OrderEntry::get_token_ack(Trace<core::web::Response const> const &event, uint32_t sequence) {
+void OrderEntry::get_token_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
   profile_.get_web_sockets_token([&]() {
     // auto &[trace_info, response] = event;
     auto &trace_info = event.trace_info;
@@ -229,7 +231,7 @@ void OrderEntry::get_token_ack(Trace<core::web::Response const> const &event, ui
         log::info("Download state={} has already been processed"sv, state);
         return;
       }
-      response.expect(core::http::Status::OK);
+      response.expect(web::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       json::Result::dispatch<json::Token>(
           body,
@@ -264,22 +266,22 @@ void OrderEntry::operator()(Trace<json::Token const> const &event) {
 
 void OrderEntry::get_positions() {
   profile_.positions([&]() {
-    auto method = core::http::Method::POST;
+    auto method = web::http::Method::POST;
     auto path = "/0/private/OpenPositions"sv;
     auto body = security_.create_body();
     auto headers = security_.create_headers(method, path, body);
-    core::web::Request request{
+    web::rest::Request request{
         .method = method,
         .path = path,
         .query = {},
-        .accept = core::http::Accept::JSON,
-        .content_type = core::http::ContentType::FORM,
+        .accept = web::http::Accept::JSON,
+        .content_type = web::http::ContentType::FORM,
         .headers = headers,
         .body = body,
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    connection_("positions"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    (*connection_)("positions"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event(trace_info, response);
       get_positions_ack(event, sequence);
@@ -287,7 +289,7 @@ void OrderEntry::get_positions() {
   });
 }
 
-void OrderEntry::get_positions_ack(Trace<core::web::Response const> const &event, uint32_t sequence) {
+void OrderEntry::get_positions_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
   profile_.positions_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = OrderEntryState::POSITIONS;
@@ -298,7 +300,7 @@ void OrderEntry::get_positions_ack(Trace<core::web::Response const> const &event
         log::info("Download state={} has already been processed"sv, state);
         return;
       }
-      response.expect(core::http::Status::OK);
+      response.expect(web::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       const auto positions = core::json::Parser::create<json::Positions>(body, buffer);
       Trace event(trace_info, positions);

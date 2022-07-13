@@ -11,6 +11,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/web/rest/client_factory.hpp"
+
 #include "roq/kraken/flags.hpp"
 
 #include "roq/kraken/json/result.hpp"
@@ -35,20 +37,20 @@ struct create_metrics final : public core::metrics::Factory {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
-  core::web::Client::Config config{
+  web::rest::Client::Config config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
       .uris = {&uri, 1},
       .proxy = Flags::rest_proxy(),
       .user_agent = ROQ_PACKAGE_NAME,
-      .connection = core::http::Connection::KEEP_ALIVE,
+      .connection = web::http::Connection::KEEP_ALIVE,
       .allow_pipelining = true,
       .request_timeout = Flags::rest_request_timeout(),
       .ping_frequency = Flags::rest_ping_freq(),
       .ping_path = Flags::rest_ping_path(),
   };
-  return core::web::Client{handler, context, config};
+  return web::rest::ClientFactory::create(handler, context, config);
 }
 }  // namespace
 
@@ -71,15 +73,15 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
 }
 
 void Rest::operator()(Event<Start> const &) {
-  connection_.start();
+  (*connection_).start();
 }
 
 void Rest::operator()(Event<Stop> const &) {
-  connection_.stop();
+  (*connection_).stop();
 }
 
 void Rest::operator()(Event<Timer> const &event) {
-  connection_.refresh(event.value.now);
+  (*connection_).refresh(event.value.now);
 }
 
 void Rest::operator()(metrics::Writer &writer) {
@@ -113,7 +115,7 @@ void Rest::operator()(ConnectionStatus status) {
   }
 }
 
-void Rest::operator()(core::web::Client::Connected const &) {
+void Rest::operator()(web::rest::Client::Connected const &) {
   if (download_.downloading()) {
     download_.bump();
   } else {
@@ -122,14 +124,14 @@ void Rest::operator()(core::web::Client::Connected const &) {
   }
 }
 
-void Rest::operator()(core::web::Client::Disconnected const &) {
+void Rest::operator()(web::rest::Client::Disconnected const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
   if (!download_.downloading())
     download_.reset();
 }
 
-void Rest::operator()(core::web::Client::Latency const &latency) {
+void Rest::operator()(web::rest::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
@@ -164,20 +166,20 @@ uint32_t Rest::download(RestState state) {
 
 void Rest::get_assets() {
   profile_.assets([&]() {
-    auto method = core::http::Method::GET;
+    auto method = web::http::Method::GET;
     auto path = "/0/public/Assets"sv;
-    core::web::Request request{
+    web::rest::Request request{
         .method = method,
         .path = path,
         .query = {},
-        .accept = core::http::Accept::JSON,
+        .accept = web::http::Accept::JSON,
         .content_type = {},
         .headers = {},
         .body = {},
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    connection_("assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    (*connection_)("assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event(trace_info, response);
       get_assets_ack(event, sequence);
@@ -185,7 +187,7 @@ void Rest::get_assets() {
   });
 }
 
-void Rest::get_assets_ack(Trace<core::web::Response const> const &event, uint32_t sequence) {
+void Rest::get_assets_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
   profile_.assets_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSETS;
@@ -196,7 +198,7 @@ void Rest::get_assets_ack(Trace<core::web::Response const> const &event, uint32_
         log::info("Download state={} has already been processed"sv, state);
         return;
       }
-      response.expect(core::http::Status::OK);
+      response.expect(web::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       const auto assets = core::json::Parser::create<json::Assets>(body, buffer);
       Trace event(trace_info, assets);
@@ -219,20 +221,20 @@ void Rest::operator()(Trace<json::Assets const> const &event) {
 
 void Rest::get_asset_pairs() {
   profile_.asset_pairs([&]() {
-    auto method = core::http::Method::GET;
+    auto method = web::http::Method::GET;
     auto path = "/0/public/AssetPairs"sv;
-    core::web::Request request{
+    web::rest::Request request{
         .method = method,
         .path = path,
         .query = {},
-        .accept = core::http::Accept::JSON,
+        .accept = web::http::Accept::JSON,
         .content_type = {},
         .headers = {},
         .body = {},
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    connection_("asset_pairs"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    (*connection_)("asset_pairs"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event(trace_info, response);
       get_asset_pairs_ack(event, sequence);
@@ -240,7 +242,7 @@ void Rest::get_asset_pairs() {
   });
 }
 
-void Rest::get_asset_pairs_ack(Trace<core::web::Response const> const &event, uint32_t sequence) {
+void Rest::get_asset_pairs_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
   profile_.asset_pairs_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSET_PAIRS;
@@ -251,7 +253,7 @@ void Rest::get_asset_pairs_ack(Trace<core::web::Response const> const &event, ui
         log::info("Download state={} has already been processed"sv, state);
         return;
       }
-      response.expect(core::http::Status::OK);
+      response.expect(web::http::Status::OK);
       core::json::Buffer buffer(decode_buffer_);
       const auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
       Trace event(trace_info, asset_pairs);

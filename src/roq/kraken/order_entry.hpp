@@ -17,7 +17,7 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/core/web/client.hpp"
+#include "roq/web/rest/client.hpp"
 
 #include "roq/server.hpp"
 
@@ -31,7 +31,7 @@
 namespace roq {
 namespace kraken {
 
-class OrderEntry final : public core::web::Client::Handler {
+class OrderEntry final : public web::rest::Client::Handler {
  public:
   struct TokenUpdate final {
     std::string_view account;
@@ -75,20 +75,20 @@ class OrderEntry final : public core::web::Client::Handler {
   uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
  protected:
-  void operator()(core::web::Client::Connected const &) override;
-  void operator()(core::web::Client::Disconnected const &) override;
-  void operator()(core::web::Client::Latency const &) override;
+  void operator()(web::rest::Client::Connected const &) override;
+  void operator()(web::rest::Client::Disconnected const &) override;
+  void operator()(web::rest::Client::Latency const &) override;
 
   void operator()(ConnectionStatus);
 
   uint32_t download(OrderEntryState);
 
   void get_token();
-  void get_token_ack(Trace<core::web::Response const> const &, uint32_t sequence);
+  void get_token_ack(Trace<web::rest::Response const> const &, uint32_t sequence);
   void operator()(Trace<json::Token const> const &);
 
   void get_positions();
-  void get_positions_ack(Trace<core::web::Response const> const &, uint32_t sequence);
+  void get_positions_ack(Trace<web::rest::Response const> const &, uint32_t sequence);
   void operator()(Trace<json::Positions const> const &);
 
  private:
@@ -97,7 +97,7 @@ class OrderEntry final : public core::web::Client::Handler {
   const uint16_t stream_id_;
   const std::string name_;
   // connection
-  core::web::Client connection_;
+  std::unique_ptr<web::rest::Client> connection_;
   // buffers
   core::Buffer decode_buffer_;
   // metrics

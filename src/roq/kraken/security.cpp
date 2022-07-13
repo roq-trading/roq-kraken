@@ -15,7 +15,7 @@ std::string Security::create_body() {
 }
 
 std::string Security::create_headers(
-    core::http::Method method, std::string_view const &path, std::string_view const &body) {
+    web::http::Method method, std::string_view const &path, std::string_view const &body) {
   return hasher_.create_headers(method, path, body);
 }
 

@@ -17,7 +17,7 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/core/web/client.hpp"
+#include "roq/web/rest/client.hpp"
 
 #include "roq/server.hpp"
 
@@ -31,7 +31,7 @@
 namespace roq {
 namespace kraken {
 
-class Rest final : public core::web::Client::Handler {
+class Rest final : public web::rest::Client::Handler {
  public:
   struct SymbolsUpdate final {
     std::vector<Symbol> &symbols;
@@ -60,20 +60,20 @@ class Rest final : public core::web::Client::Handler {
   void operator()(metrics::Writer &);
 
  protected:
-  void operator()(core::web::Client::Connected const &) override;
-  void operator()(core::web::Client::Disconnected const &) override;
-  void operator()(core::web::Client::Latency const &) override;
+  void operator()(web::rest::Client::Connected const &) override;
+  void operator()(web::rest::Client::Disconnected const &) override;
+  void operator()(web::rest::Client::Latency const &) override;
 
   void operator()(ConnectionStatus);
 
   uint32_t download(RestState);
 
   void get_assets();
-  void get_assets_ack(Trace<core::web::Response const> const &, uint32_t sequence);
+  void get_assets_ack(Trace<web::rest::Response const> const &, uint32_t sequence);
   void operator()(Trace<json::Assets const> const &);
 
   void get_asset_pairs();
-  void get_asset_pairs_ack(Trace<core::web::Response const> const &, uint32_t sequence);
+  void get_asset_pairs_ack(Trace<web::rest::Response const> const &, uint32_t sequence);
   void operator()(Trace<json::AssetPairs const> const &);
 
  private:
@@ -82,7 +82,7 @@ class Rest final : public core::web::Client::Handler {
   const uint16_t stream_id_;
   const std::string name_;
   // connection
-  core::web::Client connection_;
+  std::unique_ptr<web::rest::Client> connection_;
   // buffers
   core::Buffer decode_buffer_;
   // metrics
