@@ -204,7 +204,7 @@ void Rest::get_assets_ack(Trace<web::rest::Response const> const &event, uint32_
       Trace event(trace_info, assets);
       (*this)(event);
       download_.check(state);
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
@@ -259,7 +259,7 @@ void Rest::get_asset_pairs_ack(Trace<web::rest::Response const> const &event, ui
       Trace event(trace_info, asset_pairs);
       (*this)(event);
       download_.check(state);
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }

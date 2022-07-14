@@ -245,7 +245,7 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response const> const &event, ui
             (*this)(event);
           });
       download_.check(state);
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
@@ -306,7 +306,7 @@ void OrderEntry::get_positions_ack(Trace<web::rest::Response const> const &event
       Trace event(trace_info, positions);
       (*this)(event);
       download_.check(state);
-    } catch (core::NetworkError &e) {
+    } catch (NetworkError &e) {
       log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
       download_.retry(state);
     }
