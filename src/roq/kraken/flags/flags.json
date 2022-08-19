@@ -78,8 +78,8 @@
     },
     {
       "name": "ws_public_subscribe_book_depth",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::Positive<uint32_t>",
+      "type": "uint16_t",
+      "validator": "roq::core::flags::Positive<uint16_t>",
       "default": 10,
       "description": "book depth (size)"
     },
