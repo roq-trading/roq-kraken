@@ -26,17 +26,17 @@ namespace json {
 
 struct ParserPrivate final {
   struct Handler {
-    virtual void operator()(Trace<Error const> const &) = 0;
-    virtual void operator()(Trace<SystemStatus const> const &) = 0;
-    virtual void operator()(Trace<Pong const> const &) = 0;
-    virtual void operator()(Trace<Heartbeat const> const &) = 0;
-    virtual void operator()(Trace<SubscriptionStatus const> const &) = 0;
+    virtual void operator()(Trace<Error> const &) = 0;
+    virtual void operator()(Trace<SystemStatus> const &) = 0;
+    virtual void operator()(Trace<Pong> const &) = 0;
+    virtual void operator()(Trace<Heartbeat> const &) = 0;
+    virtual void operator()(Trace<SubscriptionStatus> const &) = 0;
 
-    virtual void operator()(Trace<AddOrderStatus const> const &) = 0;
-    virtual void operator()(Trace<CancelOrderStatus const> const &) = 0;
+    virtual void operator()(Trace<AddOrderStatus> const &) = 0;
+    virtual void operator()(Trace<CancelOrderStatus> const &) = 0;
 
-    virtual void operator()(Trace<OpenOrders const> const &) = 0;
-    virtual void operator()(Trace<OwnTrades const> const &) = 0;
+    virtual void operator()(Trace<OpenOrders> const &) = 0;
+    virtual void operator()(Trace<OwnTrades> const &) = 0;
   };
 
   static bool dispatch(Handler &, std::string_view const &message, core::json::Buffer &, TraceInfo const &);

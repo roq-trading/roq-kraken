@@ -30,8 +30,8 @@ namespace kraken {
 class DropCopy final : public web::socket::Client::Handler, public json::ParserPrivate::Handler {
  public:
   struct Handler {
-    virtual void operator()(Trace<StreamStatus const> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency const> const &) = 0;
+    virtual void operator()(Trace<StreamStatus> const &) = 0;
+    virtual void operator()(Trace<ExternalLatency> const &) = 0;
   };
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &, std::string_view const &token);
@@ -65,17 +65,17 @@ class DropCopy final : public web::socket::Client::Handler, public json::ParserP
 
   void parse(std::string_view const &message);
 
-  void operator()(Trace<json::Error const> const &) override;
-  void operator()(Trace<json::SystemStatus const> const &) override;
-  void operator()(Trace<json::Pong const> const &) override;
-  void operator()(Trace<json::Heartbeat const> const &) override;
-  void operator()(Trace<json::SubscriptionStatus const> const &) override;
+  void operator()(Trace<json::Error> const &) override;
+  void operator()(Trace<json::SystemStatus> const &) override;
+  void operator()(Trace<json::Pong> const &) override;
+  void operator()(Trace<json::Heartbeat> const &) override;
+  void operator()(Trace<json::SubscriptionStatus> const &) override;
 
-  void operator()(Trace<json::AddOrderStatus const> const &) override;
-  void operator()(Trace<json::CancelOrderStatus const> const &) override;
+  void operator()(Trace<json::AddOrderStatus> const &) override;
+  void operator()(Trace<json::CancelOrderStatus> const &) override;
 
-  void operator()(Trace<json::OpenOrders const> const &) override;
-  void operator()(Trace<json::OwnTrades const> const &) override;
+  void operator()(Trace<json::OpenOrders> const &) override;
+  void operator()(Trace<json::OwnTrades> const &) override;
 
   void reset();
 

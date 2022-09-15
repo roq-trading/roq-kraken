@@ -254,32 +254,32 @@ void MarketData::parse(std::string_view const &message) {
   });
 }
 
-void MarketData::operator()(Trace<json::Error const> const &event) {
+void MarketData::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::fatal("error={}"sv, error);
 }
 
-void MarketData::operator()(Trace<json::SystemStatus const> const &event) {
+void MarketData::operator()(Trace<json::SystemStatus> const &event) {
   auto &[trace_info, system_status] = event;
   log::info("system_status={}"sv, system_status);
 }
 
-void MarketData::operator()(Trace<json::Pong const> const &event) {
+void MarketData::operator()(Trace<json::Pong> const &event) {
   auto &[trace_info, pong] = event;
   log::info<1>("pong={}"sv, pong);
 }
 
-void MarketData::operator()(Trace<json::Heartbeat const> const &event) {
+void MarketData::operator()(Trace<json::Heartbeat> const &event) {
   auto &[trace_info, heartbeat] = event;
   log::info<1>("heartbeat={}"sv, heartbeat);
 }
 
-void MarketData::operator()(Trace<json::SubscriptionStatus const> const &event) {
+void MarketData::operator()(Trace<json::SubscriptionStatus> const &event) {
   auto &[trace_info, subscription_status] = event;
   log::info<1>("subscription_status={}"sv, subscription_status);
 }
 
-void MarketData::operator()(Trace<json::Trade const> const &event, std::string_view const &pair) {
+void MarketData::operator()(Trace<json::Trade> const &event, std::string_view const &pair) {
   auto &[trace_info, trade] = event;
   log::info<3>(R"(trade={}, pair="{}")"sv, trade, pair);
   (*connection_).touch(trace_info.source_receive_time);
@@ -301,7 +301,7 @@ void MarketData::operator()(Trace<json::Trade const> const &event, std::string_v
   }
 }
 
-void MarketData::operator()(Trace<json::Spread const> const &event, std::string_view const &pair) {
+void MarketData::operator()(Trace<json::Spread> const &event, std::string_view const &pair) {
   auto &[trace_info, spread] = event;
   log::info<3>(R"(spread={}, pair="{}")"sv, spread, pair);
   (*connection_).touch(trace_info.source_receive_time);
@@ -322,7 +322,7 @@ void MarketData::operator()(Trace<json::Spread const> const &event, std::string_
   create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
 }
 
-void MarketData::operator()(Trace<json::Book const> const &event, std::string_view const &pair) {
+void MarketData::operator()(Trace<json::Book> const &event, std::string_view const &pair) {
   auto &[trace_info, book] = event;
   log::info<3>(R"(book={}, pair="{}")"sv, book, pair);
   (*connection_).touch(trace_info.source_receive_time);

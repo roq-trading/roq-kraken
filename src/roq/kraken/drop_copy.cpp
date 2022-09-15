@@ -197,50 +197,50 @@ void DropCopy::parse(std::string_view const &message) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Error const> const &event) {
+void DropCopy::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::fatal("error={}"sv, error);
 }
 
-void DropCopy::operator()(Trace<json::SystemStatus const> const &event) {
+void DropCopy::operator()(Trace<json::SystemStatus> const &event) {
   auto &[trace_info, system_status] = event;
   log::info("system_status={}"sv, system_status);
 }
 
-void DropCopy::operator()(Trace<json::Pong const> const &event) {
+void DropCopy::operator()(Trace<json::Pong> const &event) {
   auto &[trace_info, pong] = event;
   log::info<1>("pong={}"sv, pong);
 }
 
-void DropCopy::operator()(Trace<json::Heartbeat const> const &event) {
+void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
   auto &[trace_info, heartbeat] = event;
   log::info<1>("heartbeat={}"sv, heartbeat);
 }
 
-void DropCopy::operator()(Trace<json::SubscriptionStatus const> const &event) {
+void DropCopy::operator()(Trace<json::SubscriptionStatus> const &event) {
   auto &[trace_info, subscription_status] = event;
   log::info("subscription_status={}"sv, subscription_status);
 }
 
-void DropCopy::operator()(Trace<json::AddOrderStatus const> const &event) {
+void DropCopy::operator()(Trace<json::AddOrderStatus> const &event) {
   auto &[trace_info, add_order_status] = event;
   log::info("add_order_status={}"sv, add_order_status);
   throw NotImplemented("not implemented"sv);
 }
 
-void DropCopy::operator()(Trace<json::CancelOrderStatus const> const &event) {
+void DropCopy::operator()(Trace<json::CancelOrderStatus> const &event) {
   auto &[trace_info, cancel_order_status] = event;
   log::info("cancel_order_status={}"sv, cancel_order_status);
   throw NotImplemented("not implemented"sv);
 }
 
-void DropCopy::operator()(Trace<json::OpenOrders const> const &event) {
+void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   auto &[trace_info, open_orders] = event;
   log::info("open_orders={}"sv, open_orders);
   throw NotImplemented("not implemented"sv);
 }
 
-void DropCopy::operator()(Trace<json::OwnTrades const> const &event) {
+void DropCopy::operator()(Trace<json::OwnTrades> const &event) {
   auto &[trace_info, own_trades] = event;
   log::info("own_trades={}"sv, own_trades);
   throw NotImplemented("not implemented"sv);

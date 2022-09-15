@@ -56,13 +56,13 @@ class Gateway final : public server::Handler,
 
   void operator()(metrics::Writer &) override;
 
-  void operator()(Trace<StreamStatus const> const &) override;
-  void operator()(Trace<ExternalLatency const> const &) override;
-  void operator()(Trace<ReferenceData const> const &, bool is_last) override;
-  void operator()(Trace<MarketStatus const> const &, bool is_last) override;
-  void operator()(Trace<TopOfBook const> const &, bool is_last) override;
-  void operator()(Trace<MarketByPriceUpdate const> const &, bool is_last, bool refresh) override;
-  void operator()(Trace<TradeSummary const> const &, bool is_last) override;
+  void operator()(Trace<StreamStatus> const &) override;
+  void operator()(Trace<ExternalLatency> const &) override;
+  void operator()(Trace<ReferenceData> const &, bool is_last) override;
+  void operator()(Trace<MarketStatus> const &, bool is_last) override;
+  void operator()(Trace<TopOfBook> const &, bool is_last) override;
+  void operator()(Trace<MarketByPriceUpdate> const &, bool is_last, bool refresh) override;
+  void operator()(Trace<TradeSummary> const &, bool is_last) override;
 
   void operator()(OrderEntry::TokenUpdate &) override;
   void operator()(Rest::SymbolsUpdate &) override;

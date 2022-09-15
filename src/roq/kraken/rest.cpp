@@ -187,7 +187,7 @@ void Rest::get_assets() {
   });
 }
 
-void Rest::get_assets_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
+void Rest::get_assets_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   profile_.assets_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSETS;
@@ -211,7 +211,7 @@ void Rest::get_assets_ack(Trace<web::rest::Response const> const &event, uint32_
   });
 }
 
-void Rest::operator()(Trace<json::Assets const> const &event) {
+void Rest::operator()(Trace<json::Assets> const &event) {
   auto &[trace_info, assets] = event;
   log::info<4>("assets={}"sv, assets);
   // do nothing
@@ -242,7 +242,7 @@ void Rest::get_asset_pairs() {
   });
 }
 
-void Rest::get_asset_pairs_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
+void Rest::get_asset_pairs_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   profile_.asset_pairs_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = RestState::ASSET_PAIRS;
@@ -266,7 +266,7 @@ void Rest::get_asset_pairs_ack(Trace<web::rest::Response const> const &event, ui
   });
 }
 
-void Rest::operator()(Trace<json::AssetPairs const> const &event) {
+void Rest::operator()(Trace<json::AssetPairs> const &event) {
   auto &[trace_info, asset_pairs] = event;
   log::info<4>("asset_pairs={}"sv, asset_pairs);
   assert(std::empty(asset_pairs.error));

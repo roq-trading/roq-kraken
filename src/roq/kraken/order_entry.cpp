@@ -218,7 +218,7 @@ void OrderEntry::get_token() {
   });
 }
 
-void OrderEntry::get_token_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
+void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   profile_.get_web_sockets_token([&]() {
     // auto &[trace_info, response] = event;
     auto &trace_info = event.trace_info;
@@ -252,7 +252,7 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response const> const &event, ui
   });
 }
 
-void OrderEntry::operator()(Trace<json::Token const> const &event) {
+void OrderEntry::operator()(Trace<json::Token> const &event) {
   auto &[trace_info, token] = event;
   log::info<2>(R"(token={})"sv, token);
   TokenUpdate token_update{
@@ -289,7 +289,7 @@ void OrderEntry::get_positions() {
   });
 }
 
-void OrderEntry::get_positions_ack(Trace<web::rest::Response const> const &event, uint32_t sequence) {
+void OrderEntry::get_positions_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   profile_.positions_ack([&]() {
     auto &[trace_info, response] = event;
     auto state = OrderEntryState::POSITIONS;
@@ -313,7 +313,7 @@ void OrderEntry::get_positions_ack(Trace<web::rest::Response const> const &event
   });
 }
 
-void OrderEntry::operator()(Trace<json::Positions const> const &event) {
+void OrderEntry::operator()(Trace<json::Positions> const &event) {
   auto &[trace_info, positions] = event;
   log::info<4>("positions={}"sv, positions);
   assert(std::empty(positions.error));
