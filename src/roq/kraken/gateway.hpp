@@ -29,7 +29,7 @@ class Gateway final : public server::Handler,
                       public MarketData::Handler,
                       public DropCopy::Handler {
  public:
-  Gateway(server::Dispatcher &, Config const &);
+  Gateway(server::Dispatcher &, Config const &, io::Context &);
 
  protected:
   // server::Handler
@@ -80,7 +80,7 @@ class Gateway final : public server::Handler,
   // security
   absl::flat_hash_map<Account, std::unique_ptr<Security>> security_;
   // io
-  std::unique_ptr<io::Context> context_;
+  io::Context &context_;
   // shared
   Shared shared_;
   // seed

@@ -4,8 +4,6 @@
 
 #include <utility>
 
-#include "roq/io/engine/context_factory.hpp"
-
 #include "roq/kraken/flags.hpp"
 
 using namespace std::literals;
@@ -39,11 +37,11 @@ auto create_drop_copy(T &security) {
 }
 }  // namespace
 
-Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config)
+Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
     : dispatcher_(dispatcher), master_account_(config.get_master_account()),
-      security_(create_security<decltype(security_)>(config)), context_(io::engine::ContextFactory::create_libevent()),
-      shared_(dispatcher), rest_(*this, *context_, ++stream_id_, shared_),
-      order_entry_(create_order_entry<decltype(order_entry_)>(*this, *context_, stream_id_, security_, shared_)),
+      security_(create_security<decltype(security_)>(config)), context_(context), shared_(dispatcher),
+      rest_(*this, context_, ++stream_id_, shared_),
+      order_entry_(create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, security_, shared_)),
       drop_copy_(create_drop_copy<decltype(drop_copy_)>(security_)) {
 }
 
@@ -80,7 +78,6 @@ void Gateway::operator()(Event<Timer> const &event) {
       (*drop_copy)(event);
   for (auto &market_data : market_data_)
     (*market_data)(event);
-  (*context_).drain();
 }
 
 void Gateway::operator()(Event<Connected> const &) {
@@ -194,7 +191,7 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"sv);
     auto drop_copy =
-        std::make_unique<DropCopy>(*this, *context_, ++stream_id_, *security_[account], shared_, token_update.token);
+        std::make_unique<DropCopy>(*this, context_, ++stream_id_, *security_[account], shared_, token_update.token);
     MessageInfo message_info;
     Start start;
     create_event_and_dispatch(*drop_copy, message_info, start);
@@ -214,7 +211,7 @@ void Gateway::ensure_symbol_slices(size_t size) {
     auto stream_id = ++stream_id_;
     auto index = std::size(market_data_);
     log::debug("Create MarketData (stream_id={}, index={})"sv, stream_id, index);
-    auto market_data = std::make_unique<MarketData>(*this, *context_, stream_id, shared_, index);
+    auto market_data = std::make_unique<MarketData>(*this, context_, stream_id, shared_, index);
     MessageInfo message_info;
     Start start;
     create_event_and_dispatch(*market_data, message_info, start);
