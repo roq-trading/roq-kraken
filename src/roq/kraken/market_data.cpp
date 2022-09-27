@@ -22,18 +22,24 @@ using namespace std::literals;
 namespace roq {
 namespace kraken {
 
+// === CONSTANTS ===
+
 namespace {
 auto const NAME = "md"sv;
+
 const Mask SUPPORTS{
     SupportType::TOP_OF_BOOK,
     SupportType::MARKET_BY_PRICE,
     SupportType::TRADE_SUMMARY,
 };
+}  // namespace
 
-struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(std::string_view const &group, std::string_view const &function)
-      : core::metrics::Factory(server::Flags::name(), group, function) {}
-};
+// === HELPERS ===
+
+namespace {
+auto create_name(auto stream_id) {
+  return fmt::format("{}:{}"sv, stream_id, NAME);
+}
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::ws_public_uri();
@@ -51,33 +57,16 @@ auto create_connection(auto &handler, auto &context) {
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
 
-template <typename T>
-void emplace(MBPUpdate &result, T const &value) {
-  new (&result) MBPUpdate{
-      .price = value.price,
-      .quantity = value.volume,
-      .implied_quantity = NaN,
-      .number_of_orders = {},
-      .update_action = {},
-      .price_level = {},
-  };
-}
-
-template <typename T>
-void emplace(Trade &result, T const &value) {
-  new (&result) Trade{
-      .side = json::map(value.side),
-      .price = value.price,
-      .quantity = value.volume,
-      .trade_id = {},
-      .taker_order_id = {},
-      .maker_order_id = {},
-  };
-}
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(auto const &group, auto const &function)
+      : core::metrics::Factory(server::Flags::name(), group, function) {}
+};
 }  // namespace
 
+// === IMPLEMENTATION ===
+
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
-    : handler_(handler), stream_id_(stream_id), name_(fmt::format("{}:{}"sv, stream_id_, NAME)), index_(index),
+    : handler_(handler), stream_id_(stream_id), name_(create_name(stream_id_)), index_(index),
       connection_(create_connection(*this, context)), decode_buffer_(Flags::decode_buffer_size()),
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -285,10 +274,20 @@ void MarketData::operator()(Trace<json::Trade> const &event, std::string_view co
   auto &[trace_info, trade] = event;
   log::info<3>(R"(trade={}, pair="{}")"sv, trade, pair);
   (*connection_).touch(trace_info.source_receive_time);
+  auto create_trade = []<typename T>(T &result, auto const &value) {
+    new (&result) T{
+        .side = json::map(value.side),
+        .price = value.price,
+        .quantity = value.volume,
+        .trade_id = {},
+        .taker_order_id = {},
+        .maker_order_id = {},
+    };
+  };
   core::back_emplacer trades(shared_.trades);
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
-    trades.emplace_back([&item](auto &result) { emplace(result, item); });
+    trades.emplace_back([&](auto &result) { create_trade(result, item); });
     utils::update_first(exchange_time_utc, item.time);
   }
   if (!std::empty(trades)) {
@@ -342,22 +341,32 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
   bool live = !std::empty(book.b) && !std::empty(book.a);
   if (snapshot && live) [[unlikely]]
     log::fatal("Unexpected"sv);
+  auto create_mbp_update = []<typename T>(T &result, auto const &value) {
+    new (&result) T{
+        .price = value.price,
+        .quantity = value.volume,
+        .implied_quantity = NaN,
+        .number_of_orders = {},
+        .update_action = {},
+        .price_level = {},
+    };
+  };
   core::back_emplacer bids(shared_.bids), asks(shared_.asks);
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : book.b) {
-    bids.emplace_back([&item](auto &result) { emplace(result, item); });
+    bids.emplace_back([&](auto &result) { create_mbp_update(result, item); });
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.bs) {
-    bids.emplace_back([&item](auto &result) { emplace(result, item); });
+    bids.emplace_back([&](auto &result) { create_mbp_update(result, item); });
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.a) {
-    asks.emplace_back([&item](auto &result) { emplace(result, item); });
+    asks.emplace_back([&](auto &result) { create_mbp_update(result, item); });
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.as) {
-    asks.emplace_back([&item](auto &result) { emplace(result, item); });
+    asks.emplace_back([&](auto &result) { create_mbp_update(result, item); });
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   if (!(std::empty(bids) && std::empty(asks))) {
