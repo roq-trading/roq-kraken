@@ -27,7 +27,7 @@ namespace kraken {
 namespace {
 auto const NAME = "om"sv;
 
-const Mask SUPPORTS{
+Mask const SUPPORTS{
     SupportType::CREATE_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
@@ -113,7 +113,7 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 
 uint16_t OrderEntry::operator()(
     Event<CreateOrder> const &, oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
-  throw NotImplemented("not implemented"sv);
+  throw NotImplemented{"not implemented"sv};
 }
 
 uint16_t OrderEntry::operator()(
@@ -121,7 +121,7 @@ uint16_t OrderEntry::operator()(
     oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
-  throw NotImplemented("not implemented"sv);
+  throw NotImplemented{"not implemented"sv};
 }
 
 uint16_t OrderEntry::operator()(
@@ -129,7 +129,7 @@ uint16_t OrderEntry::operator()(
     oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
-  throw NotImplemented("not implemented"sv);
+  throw NotImplemented{"not implemented"sv};
 }
 
 uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
@@ -223,7 +223,7 @@ void OrderEntry::get_token() {
     auto sequence = download_.sequence();
     (*connection_)("token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
-      Trace event(trace_info, response);
+      Trace event{trace_info, response};
       get_token_ack(event, sequence);
     });
   });
@@ -243,7 +243,7 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
         return;
       }
       response.expect(web::http::Status::OK);
-      core::json::Buffer buffer(decode_buffer_);
+      core::json::Buffer buffer{decode_buffer_};
       json::Result::dispatch<json::Token>(
           body,
           buffer,
@@ -252,7 +252,7 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
             log::fatal("Unexpected"sv);
           },
           [&](const json::Token &token) {  // success
-            Trace event(trace_info, token);
+            Trace event{trace_info, token};
             (*this)(event);
           });
       download_.check(state);
@@ -294,7 +294,7 @@ void OrderEntry::get_positions() {
     auto sequence = download_.sequence();
     (*connection_)("positions"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
-      Trace event(trace_info, response);
+      Trace event{trace_info, response};
       get_positions_ack(event, sequence);
     });
   });
@@ -312,9 +312,9 @@ void OrderEntry::get_positions_ack(Trace<web::rest::Response> const &event, uint
         return;
       }
       response.expect(web::http::Status::OK);
-      core::json::Buffer buffer(decode_buffer_);
+      core::json::Buffer buffer{decode_buffer_};
       const auto positions = core::json::Parser::create<json::Positions>(body, buffer);
-      Trace event(trace_info, positions);
+      Trace event{trace_info, positions};
       (*this)(event);
       download_.check(state);
     } catch (NetworkError &e) {

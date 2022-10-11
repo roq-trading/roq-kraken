@@ -44,7 +44,7 @@ auto create_connection(auto &handler, auto &context) {
       .read_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
       .encode_buffer_size = Flags::encode_buffer_size(),
   };
-  return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
+  return web::socket::ClientFactory::create(handler, context, config, []() -> std::string { return {}; });
 }
 
 struct create_metrics final : public core::metrics::Factory {
@@ -202,7 +202,7 @@ uint32_t DropCopy::download(DropCopyState state) {
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto trace_info = server::create_trace_info();
-    core::json::Buffer buffer(decode_buffer_);
+    core::json::Buffer buffer{decode_buffer_};
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
     if (!result) [[unlikely]]
       log::warn(R"(Unexpected: message="{}")"sv, message);
@@ -237,25 +237,25 @@ void DropCopy::operator()(Trace<json::SubscriptionStatus> const &event) {
 void DropCopy::operator()(Trace<json::AddOrderStatus> const &event) {
   auto &[trace_info, add_order_status] = event;
   log::info("add_order_status={}"sv, add_order_status);
-  throw NotImplemented("not implemented"sv);
+  throw NotImplemented{"not implemented"sv};
 }
 
 void DropCopy::operator()(Trace<json::CancelOrderStatus> const &event) {
   auto &[trace_info, cancel_order_status] = event;
   log::info("cancel_order_status={}"sv, cancel_order_status);
-  throw NotImplemented("not implemented"sv);
+  throw NotImplemented{"not implemented"sv};
 }
 
 void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
   auto &[trace_info, open_orders] = event;
   log::info("open_orders={}"sv, open_orders);
-  throw NotImplemented("not implemented"sv);
+  throw NotImplemented{"not implemented"sv};
 }
 
 void DropCopy::operator()(Trace<json::OwnTrades> const &event) {
   auto &[trace_info, own_trades] = event;
   log::info("own_trades={}"sv, own_trades);
-  throw NotImplemented("not implemented"sv);
+  throw NotImplemented{"not implemented"sv};
 }
 
 }  // namespace kraken

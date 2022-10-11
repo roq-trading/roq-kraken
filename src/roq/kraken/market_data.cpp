@@ -238,7 +238,7 @@ void MarketData::unsubscribe_book(std::string_view const &symbol) {
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto trace_info = server::create_trace_info();
-    core::json::Buffer buffer(decode_buffer_);
+    core::json::Buffer buffer{decode_buffer_};
     auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
     if (!result) [[unlikely]]
       log::warn(R"(Unexpected: message="{}")"sv, message);
@@ -284,7 +284,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, std::string_view co
         .maker_order_id = {},
     };
   };
-  core::back_emplacer trades(shared_.trades);
+  core::back_emplacer trades{shared_.trades};
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
     trades.emplace_back([&](auto &result) { create_trade(result, item); });
@@ -351,7 +351,7 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
         .price_level = {},
     };
   };
-  core::back_emplacer bids(shared_.bids), asks(shared_.asks);
+  core::back_emplacer bids{shared_.bids}, asks{shared_.asks};
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : book.b) {
     bids.emplace_back([&](auto &result) { create_mbp_update(result, item); });

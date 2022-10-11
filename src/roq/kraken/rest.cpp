@@ -178,11 +178,9 @@ uint32_t Rest::download(RestState state) {
 
 void Rest::get_assets() {
   profile_.assets([&]() {
-    auto method = web::http::Method::GET;
-    auto path = "/0/public/Assets"sv;
     web::rest::Request request{
-        .method = method,
-        .path = path,
+        .method = web::http::Method::GET,
+        .path = "/0/public/Assets"sv,
         .query = {},
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -193,7 +191,7 @@ void Rest::get_assets() {
     auto sequence = download_.sequence();
     (*connection_)("assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
-      Trace event(trace_info, response);
+      Trace event{trace_info, response};
       get_assets_ack(event, sequence);
     });
   });
@@ -211,9 +209,9 @@ void Rest::get_assets_ack(Trace<web::rest::Response> const &event, uint32_t sequ
         return;
       }
       response.expect(web::http::Status::OK);
-      core::json::Buffer buffer(decode_buffer_);
+      core::json::Buffer buffer{decode_buffer_};
       const auto assets = core::json::Parser::create<json::Assets>(body, buffer);
-      Trace event(trace_info, assets);
+      Trace event{trace_info, assets};
       (*this)(event);
       download_.check(state);
     } catch (NetworkError &e) {
@@ -233,11 +231,9 @@ void Rest::operator()(Trace<json::Assets> const &event) {
 
 void Rest::get_asset_pairs() {
   profile_.asset_pairs([&]() {
-    auto method = web::http::Method::GET;
-    auto path = "/0/public/AssetPairs"sv;
     web::rest::Request request{
-        .method = method,
-        .path = path,
+        .method = web::http::Method::GET,
+        .path = "/0/public/AssetPairs"sv,
         .query = {},
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -248,7 +244,7 @@ void Rest::get_asset_pairs() {
     auto sequence = download_.sequence();
     (*connection_)("asset_pairs"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
-      Trace event(trace_info, response);
+      Trace event{trace_info, response};
       get_asset_pairs_ack(event, sequence);
     });
   });
@@ -266,9 +262,9 @@ void Rest::get_asset_pairs_ack(Trace<web::rest::Response> const &event, uint32_t
         return;
       }
       response.expect(web::http::Status::OK);
-      core::json::Buffer buffer(decode_buffer_);
+      core::json::Buffer buffer{decode_buffer_};
       const auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
-      Trace event(trace_info, asset_pairs);
+      Trace event{trace_info, asset_pairs};
       (*this)(event);
       download_.check(state);
     } catch (NetworkError &e) {

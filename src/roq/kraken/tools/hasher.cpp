@@ -18,10 +18,16 @@ namespace roq {
 namespace kraken {
 namespace tools {
 
+// === CONSTANTS ===
+
 namespace {
 const constexpr auto THRESHOLD = -1000ms;
+}
 
-auto create_hmac(std::string_view const &secret) {
+// === CONSTANTS ===
+
+namespace {
+auto create_hmac(auto const &secret) {
   auto raw_secret = core::binascii::Base64::decode(secret, true);
   return core::crypto::HMAC_SHA512(raw_secret);
 }
