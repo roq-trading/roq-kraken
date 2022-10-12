@@ -21,5 +21,5 @@ roq::Service::Info INFO{
 // === IMPLEMENTATION ===
 
 int main(int argc, char **argv) {
-  return roq::kraken::Application(argc, argv, INFO).run();
+  return roq::kraken::Application{argc, argv, INFO}.run();
 }
