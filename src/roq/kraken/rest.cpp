@@ -112,7 +112,7 @@ void Rest::operator()(metrics::Writer &writer) {
 void Rest::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     auto trace_info = server::create_trace_info();
-    const StreamStatus stream_status{
+    StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -145,7 +145,7 @@ void Rest::operator()(web::rest::Client::Disconnected const &) {
 
 void Rest::operator()(web::rest::Client::Latency const &latency) {
   auto trace_info = server::create_trace_info();
-  const ExternalLatency external_latency{
+  ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -188,12 +188,12 @@ void Rest::get_assets() {
         .body = {},
         .quality_of_service = {},
     };
-    auto sequence = download_.sequence();
-    (*connection_)("assets"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event{trace_info, response};
       get_assets_ack(event, sequence);
-    });
+    };
+    (*connection_)("assets"sv, request, callback);
   });
 }
 
@@ -210,7 +210,7 @@ void Rest::get_assets_ack(Trace<web::rest::Response> const &event, uint32_t sequ
       }
       response.expect(web::http::Status::OK);
       core::json::Buffer buffer{decode_buffer_};
-      const auto assets = core::json::Parser::create<json::Assets>(body, buffer);
+      auto assets = core::json::Parser::create<json::Assets>(body, buffer);
       Trace event{trace_info, assets};
       (*this)(event);
       download_.check(state);
@@ -241,12 +241,12 @@ void Rest::get_asset_pairs() {
         .body = {},
         .quality_of_service = {},
     };
-    auto sequence = download_.sequence();
-    (*connection_)("asset_pairs"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       auto trace_info = server::create_trace_info();
       Trace event{trace_info, response};
       get_asset_pairs_ack(event, sequence);
-    });
+    };
+    (*connection_)("asset_pairs"sv, request, callback);
   });
 }
 
@@ -263,7 +263,7 @@ void Rest::get_asset_pairs_ack(Trace<web::rest::Response> const &event, uint32_t
       }
       response.expect(web::http::Status::OK);
       core::json::Buffer buffer{decode_buffer_};
-      const auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
+      auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
       Trace event{trace_info, asset_pairs};
       (*this)(event);
       download_.check(state);
@@ -293,7 +293,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
     auto discard = shared_.discard_symbol(symbol);
     auto tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals));
     auto min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals));
-    const ReferenceData reference_data{
+    ReferenceData reference_data{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
@@ -326,7 +326,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
     if (all_symbols_.emplace(symbol).second)  // only include new
       symbols.emplace_back(symbol);
     ++counter;
-    const MarketStatus market_status{
+    MarketStatus market_status{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
