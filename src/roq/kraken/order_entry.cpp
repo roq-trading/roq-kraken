@@ -232,7 +232,6 @@ void OrderEntry::get_token() {
 void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   constexpr auto const STATE = OrderEntryState::TOKEN;
   profile_.get_web_sockets_token([&]() {
-    auto &trace_info = event.trace_info;
     auto handle_success = [&](auto &body) {
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
@@ -246,8 +245,8 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
               log::fatal("Unexpected"sv);
             },
             [&](const json::Token &token) {  // success
-              Trace event{trace_info, token};
-              (*this)(event);
+              Trace event_2{event, token};
+              (*this)(event_2);
             });
         download_.check(STATE);
       }
@@ -300,15 +299,14 @@ void OrderEntry::get_positions() {
 void OrderEntry::get_positions_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
   constexpr auto const STATE = OrderEntryState::POSITIONS;
   profile_.positions_ack([&]() {
-    auto &trace_info = event.trace_info;
     auto handle_success = [&](auto &body) {
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
         core::json::Buffer buffer{decode_buffer_};
         const auto positions = core::json::Parser::create<json::Positions>(body, buffer);
-        Trace event{trace_info, positions};
-        (*this)(event);
+        Trace event_2{event, positions};
+        (*this)(event_2);
         download_.check(STATE);
       }
     };
