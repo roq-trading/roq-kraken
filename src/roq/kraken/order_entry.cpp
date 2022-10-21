@@ -27,7 +27,7 @@ namespace kraken {
 namespace {
 auto const NAME = "om"sv;
 
-Mask const SUPPORTS{
+auto const SUPPORTS = Mask{
     SupportType::CREATE_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
@@ -230,36 +230,33 @@ void OrderEntry::get_token() {
 }
 
 void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  constexpr auto const STATE = OrderEntryState::TOKEN;
   profile_.get_web_sockets_token([&]() {
-    // auto &[trace_info, response] = event;
     auto &trace_info = event.trace_info;
-    auto &response = event.value;
-    auto state = OrderEntryState::TOKEN;
-    try {
-      auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
-      if (download_.skip(sequence, state)) {
-        log::info("Download state={} has already been processed"sv, state);
-        return;
+    auto handle_success = [&](auto &body) {
+      if (download_.skip(sequence, STATE)) {
+        log::info("Download state={} has already been processed"sv, STATE);
+      } else {
+        core::json::Buffer buffer{decode_buffer_};
+        json::Result::dispatch<json::Token>(
+            body,
+            buffer,
+            [](const std::span<std::string_view> &e) {  // error
+              log::warn("error=[{}]"sv, fmt::join(e, ","sv));
+              log::fatal("Unexpected"sv);
+            },
+            [&](const json::Token &token) {  // success
+              Trace event{trace_info, token};
+              (*this)(event);
+            });
+        download_.check(STATE);
       }
-      response.expect(web::http::Status::OK);
-      core::json::Buffer buffer{decode_buffer_};
-      json::Result::dispatch<json::Token>(
-          body,
-          buffer,
-          [](const std::span<std::string_view> &e) {  // error
-            log::warn("error=[{}]"sv, fmt::join(e, ","sv));
-            log::fatal("Unexpected"sv);
-          },
-          [&](const json::Token &token) {  // success
-            Trace event{trace_info, token};
-            (*this)(event);
-          });
-      download_.check(state);
-    } catch (NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
-      download_.retry(state);
-    }
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      download_.retry(STATE);
+    };
+    process_response(event, handle_success, handle_error);
   });
 }
 
@@ -301,26 +298,25 @@ void OrderEntry::get_positions() {
 }
 
 void OrderEntry::get_positions_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  constexpr auto const STATE = OrderEntryState::POSITIONS;
   profile_.positions_ack([&]() {
-    auto &[trace_info, response] = event;
-    auto state = OrderEntryState::POSITIONS;
-    try {
-      auto [status, category, body] = response.result();
-      log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
-      if (download_.skip(sequence, state)) {
-        log::info("Download state={} has already been processed"sv, state);
-        return;
+    auto &trace_info = event.trace_info;
+    auto handle_success = [&](auto &body) {
+      if (download_.skip(sequence, STATE)) {
+        log::info("Download state={} has already been processed"sv, STATE);
+      } else {
+        core::json::Buffer buffer{decode_buffer_};
+        const auto positions = core::json::Parser::create<json::Positions>(body, buffer);
+        Trace event{trace_info, positions};
+        (*this)(event);
+        download_.check(STATE);
       }
-      response.expect(web::http::Status::OK);
-      core::json::Buffer buffer{decode_buffer_};
-      const auto positions = core::json::Parser::create<json::Positions>(body, buffer);
-      Trace event{trace_info, positions};
-      (*this)(event);
-      download_.check(state);
-    } catch (NetworkError &e) {
-      log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
-      download_.retry(state);
-    }
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      download_.retry(STATE);
+    };
+    process_response(event, handle_success, handle_error);
   });
 }
 
@@ -328,6 +324,65 @@ void OrderEntry::operator()(Trace<json::Positions> const &event) {
   auto &[trace_info, positions] = event;
   log::info<4>("positions={}"sv, positions);
   assert(std::empty(positions.error));
+}
+
+template <typename SuccessHandler, typename ErrorHandler>
+void OrderEntry::process_response(
+    web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
+  try {
+    auto [status, category, body] = response.result();
+    log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
+    switch (category) {
+      using enum web::http::Category;
+      case SUCCESS:  // 2xx
+        success_handler(body);
+        break;
+      case CLIENT_ERROR:  // 4xx
+        error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, magic_enum::enum_name(status));
+        break;
+      case SERVER_ERROR:  // 5xx
+        error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, magic_enum::enum_name(status));
+        break;
+      default:
+        response.expect(web::http::Status::OK);  // throws
+    }
+  } catch (oms::Exception &e) {
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    error_handler(e.origin, e.status, e.error, e.what());
+  } catch (NetworkError &e) {
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    error_handler(Origin::GATEWAY, e.request_status(), e.error(), e.what());
+  } catch (std::exception &e) {
+    log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
+    error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, e.what());
+  }
+}
+
+template <typename... Args>
+void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint32_t order_id, Args &&...args) {
+  auto &[trace_info, response] = event;
+  if (shared_.update_order(
+          user_id,
+          order_id,
+          stream_id_,
+          trace_info,
+          response,
+          std::forward<Args>(args)...,
+          []([[maybe_unused]] auto &order) {})) {
+  } else {
+    log::warn("Did not find order: user_id={}, order_id={}"sv, user_id, order_id);
+  }
+}
+
+template <typename... Args>
+void OrderEntry::operator()(
+    Trace<oms::OrderUpdate> const &event, std::string_view const &client_order_id, Args &&...args) {
+  auto &[trace_info, order_update] = event;
+  if (shared_.update_order(
+          client_order_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
+  } else {
+    log::warn("*** EXTERNAL ORDER ***"sv);
+  }
 }
 
 }  // namespace kraken

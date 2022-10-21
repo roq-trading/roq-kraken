@@ -41,8 +41,6 @@ class OrderEntry final : public web::rest::Client::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
-    virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
-    virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
     // cross-communication
     virtual void operator()(TokenUpdate &) = 0;
   };
@@ -90,6 +88,15 @@ class OrderEntry final : public web::rest::Client::Handler {
   void get_positions();
   void get_positions_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::Positions> const &);
+
+  template <typename SuccessHandler, typename ErrorHandler>
+  void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
+
+  template <typename... Args>
+  void operator()(Trace<oms::Response> const &, uint8_t user_id, uint32_t order_id, Args &&...);
+
+  template <typename... Args>
+  void operator()(Trace<oms::OrderUpdate> const &, std::string_view const &client_order_id, Args &&...);
 
  private:
   Handler &handler_;

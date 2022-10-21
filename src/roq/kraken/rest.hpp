@@ -76,6 +76,9 @@ class Rest final : public web::rest::Client::Handler {
   void get_asset_pairs_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::AssetPairs> const &);
 
+  template <typename SuccessHandler, typename ErrorHandler>
+  void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
+
  private:
   Handler &handler_;
   // config

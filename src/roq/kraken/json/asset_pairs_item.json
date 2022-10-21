@@ -73,6 +73,14 @@
     {
       "name": "cost_decimals",
       "type": "int32_t"
+    },
+    {
+      "name": "costmin",
+      "type": "double"
+    },
+    {
+      "name": "tick_size",
+      "type": "double"
     }
   ]
 }
