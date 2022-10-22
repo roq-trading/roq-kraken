@@ -204,8 +204,7 @@ void Rest::get_assets_ack(Trace<web::rest::Response> const &event, uint32_t sequ
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        core::json::Buffer buffer{decode_buffer_};
-        auto assets = core::json::Parser::create<json::Assets>(body, buffer);
+        json::Assets assets{body, decode_buffer_};
         Trace event_2{event, assets};
         (*this)(event_2);
         download_.check(STATE);
@@ -255,8 +254,7 @@ void Rest::get_asset_pairs_ack(Trace<web::rest::Response> const &event, uint32_t
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        core::json::Buffer buffer{decode_buffer_};
-        auto asset_pairs = core::json::Parser::create<json::AssetPairs>(body, buffer);
+        json::AssetPairs asset_pairs{body, decode_buffer_};
         Trace event_2{event, asset_pairs};
         (*this)(event_2);
         download_.check(STATE);

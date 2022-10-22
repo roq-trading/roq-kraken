@@ -303,8 +303,7 @@ void OrderEntry::get_positions_ack(Trace<web::rest::Response> const &event, uint
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        core::json::Buffer buffer{decode_buffer_};
-        const auto positions = core::json::Parser::create<json::Positions>(body, buffer);
+        json::Positions positions{body, decode_buffer_};
         Trace event_2{event, positions};
         (*this)(event_2);
         download_.check(STATE);
