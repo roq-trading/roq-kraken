@@ -144,7 +144,7 @@ void DropCopy::operator()(web::socket::Client::Close const &) {
 }
 
 void DropCopy::operator()(web::socket::Client::Latency const &latency) {
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   const ExternalLatency external_latency{
       .stream_id = stream_id_,
       .account = security_.get_account(),
@@ -164,7 +164,7 @@ void DropCopy::operator()(web::socket::Client::Binary const &) {
 
 void DropCopy::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
-    auto trace_info = server::create_trace_info();
+    TraceInfo trace_info;
     const StreamStatus stream_status{
         .stream_id = stream_id_,
         .account = security_.get_account(),
@@ -201,7 +201,7 @@ uint32_t DropCopy::download(DropCopyState state) {
 
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
-    auto trace_info = server::create_trace_info();
+    TraceInfo trace_info;
     core::json::Buffer buffer{decode_buffer_};
     auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
     if (!result) [[unlikely]]

@@ -7,7 +7,7 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/core/clock.hpp"
+#include "roq/clock.hpp"
 
 #include "roq/core/binascii/base64.hpp"
 
@@ -38,7 +38,7 @@ Hasher::Hasher(std::string_view const &key, std::string_view const &secret, std:
 }
 
 std::string Hasher::create_body() {
-  auto now = std::chrono::duration_cast<decltype(nonce_)>(core::clock::GetRealTime());
+  auto now = std::chrono::duration_cast<decltype(nonce_)>(clock::get_realtime());
   auto diff = now - nonce_;
   if (diff < THRESHOLD) [[unlikely]]
     log::fatal("Probably something wrong... diff={})"sv, diff);

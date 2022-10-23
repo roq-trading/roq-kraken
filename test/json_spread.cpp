@@ -44,7 +44,7 @@ TEST_CASE("json_spread_simple", "[json_spread]") {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
   CHECK(handler.found == true);
 }

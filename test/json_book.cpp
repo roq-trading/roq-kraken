@@ -64,7 +64,7 @@ TEST_CASE("json_book_parse_test_snapshot", "[json_book]") {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -82,7 +82,7 @@ TEST_CASE("json_book_parse_test_update_bid_1", "[json_book]") {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -100,7 +100,7 @@ TEST_CASE("json_book_parse_test_update_ask_1", "[json_book]") {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -200,7 +200,7 @@ TEST_CASE("json_book_parse_test_update_complex", "[json_book]") {
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
 
@@ -273,7 +273,7 @@ TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "[json_boo
   Handler handler;
   core::Buffer buffer_(8192);
   core::json::Buffer buffer(buffer_);
-  auto trace_info = server::create_trace_info();
+  TraceInfo trace_info;
   CHECK_THROWS_AS(
       json::ParserPublic::dispatch(handler, message, buffer, trace_info),
       OutOfRange);  //  XXX maybe wrap as core::BadState?
