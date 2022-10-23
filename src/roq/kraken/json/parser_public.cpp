@@ -21,11 +21,11 @@ bool ParserPublic::dispatch(
   auto root = parser.root();
   return std::visit(
       overloaded{
-          [](core::json::Null const &) -> bool { throw std::bad_cast(); },
-          [](bool) -> bool { throw std::bad_cast(); },
-          [](int64_t) -> bool { throw std::bad_cast(); },
-          [](double) -> bool { throw std::bad_cast(); },
-          [](std::string_view const &) -> bool { throw std::bad_cast(); },
+          [](core::json::Null const &) -> bool { throw std::bad_cast{}; },
+          [](bool) -> bool { throw std::bad_cast{}; },
+          [](int64_t) -> bool { throw std::bad_cast{}; },
+          [](double) -> bool { throw std::bad_cast{}; },
+          [](std::string_view const &) -> bool { throw std::bad_cast{}; },
           [&](core::json::Object &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
           [&](core::json::Array &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
       },
@@ -92,10 +92,10 @@ bool ParserPublic::dispatch(
             break;
           }
           case ADD_ORDER_STATUS: {
-            throw RuntimeError("addOrderStatus not supported"sv);
+            throw RuntimeError{"addOrderStatus not supported"sv};
           }
           case CANCEL_ORDER_STATUS:
-            throw RuntimeError("cancelOrderStatus not supported"sv);
+            throw RuntimeError{"cancelOrderStatus not supported"sv};
         }
         break;
       }
@@ -140,10 +140,10 @@ bool dispatch2(
         log::fatal("Unexpected"sv);
         break;
       case TICKER: {
-        throw RuntimeError("ticker not supported"sv);
+        throw RuntimeError{"ticker not supported"sv};
       }
       case OHLC: {
-        throw RuntimeError("ohlc not supported"sv);
+        throw RuntimeError{"ohlc not supported"sv};
       }
       case TRADE: {
         if (data_count != 1) [[unlikely]]
@@ -179,10 +179,10 @@ bool dispatch2(
         break;
       }
       case OWN_TRADES: {
-        throw RuntimeError("ownTrades not supported"sv);
+        throw RuntimeError{"ownTrades not supported"sv};
       }
       case OPEN_ORDERS: {
-        throw RuntimeError("openOrders not supported"sv);
+        throw RuntimeError{"openOrders not supported"sv};
       }
     }
   }

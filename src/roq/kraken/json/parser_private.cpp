@@ -21,11 +21,11 @@ bool ParserPrivate::dispatch(
   auto root = parser.root();
   return std::visit(
       overloaded{
-          [](core::json::Null const &) -> bool { throw std::bad_cast(); },
-          [](bool) -> bool { throw std::bad_cast(); },
-          [](int64_t) -> bool { throw std::bad_cast(); },
-          [](double) -> bool { throw std::bad_cast(); },
-          [](std::string_view const &) -> bool { throw std::bad_cast(); },
+          [](core::json::Null const &) -> bool { throw std::bad_cast{}; },
+          [](bool) -> bool { throw std::bad_cast{}; },
+          [](int64_t) -> bool { throw std::bad_cast{}; },
+          [](double) -> bool { throw std::bad_cast{}; },
+          [](std::string_view const &) -> bool { throw std::bad_cast{}; },
           [&](core::json::Object &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
           [&](core::json::Array &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
       },
@@ -136,11 +136,11 @@ bool dispatch2(
         log::fatal("Unexpected"sv);
         break;
       case TICKER: {
-        throw RuntimeError("ticker not supported"sv);
+        throw RuntimeError{"ticker not supported"sv};
         break;
       }
       case OHLC: {
-        throw RuntimeError("ohlc not supported"sv);
+        throw RuntimeError{"ohlc not supported"sv};
         break;
       }
       case TRADE: {
@@ -174,11 +174,11 @@ bool dispatch2(
         break;
       }
       case OWN_TRADES: {
-        throw RuntimeError("ownTrades not supported"sv);
+        throw RuntimeError{"ownTrades not supported"sv};
         break;
       }
       case OPEN_ORDERS: {
-        throw RuntimeError("openOrders not supported"sv);
+        throw RuntimeError{"openOrders not supported"sv};
         break;
       }
     }

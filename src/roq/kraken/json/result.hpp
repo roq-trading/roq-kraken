@@ -32,10 +32,10 @@ struct Result final {
         result_handler(obj);
         return;
       } else {
-        throw RuntimeError(R"(Unexpected key="{}")"sv, key);
+        throw RuntimeError{R"(Unexpected key="{}")"sv, key};
       }
     }
-    throw RuntimeError(R"(Didn't find key in {"error", "result"})"sv);
+    throw RuntimeError{R"(Didn't find key in {"error", "result"})"sv};
   }
 };
 
