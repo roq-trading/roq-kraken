@@ -16,7 +16,7 @@ namespace kraken {
 // === CONSTANTS ===
 
 namespace {
-Mask const SUPPORTS{
+auto const SUPPORTS = Mask{
     SupportType::REFERENCE_DATA,
     SupportType::MARKET_STATUS,
     SupportType::TOP_OF_BOOK,

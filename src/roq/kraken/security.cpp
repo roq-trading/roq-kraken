@@ -8,8 +8,10 @@ namespace kraken {
 // === IMPLEMENTATION ===
 
 Security::Security(Config const &config, std::string_view const &account)
-    : account_(account),
-      hasher_(config.get_access_key(account), config.get_access_secret(account), config.get_access_password(account)) {
+    : account_{account}, hasher_{
+                             config.get_access_key(account),
+                             config.get_access_secret(account),
+                             config.get_access_password(account)} {
 }
 
 std::string Security::create_body() {

@@ -21,7 +21,7 @@ namespace tools {
 // === CONSTANTS ===
 
 namespace {
-const constexpr auto THRESHOLD = -1000ms;
+constexpr auto const THRESHOLD = -1000ms;
 }
 
 // === CONSTANTS ===
@@ -34,7 +34,7 @@ auto create_hmac(auto const &secret) {
 }  // namespace
 
 Hasher::Hasher(std::string_view const &key, std::string_view const &secret, std::string_view const &passphrase)
-    : key_(key), passphrase_(passphrase), hmac_(create_hmac(secret)) {
+    : key_{key}, passphrase_{passphrase}, hmac_{create_hmac(secret)} {
 }
 
 std::string Hasher::create_body() {
