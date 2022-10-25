@@ -12,7 +12,7 @@
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std::chrono::microseconds"
     },
     {
       "name": "bidVolume",

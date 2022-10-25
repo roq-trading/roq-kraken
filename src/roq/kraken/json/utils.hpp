@@ -39,6 +39,23 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
       value);
 }
 
+template <>
+inline void update(std::chrono::microseconds &result, core::json::Value const &value) {
+  return std::visit(
+      overloaded{
+          [&](core::json::Null const &) { result = std::chrono::microseconds{}; },
+          [](bool) { throw std::bad_cast{}; },
+          [&](int64_t value) { result = std::chrono::microseconds{static_cast<uint64_t>(value * int64_t{1000000})}; },
+          [&](double value) { result = std::chrono::microseconds{static_cast<uint64_t>(value * 1.0e6)}; },
+          [&](std::string_view const &value) {
+            result = core::charconv::datetime_from_string<std::remove_reference<decltype(result)>::type>(value);
+          },
+          [](core::json::Object const &) { throw std::bad_cast{}; },
+          [](core::json::Array const &) { throw std::bad_cast{}; },
+      },
+      value);
+}
+
 inline roq::OrderType map(json::OrderType order_type) {
   switch (order_type) {
     using enum json::OrderType::type_t;
