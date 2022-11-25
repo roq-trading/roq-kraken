@@ -21,6 +21,10 @@
     {
       "name": "collateral_value",
       "type": "double"
+    },
+    {
+      "name": "status",
+      "type": "std::string_view"
     }
   ]
 }

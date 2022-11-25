@@ -81,6 +81,18 @@
     {
       "name": "tick_size",
       "type": "double"
+    },
+    {
+      "name": "status",
+      "type": "std::string_view"
+    },
+    {
+      "name": "long_position_limit",
+      "type": "double"
+    },
+    {
+      "name": "short_position_limit",
+      "type": "double"
     }
   ]
 }
