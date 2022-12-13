@@ -2,8 +2,8 @@
 
 #include "roq/kraken/tools/hasher.hpp"
 
-#include <array>
 #include <random>
+#include <vector>
 
 #include "roq/logging.hpp"
 
@@ -27,16 +27,17 @@ constexpr auto const THRESHOLD = -1000ms;
 // === CONSTANTS ===
 
 namespace {
-auto create_hmac(auto const &secret) {
+template <typename R>
+R create_hmac(auto const &secret) {
   std::vector<std::byte> buffer;
   buffer.resize(core::binascii::Base64::get_max_binary_length(std::size(secret)));
   auto raw_secret = core::binascii::Base64::decode(buffer, secret);
-  return core::mac::HMAC_SHA512(raw_secret);
+  return R{raw_secret};
 }
 }  // namespace
 
 Hasher::Hasher(std::string_view const &key, std::string_view const &secret, std::string_view const &passphrase)
-    : key_{key}, passphrase_{passphrase}, hmac_{create_hmac(secret)} {
+    : key_{key}, passphrase_{passphrase}, mac_{create_hmac<decltype(mac_)>(secret)} {
 }
 
 std::string Hasher::create_body() {
@@ -65,20 +66,17 @@ std::string Hasher::create_headers(
   assert(method == web::http::Method::POST);
   assert(!std::empty(body));
   auto nonce = fmt::format("{}"sv, nonce_.count());
-  sha_.clear();
-  sha_.update(nonce);
-  sha_.update(body);
-  std::array<std::byte, 32> buffer_1;
-  auto length_1 = sha_.digest(buffer_1);
-  assert(length_1 == std::size(buffer_1));
-  hmac_.clear();
-  hmac_.update(std::data(path), std::size(path));
-  hmac_.update(std::data(buffer_1), std::size(buffer_1));
-  std::array<std::byte, 64> buffer_2;
-  auto length_2 = hmac_.digest(buffer_2);
-  assert(length_2 == std::size(buffer_2));
+  hash_.clear();
+  hash_.update(nonce);
+  hash_.update(body);
+  std::array<std::byte, Hash::DIGEST_LENGTH> buffer_1;
+  auto digest_1 = hash_.final(buffer_1);
+  mac_.clear();
+  mac_.update(path);
+  mac_.update(digest_1);
+  auto digest_2 = mac_.final(digest_);
   std::string sign_2;
-  core::binascii::Base64::encode(sign_2, buffer_2, false);
+  core::binascii::Base64::encode(sign_2, digest_2, false);
   return fmt::format(
       "API-Key: {}\r\n"
       "API-Sign: {}\r\n"sv,

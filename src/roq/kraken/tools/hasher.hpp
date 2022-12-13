@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <string>
 #include <string_view>
 
 #include "roq/core/hash/sha256.hpp"
-#include "roq/core/mac/hmac_sha512.hpp"
+
+#include "roq/core/mac/hmac.hpp"
 
 #include "roq/web/http/method.hpp"
 
@@ -29,10 +31,15 @@ class Hasher final {
   std::string create_headers(web::http::Method, std::string_view const &path, std::string_view const &body);
 
  private:
-  const std::string key_;
-  const std::string passphrase_;
-  core::hash::SHA256 sha_;
-  core::mac::HMAC_SHA512 hmac_;
+  using Hash = core::hash::SHA256;
+  using MAC = core::mac::HMAC<core::hash::SHA512>;
+  using Digest = std::array<std::byte, MAC::DIGEST_LENGTH>;
+
+  std::string const key_;
+  std::string const passphrase_;
+  Hash hash_;
+  MAC mac_;
+  Digest digest_;
   // experimental
   std::chrono::milliseconds nonce_ = {};
 };
