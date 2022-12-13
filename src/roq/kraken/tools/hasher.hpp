@@ -6,8 +6,8 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/crypto/hmac_sha512.hpp"
-#include "roq/core/crypto/sha256.hpp"
+#include "roq/core/hash/sha256.hpp"
+#include "roq/core/mac/hmac_sha512.hpp"
 
 #include "roq/web/http/method.hpp"
 
@@ -31,8 +31,8 @@ class Hasher final {
  private:
   const std::string key_;
   const std::string passphrase_;
-  core::crypto::SHA256 sha_;
-  core::crypto::HMAC_SHA512 hmac_;
+  core::hash::SHA256 sha_;
+  core::mac::HMAC_SHA512 hmac_;
   // experimental
   std::chrono::milliseconds nonce_ = {};
 };

@@ -31,7 +31,7 @@ auto create_hmac(auto const &secret) {
   std::vector<std::byte> buffer;
   buffer.resize(core::binascii::Base64::get_max_binary_length(std::size(secret)));
   auto raw_secret = core::binascii::Base64::decode(buffer, secret);
-  return core::crypto::HMAC_SHA512(raw_secret);
+  return core::mac::HMAC_SHA512(raw_secret);
 }
 }  // namespace
 
