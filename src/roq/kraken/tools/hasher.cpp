@@ -9,7 +9,7 @@
 
 #include "roq/clock.hpp"
 
-#include "roq/core/binascii/base64.hpp"
+#include "roq/core/codec/base64.hpp"
 
 using namespace std::literals;
 using namespace std::literals;
@@ -30,8 +30,8 @@ namespace {
 template <typename R>
 R create_hmac(auto const &secret) {
   std::vector<std::byte> buffer;
-  buffer.resize(core::binascii::Base64::get_max_binary_length(std::size(secret)));
-  auto raw_secret = core::binascii::Base64::decode(buffer, secret, false, false);
+  buffer.resize(core::codec::Base64::get_max_binary_length(std::size(secret)));
+  auto raw_secret = core::codec::Base64::decode(buffer, secret, false, false);
   return R{raw_secret};
 }
 }  // namespace
@@ -76,7 +76,7 @@ std::string Hasher::create_headers(
   mac_.update(digest_1);
   auto digest_2 = mac_.final(digest_);
   std::string sign_2;
-  core::binascii::Base64::encode(sign_2, digest_2, false, false);
+  core::codec::Base64::encode(sign_2, digest_2, false, false);
   return fmt::format(
       "API-Key: {}\r\n"
       "API-Sign: {}\r\n"sv,
