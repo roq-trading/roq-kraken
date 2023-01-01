@@ -102,7 +102,6 @@ class Rest final : public web::rest::Client::Handler {
   Shared &shared_;
   absl::flat_hash_set<Symbol> all_symbols_;
   // state
-  bool ready_ = false;
   ConnectionStatus status_ = {};
   core::Download<RestState> download_;
 };

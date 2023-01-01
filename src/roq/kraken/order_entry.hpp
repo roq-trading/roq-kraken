@@ -122,7 +122,6 @@ class OrderEntry final : public web::rest::Client::Handler {
   // cache
   Shared &shared_;
   // state
-  bool ready_ = false;
   ConnectionStatus status_ = {};
   core::Download<OrderEntryState> download_;
 };
