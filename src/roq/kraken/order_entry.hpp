@@ -31,8 +31,7 @@
 namespace roq {
 namespace kraken {
 
-class OrderEntry final : public web::rest::Client::Handler {
- public:
+struct OrderEntry final : public web::rest::Client::Handler {
   struct TokenUpdate final {
     std::string_view account;
     std::string_view token;

@@ -25,8 +25,7 @@
 namespace roq {
 namespace kraken {
 
-class MarketData final : public web::socket::Client::Handler, public json::ParserPublic::Handler {
- public:
+struct MarketData final : public web::socket::Client::Handler, public json::ParserPublic::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;

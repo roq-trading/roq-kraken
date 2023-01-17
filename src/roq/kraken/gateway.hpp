@@ -23,12 +23,11 @@
 namespace roq {
 namespace kraken {
 
-class Gateway final : public server::Handler,
-                      public Rest::Handler,
-                      public OrderEntry::Handler,
-                      public MarketData::Handler,
-                      public DropCopy::Handler {
- public:
+struct Gateway final : public server::Handler,
+                       public Rest::Handler,
+                       public OrderEntry::Handler,
+                       public MarketData::Handler,
+                       public DropCopy::Handler {
   Gateway(server::Dispatcher &, Config const &, io::Context &);
 
  protected:
