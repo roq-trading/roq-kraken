@@ -3,11 +3,10 @@
 #include "roq/kraken/market_data.hpp"
 
 #include <algorithm>
+#include <utility>
 
 #include "roq/mask.hpp"
 #include "roq/utils/update.hpp"
-
-#include "roq/core/back_emplacer.hpp"
 
 #include "roq/core/metrics/factory.hpp"
 
@@ -43,7 +42,7 @@ auto create_name(auto stream_id) {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::ws_public_uri();
-  web::socket::Client::Config config{
+  auto config = web::socket::Client::Config{
       .always_reconnect = true,
       .connection_timeout = server::Flags::net_connection_timeout(),
       .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
@@ -129,7 +128,7 @@ void MarketData::operator()(web::socket::Client::Close const &) {
 
 void MarketData::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
-  const ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -149,7 +148,7 @@ void MarketData::operator()(web::socket::Client::Binary const &) {
 void MarketData::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    const StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -274,8 +273,9 @@ void MarketData::operator()(Trace<json::Trade> const &event, std::string_view co
   auto &[trace_info, trade] = event;
   log::info<3>(R"(trade={}, pair="{}")"sv, trade, pair);
   (*connection_).touch(trace_info.source_receive_time);
-  auto create_trade = []<typename T>(T &result, auto const &value) {
-    new (&result) T{
+  shared_.trades.clear();
+  auto emplace_back = [](auto &result, auto &value) {
+    auto trade = Trade{
         .side = json::map(value.side),
         .price = value.price,
         .quantity = value.volume,
@@ -283,19 +283,19 @@ void MarketData::operator()(Trace<json::Trade> const &event, std::string_view co
         .taker_order_id = {},
         .maker_order_id = {},
     };
+    result.emplace_back(std::move(trade));
   };
-  core::back_emplacer trades{shared_.trades};
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : trade.data) {
-    trades.emplace_back([&](auto &result) { create_trade(result, item); });
+    emplace_back(shared_.trades, item);
     utils::update_first(exchange_time_utc, item.time);
   }
-  if (!std::empty(trades)) {
-    const TradeSummary trade_summary{
+  if (!std::empty(shared_.trades)) {
+    auto trade_summary = TradeSummary{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = pair,
-        .trades = trades,
+        .trades = shared_.trades,
         .exchange_time_utc = exchange_time_utc,
         .exchange_sequence = {},
     };
@@ -307,7 +307,7 @@ void MarketData::operator()(Trace<json::Spread> const &event, std::string_view c
   auto &[trace_info, spread] = event;
   log::info<3>(R"(spread={}, pair="{}")"sv, spread, pair);
   (*connection_).touch(trace_info.source_receive_time);
-  const TopOfBook top_of_book{
+  auto top_of_book = TopOfBook{
       .stream_id = stream_id_,
       .exchange = Flags::exchange(),
       .symbol = pair,
@@ -341,8 +341,10 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
   bool live = !std::empty(book.b) && !std::empty(book.a);
   if (snapshot && live) [[unlikely]]
     log::fatal("Unexpected"sv);
-  auto create_mbp_update = []<typename T>(T &result, auto const &value) {
-    new (&result) T{
+  shared_.bids.clear();
+  shared_.asks.clear();
+  auto emplace_back = [](auto &result, auto &value) {
+    auto mbp_update = MBPUpdate{
         .price = value.price,
         .quantity = value.volume,
         .implied_quantity = NaN,
@@ -350,32 +352,32 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
         .update_action = {},
         .price_level = {},
     };
+    result.emplace_back(std::move(mbp_update));
   };
-  core::back_emplacer bids{shared_.bids}, asks{shared_.asks};
   std::chrono::nanoseconds exchange_time_utc = {};
   for (auto &item : book.b) {
-    bids.emplace_back([&](auto &result) { create_mbp_update(result, item); });
+    emplace_back(shared_.bids, item);
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.bs) {
-    bids.emplace_back([&](auto &result) { create_mbp_update(result, item); });
+    emplace_back(shared_.bids, item);
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.a) {
-    asks.emplace_back([&](auto &result) { create_mbp_update(result, item); });
+    emplace_back(shared_.asks, item);
     utils::update_first(exchange_time_utc, item.timestamp);
   }
   for (auto &item : book.as) {
-    asks.emplace_back([&](auto &result) { create_mbp_update(result, item); });
+    emplace_back(shared_.asks, item);
     utils::update_first(exchange_time_utc, item.timestamp);
   }
-  if (!(std::empty(bids) && std::empty(asks))) {
-    const MarketByPriceUpdate market_by_price_update{
+  if (!(std::empty(shared_.bids) && std::empty(shared_.asks))) {
+    auto market_by_price_update = MarketByPriceUpdate{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = pair,
-        .bids = bids,
-        .asks = asks,
+        .bids = shared_.bids,
+        .asks = shared_.asks,
         .update_type = snapshot ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL,
         .exchange_time_utc = exchange_time_utc,
         .exchange_sequence = {},
@@ -407,15 +409,7 @@ void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const
       .checksum = {},
   };
   log::info<3>("market_by_price_update={}"sv, market_by_price_update);
-  create_trace_and_dispatch(
-      shared_,
-      trace_info,
-      market_by_price_update,
-      true,
-      false,
-      shared_.final_bids,
-      shared_.final_asks,
-      []([[maybe_unused]] auto &market_by_price) {});
+  create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true, false);
   latch_.emplace(symbol);  // latch
   log::info(R"(DEBUG: latching symbol="{}")"sv, symbol);
   unsubscribe_book(symbol);

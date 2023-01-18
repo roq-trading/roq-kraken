@@ -42,7 +42,7 @@ auto create_name(auto stream_id) {
 
 auto create_connection(auto &handler, auto &context) {
   auto uri = Flags::rest_uri();
-  web::rest::Client::Config config{
+  auto config = web::rest::Client::Config{
       .decode_buffer_size = Flags::decode_buffer_size(),
       .encode_buffer_size = Flags::encode_buffer_size(),
       .validate_certificate = server::Flags::net_tls_validate_certificate(),
@@ -112,7 +112,7 @@ void Rest::operator()(metrics::Writer &writer) {
 void Rest::operator()(ConnectionStatus status) {
   if (utils::update(status_, status)) {
     TraceInfo trace_info;
-    StreamStatus stream_status{
+    auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = {},
         .supports = SUPPORTS,
@@ -145,7 +145,7 @@ void Rest::operator()(web::rest::Client::Disconnected const &) {
 
 void Rest::operator()(web::rest::Client::Latency const &latency) {
   TraceInfo trace_info;
-  ExternalLatency external_latency{
+  auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
       .account = {},
       .latency = latency.sample,
@@ -178,7 +178,7 @@ uint32_t Rest::download(RestState state) {
 
 void Rest::get_assets() {
   profile_.assets([&]() {
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = "/0/public/Assets"sv,
         .query = {},
@@ -228,7 +228,7 @@ void Rest::operator()(Trace<json::Assets> const &event) {
 
 void Rest::get_asset_pairs() {
   profile_.asset_pairs([&]() {
-    web::rest::Request request{
+    auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = "/0/public/AssetPairs"sv,
         .query = {},
@@ -289,7 +289,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
     if (std::isnan(tick_size))
       tick_size = std::pow(double{10.0}, -static_cast<double>(item.pair_decimals));
     auto min_trade_vol = std::pow(double{10.0}, -static_cast<double>(item.lot_decimals));
-    ReferenceData reference_data{
+    auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
@@ -322,7 +322,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
     if (all_symbols_.emplace(symbol).second)  // only include new
       symbols.emplace_back(symbol);
     ++counter;
-    MarketStatus market_status{
+    auto market_status = MarketStatus{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = symbol,
@@ -332,7 +332,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
   }
   log::info("AssetPairs {} / {}"sv, counter, std::size(asset_pairs.result));
   if (!std::empty(symbols)) {
-    SymbolsUpdate symbols_update{
+    auto symbols_update = SymbolsUpdate{
         .symbols = symbols,
     };
     handler_(symbols_update);
