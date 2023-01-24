@@ -154,7 +154,8 @@ void Rest::operator()(Trace<web::rest::Client::Latency> const &event) {
   latency_.ping.update(latency.sample);
 }
 
-void Rest::operator()(Trace<web::rest::Response> const &, [[maybe_unused]] uint64_t request_id, [maybe_unused]] uint64_t opaque) {
+void Rest::operator()(
+    Trace<web::rest::Response> const &, [[maybe_unused]] uint64_t request_id, [[maybe_unused]] uint64_t opaque) {
 }
 
 uint32_t Rest::download(RestState state) {
