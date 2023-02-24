@@ -18,8 +18,8 @@
 
 #include "roq/server.hpp"
 
+#include "roq/kraken/authenticator.hpp"
 #include "roq/kraken/drop_copy_state.hpp"
-#include "roq/kraken/security.hpp"
 #include "roq/kraken/shared.hpp"
 
 #include "roq/kraken/json/parser_private.hpp"
@@ -33,7 +33,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
   };
 
-  DropCopy(Handler &, io::Context &, uint16_t stream_id, Security &, Shared &, std::string_view const &token);
+  DropCopy(Handler &, io::Context &, uint16_t stream_id, Authenticator &, Shared &, std::string_view const &token);
 
   DropCopy(DropCopy &&) = delete;
   DropCopy(DropCopy const &) = delete;
@@ -99,8 +99,8 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   struct {
     core::metrics::Latency ping, heartbeat;
   } latency_;
-  // security
-  Security &security_;
+  // authenticator
+  Authenticator &authenticator_;
   // cache
   Shared &shared_;
   // state

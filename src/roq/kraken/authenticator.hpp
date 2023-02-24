@@ -9,16 +9,16 @@
 
 #include "roq/kraken/config.hpp"
 
-#include "roq/kraken/tools/hasher.hpp"
+#include "roq/kraken/tools/crypto.hpp"
 
 namespace roq {
 namespace kraken {
 
-struct Security final {
-  Security(Config const &, std::string_view const &account);
+struct Authenticator final {
+  Authenticator(Config const &, std::string_view const &account);
 
-  Security(Security &&) = delete;
-  Security(Security const &) = delete;
+  Authenticator(Authenticator &&) = delete;
+  Authenticator(Authenticator const &) = delete;
 
   std::string_view get_account() const { return account_; }
 
@@ -27,8 +27,8 @@ struct Security final {
   std::string create_headers(web::http::Method, std::string_view const &path, std::string_view const &body);
 
  private:
-  const std::string account_;
-  tools::Hasher hasher_;
+  std::string const account_;
+  tools::Crypto crypto_;
 };
 
 }  // namespace kraken

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2023, Hans Erik Thrane */
 
-#include "roq/kraken/tools/hasher.hpp"
+#include "roq/kraken/tools/crypto.hpp"
 
 #include <random>
 #include <vector>
@@ -36,11 +36,11 @@ R create_hmac(auto const &secret) {
 }
 }  // namespace
 
-Hasher::Hasher(std::string_view const &key, std::string_view const &secret, std::string_view const &passphrase)
+Crypto::Crypto(std::string_view const &key, std::string_view const &secret, std::string_view const &passphrase)
     : key_{key}, passphrase_{passphrase}, mac_{create_hmac<decltype(mac_)>(secret)} {
 }
 
-std::string Hasher::create_body() {
+std::string Crypto::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(clock::get_realtime());
   auto diff = now - nonce_;
   if (diff < THRESHOLD) [[unlikely]]
@@ -61,7 +61,7 @@ std::string Hasher::create_body() {
   }
 }
 
-std::string Hasher::create_headers(
+std::string Crypto::create_headers(
     web::http::Method method, std::string_view const &path, std::string_view const &body) {
   assert(method == web::http::Method::POST);
   assert(!std::empty(body));

@@ -22,7 +22,6 @@
 #include "roq/server.hpp"
 
 #include "roq/kraken/rest_state.hpp"
-#include "roq/kraken/security.hpp"
 #include "roq/kraken/shared.hpp"
 
 #include "roq/kraken/json/asset_pairs.hpp"
