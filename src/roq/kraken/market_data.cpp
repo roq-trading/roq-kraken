@@ -298,6 +298,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, std::string_view co
         .trades = shared_.trades,
         .exchange_time_utc = exchange_time_utc,
         .exchange_sequence = {},
+        .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
   }
@@ -320,6 +321,7 @@ void MarketData::operator()(Trace<json::Spread> const &event, std::string_view c
       .update_type = UpdateType::INCREMENTAL,
       .exchange_time_utc = spread.timestamp,
       .exchange_sequence = {},
+      .sending_time_utc = {},
   };
   create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
 }
@@ -381,6 +383,7 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
         .update_type = snapshot ? UpdateType::SNAPSHOT : UpdateType::INCREMENTAL,
         .exchange_time_utc = exchange_time_utc,
         .exchange_sequence = {},
+        .sending_time_utc = {},
         .price_decimals = {},
         .quantity_decimals = {},
         .checksum = {},
@@ -404,6 +407,7 @@ void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const
       .update_type = UpdateType::STALE,
       .exchange_time_utc = {},
       .exchange_sequence = {},
+      .sending_time_utc = {},
       .price_decimals = {},
       .quantity_decimals = {},
       .checksum = {},
