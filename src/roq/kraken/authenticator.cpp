@@ -8,10 +8,8 @@ namespace kraken {
 // === IMPLEMENTATION ===
 
 Authenticator::Authenticator(Config const &config, std::string_view const &account)
-    : account_{account}, crypto_{
-                             config.get_access_key(account),
-                             config.get_access_secret(account),
-                             config.get_access_password(account)} {
+    : account_{account},
+      crypto_{config.get_access_key(account), config.get_access_secret(account), config.get_access_password(account)} {
 }
 
 std::string Authenticator::create_body() {

@@ -44,8 +44,8 @@ auto create_drop_copy(auto &authenticator_by_account) {
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, master_account_{config.get_master_account()},
       authenticator_{create_authenticator<decltype(authenticator_)>(config)}, context_{context}, shared_{dispatcher},
-      rest_{*this, context_, ++stream_id_, shared_}, order_entry_{create_order_entry<decltype(order_entry_)>(
-                                                         *this, context_, stream_id_, authenticator_, shared_)},
+      rest_{*this, context_, ++stream_id_, shared_},
+      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, authenticator_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(authenticator_)} {
 }
 
