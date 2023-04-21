@@ -331,7 +331,7 @@ void MarketData::operator()(Trace<json::Spread> const &event, std::string_view c
           .ask_price = spread.ask,
           .ask_quantity = spread.ask_volume,
       },
-      .update_type = UpdateType::INCREMENTAL,
+      .update_type = UpdateType::SNAPSHOT,
       .exchange_time_utc = spread.timestamp,
       .exchange_sequence = {},
       .sending_time_utc = {},
