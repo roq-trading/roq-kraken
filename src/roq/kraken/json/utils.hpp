@@ -57,9 +57,8 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
 inline roq::OrderType map(json::OrderType order_type) {
   switch (order_type) {
     using enum json::OrderType::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case L:
       return roq::OrderType::LIMIT;
@@ -70,15 +69,14 @@ inline roq::OrderType map(json::OrderType order_type) {
     case MARKET:
       return roq::OrderType::MARKET;
   }
-  return roq::OrderType::UNDEFINED;
+  return {};
 }
 
 inline roq::Side map(json::Side side) {
   switch (side) {
     using enum json::Side::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case B:
       return roq::Side::BUY;
@@ -89,7 +87,7 @@ inline roq::Side map(json::Side side) {
     case SELL:
       return roq::Side::SELL;
   }
-  return roq::Side::UNDEFINED;
+  return {};
 }
 
 }  // namespace json

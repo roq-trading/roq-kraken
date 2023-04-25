@@ -43,17 +43,17 @@ bool ParserPublic::dispatch(
     auto field = ResultField(key);
     switch (field) {
       using enum ResultField::type_t;
-      case UNDEFINED:
-      case UNKNOWN:
+      case UNDEFINED__:
+      case UNKNOWN__:
         break;
       case EVENT: {
         auto event = Event(value);
         switch (event) {
           using enum Event::type_t;
-          case UNDEFINED:
+          case UNDEFINED__:
             log::fatal("Unexpected"sv);
             break;
-          case UNKNOWN:
+          case UNKNOWN__:
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case ERROR: {
@@ -135,8 +135,8 @@ bool dispatch2(
       break;
     switch (channel) {
       using enum Channel::type_t;
-      case UNDEFINED:
-      case UNKNOWN:
+      case UNDEFINED__:
+      case UNKNOWN__:
         log::fatal("Unexpected"sv);
         break;
       case TICKER: {
@@ -215,7 +215,7 @@ bool ParserPublic::dispatch(
     core::json::Array &root,
     TraceInfo const &trace_info) {
   int64_t channel_id = 0;
-  Channel channel = Channel::UNDEFINED;
+  Channel channel = Channel::UNDEFINED__;
   std::string_view pair;
   size_t offset = 0;
   size_t data_count = 0;
@@ -234,7 +234,7 @@ bool ParserPublic::dispatch(
               name.remove_suffix(std::size(name) - pos);
             channel = Channel(name);
 #ifndef NDEBUG
-            if (channel == Channel::UNKNOWN) [[unlikely]]
+            if (channel == Channel::UNKNOWN__) [[unlikely]]
               log::fatal(R"(Unknown channel="{}")"sv, name);
 #endif
             break;

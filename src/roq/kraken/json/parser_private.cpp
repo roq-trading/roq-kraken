@@ -43,17 +43,17 @@ bool ParserPrivate::dispatch(
     auto field = ResultField(key);
     switch (field) {
       using enum ResultField::type_t;
-      case UNDEFINED:
-      case UNKNOWN:
+      case UNDEFINED__:
+      case UNKNOWN__:
         break;
       case EVENT: {
         auto event = Event(value);
         switch (event) {
           using enum Event::type_t;
-          case UNDEFINED:
+          case UNDEFINED__:
             log::fatal("Unexpected"sv);
             break;
-          case UNKNOWN:
+          case UNKNOWN__:
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case ERROR: {
@@ -131,8 +131,8 @@ bool dispatch2(
       break;
     switch (channel) {
       using enum Channel::type_t;
-      case UNDEFINED:
-      case UNKNOWN:
+      case UNDEFINED__:
+      case UNKNOWN__:
         log::fatal("Unexpected"sv);
         break;
       case TICKER: {
@@ -209,7 +209,7 @@ bool ParserPrivate::dispatch(
     core::json::Buffer &buffer,
     core::json::Array &root,
     TraceInfo const &) {
-  Channel channel = Channel::UNDEFINED;
+  Channel channel = Channel::UNDEFINED__;
   size_t offset = 0;
   for (auto value : root) {
     switch (offset) {
@@ -221,7 +221,7 @@ bool ParserPrivate::dispatch(
           name.remove_suffix(std::size(name) - pos);
         channel = Channel(name);
 #ifndef NDEBUG
-        if (channel == Channel::UNKNOWN) [[unlikely]]
+        if (channel == Channel::UNKNOWN__) [[unlikely]]
           log::fatal(R"(Unknown channel="{}")"sv, name);
 #endif
         break;
