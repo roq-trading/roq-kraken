@@ -17,7 +17,7 @@ namespace json {
 bool ParserPrivate::dispatch(
     Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
   // different parsing depending on object or array representation
-  core::json::Parser parser(message);
+  core::json::Parser parser{message};
   auto root = parser.root();
   return std::visit(
       overloaded{
@@ -40,14 +40,14 @@ bool ParserPrivate::dispatch(
     TraceInfo const &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
-    auto field = ResultField(key);
+    auto field = ResultField{key};
     switch (field) {
       using enum ResultField::type_t;
       case UNDEFINED__:
       case UNKNOWN__:
         break;
       case EVENT: {
-        auto event = Event(value);
+        auto event = Event{value};
         switch (event) {
           using enum Event::type_t;
           case UNDEFINED__:
@@ -57,50 +57,50 @@ bool ParserPrivate::dispatch(
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case ERROR: {
-            auto const error = core::json::Parser::create<Error>(message);
-            Trace event(trace_info, error);
+            Error error{message};
+            Trace event{trace_info, error};
             handler(event);
             dispatched = true;
             break;
           }
           case SYSTEM_STATUS: {
-            auto const system_status = core::json::Parser::create<SystemStatus>(message);
-            Trace event(trace_info, system_status);
+            SystemStatus system_status{message};
+            Trace event{trace_info, system_status};
             handler(event);
             dispatched = true;
             break;
           }
           case PONG: {
-            auto const pong = core::json::Parser::create<Pong>(message);
-            Trace event(trace_info, pong);
+            Pong pong{message};
+            Trace event{trace_info, pong};
             handler(event);
             dispatched = true;
             break;
           }
           case HEARTBEAT: {
-            auto const heartbeat = core::json::Parser::create<Heartbeat>(message);
-            Trace event(trace_info, heartbeat);
+            Heartbeat heartbeat{message};
+            Trace event{trace_info, heartbeat};
             handler(event);
             dispatched = true;
             break;
           }
           case SUBSCRIPTION_STATUS: {
-            auto const subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
-            Trace event(trace_info, subscription_status);
+            SubscriptionStatus subscription_status{message};
+            Trace event{trace_info, subscription_status};
             handler(event);
             dispatched = true;
             break;
           }
           case ADD_ORDER_STATUS: {
-            auto const add_order_status = core::json::Parser::create<AddOrderStatus>(message);
-            Trace event(trace_info, add_order_status);
+            AddOrderStatus add_order_status{message};
+            Trace event{trace_info, add_order_status};
             handler(event);
             dispatched = true;
             break;
           }
           case CANCEL_ORDER_STATUS:
-            auto const cancel_order_status = core::json::Parser::create<CancelOrderStatus>(message);
-            Trace event(trace_info, cancel_order_status);
+            CancelOrderStatus cancel_order_status{message};
+            Trace event{trace_info, cancel_order_status};
             handler(event);
             dispatched = true;
             break;
@@ -219,7 +219,7 @@ bool ParserPrivate::dispatch(
         auto pos = name.find_first_of('-');
         if (pos != name.npos)
           name.remove_suffix(std::size(name) - pos);
-        channel = Channel(name);
+        channel = Channel{name};
 #ifndef NDEBUG
         if (channel == Channel::UNKNOWN__) [[unlikely]]
           log::fatal(R"(Unknown channel="{}")"sv, name);

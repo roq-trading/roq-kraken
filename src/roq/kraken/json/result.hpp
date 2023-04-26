@@ -17,7 +17,7 @@ struct Result final {
   template <typename T, typename E, typename H>
   static void dispatch(std::string_view const &message, core::json::Buffer &buffer, E error_handler, H result_handler) {
     using namespace std::literals;
-    core::json::Parser parser(message);
+    core::json::Parser parser{message};
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::Object>(root)) {
       if (key.compare("error"sv) == 0) {
@@ -28,7 +28,7 @@ struct Result final {
           return;
         }
       } else if (key.compare("result"sv) == 0) {
-        T obj(value);  // note! no buffer
+        T obj{value};  // note! no buffer
         result_handler(obj);
         return;
       } else {

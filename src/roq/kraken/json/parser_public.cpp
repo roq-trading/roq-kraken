@@ -17,7 +17,7 @@ namespace json {
 bool ParserPublic::dispatch(
     Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
   // different parsing depending on object or array representation
-  core::json::Parser parser(message);
+  core::json::Parser parser{message};
   auto root = parser.root();
   return std::visit(
       overloaded{
@@ -40,7 +40,7 @@ bool ParserPublic::dispatch(
     TraceInfo const &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
-    auto field = ResultField(key);
+    auto field = ResultField{key};
     switch (field) {
       using enum ResultField::type_t;
       case UNDEFINED__:
@@ -57,36 +57,36 @@ bool ParserPublic::dispatch(
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case ERROR: {
-            auto const error = core::json::Parser::create<Error>(message);
-            Trace event(trace_info, error);
+            Error error{message};
+            Trace event{trace_info, error};
             handler(event);
             dispatched = true;
             break;
           }
           case SYSTEM_STATUS: {
-            auto const system_status = core::json::Parser::create<SystemStatus>(message);
-            Trace event(trace_info, system_status);
+            SystemStatus system_status{message};
+            Trace event{trace_info, system_status};
             handler(event);
             dispatched = true;
             break;
           }
           case PONG: {
-            auto const pong = core::json::Parser::create<Pong>(message);
-            Trace event(trace_info, pong);
+            Pong pong{message};
+            Trace event{trace_info, pong};
             handler(event);
             dispatched = true;
             break;
           }
           case HEARTBEAT: {
-            auto const heartbeat = core::json::Parser::create<Heartbeat>(message);
-            Trace event(trace_info, heartbeat);
+            Heartbeat heartbeat{message};
+            Trace event{trace_info, heartbeat};
             handler(event);
             dispatched = true;
             break;
           }
           case SUBSCRIPTION_STATUS: {
-            auto const subscription_status = core::json::Parser::create<SubscriptionStatus>(message);
-            Trace event(trace_info, subscription_status);
+            SubscriptionStatus subscription_status{message};
+            Trace event{trace_info, subscription_status};
             handler(event);
             dispatched = true;
             break;
@@ -123,7 +123,7 @@ bool dispatch2(
       data_count);
   */
   bool dispatched = false;
-  core::json::Parser parser(message);
+  core::json::Parser parser{message};
   auto root = parser.root();
   size_t offset = 0;
   Book book_1, book_2;
@@ -139,17 +139,15 @@ bool dispatch2(
       case UNKNOWN__:
         log::fatal("Unexpected"sv);
         break;
-      case TICKER: {
+      case TICKER:
         throw RuntimeError{"ticker not supported"sv};
-      }
-      case OHLC: {
+      case OHLC:
         throw RuntimeError{"ohlc not supported"sv};
-      }
       case TRADE: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
-        const Trade trade(value, buffer);
-        Trace event(trace_info, trade);
+        Trade trade{value, buffer};
+        Trace event{trace_info, trade};
         handler(event, pair);
         dispatched = true;
         break;
@@ -157,8 +155,8 @@ bool dispatch2(
       case SPREAD: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
-        const Spread spread(value);
-        Trace event(trace_info, spread);
+        Spread spread{value};
+        Trace event{trace_info, spread};
         handler(event, pair);
         dispatched = true;
         break;
@@ -168,22 +166,20 @@ bool dispatch2(
           log::fatal("Unexpected"sv);
         switch (offset) {
           case 2:
-            book_1 = Book(value, buffer);
+            book_1 = Book{value, buffer};
             break;
           case 3:
-            book_2 = Book(value, buffer);
+            book_2 = Book{value, buffer};
             break;
           default:
             log::fatal("Unexpected"sv);
         }
         break;
       }
-      case OWN_TRADES: {
+      case OWN_TRADES:
         throw RuntimeError{"ownTrades not supported"sv};
-      }
-      case OPEN_ORDERS: {
+      case OPEN_ORDERS:
         throw RuntimeError{"openOrders not supported"sv};
-      }
     }
   }
   if (!dispatched && channel == Channel::BOOK) {
@@ -200,7 +196,7 @@ bool dispatch2(
         log::fatal("Unexpected"sv);
       }
     }
-    Trace event(trace_info, std::as_const(book_1));
+    Trace event{trace_info, std::as_const(book_1)};
     handler(event, pair);
     dispatched = true;
   }
@@ -232,7 +228,7 @@ bool ParserPublic::dispatch(
             auto pos = name.find_first_of('-');
             if (pos != name.npos)
               name.remove_suffix(std::size(name) - pos);
-            channel = Channel(name);
+            channel = Channel{name};
 #ifndef NDEBUG
             if (channel == Channel::UNKNOWN__) [[unlikely]]
               log::fatal(R"(Unknown channel="{}")"sv, name);
