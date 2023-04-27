@@ -61,7 +61,7 @@ std::string const &Config::get_access_password(Account const &account) const {
   return (*iter).second.password;
 }
 
-void Config::dispatch(server::config::Dispatcher::Handler &handler) const {
+void Config::dispatch(server::config::Handler &handler) const {
   handler(Flags::exchange());
   handler(symbols);
   for (auto &iter : accounts)
