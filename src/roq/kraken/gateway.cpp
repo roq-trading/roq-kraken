@@ -15,26 +15,29 @@ namespace kraken {
 
 namespace {
 template <typename R>
-auto create_authenticator(auto const &config) {
-  R result;
+R create_accounts(auto &config) {
+  using result_type = std::remove_cvref<R>::type;
+  result_type result;
   for (auto &[_, iter] : config.accounts)
-    result.try_emplace(iter.name, std::make_unique<Authenticator>(config, iter.name));
+    result.try_emplace(iter.name, std::make_unique<Account>(config, iter.name));
   return result;
 }
 
 template <typename R>
-auto create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &authenticator_by_account, auto &shared) {
-  R result;
-  for (auto &[account, authenticator] : authenticator_by_account)
-    result.try_emplace(account, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *authenticator, shared));
+R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
+  using result_type = std::remove_cvref<R>::type;
+  result_type result;
+  for (auto &[name, account] : accounts)
+    result.try_emplace(name, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 
 template <typename R>
-auto create_drop_copy(auto &authenticator_by_account) {
-  R result;
-  for (auto &[account, authenticator] : authenticator_by_account)
-    result.try_emplace(account, nullptr);
+R create_drop_copy(auto &accounts) {
+  using result_type = std::remove_cvref<R>::type;
+  result_type result;
+  for (auto &[name, account] : accounts)
+    result.try_emplace(name, nullptr);
   return result;
 }
 }  // namespace
@@ -42,11 +45,10 @@ auto create_drop_copy(auto &authenticator_by_account) {
 // === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, master_account_{config.get_master_account()},
-      authenticator_{create_authenticator<decltype(authenticator_)>(config)}, context_{context}, shared_{dispatcher},
-      rest_{*this, context_, ++stream_id_, shared_},
-      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, authenticator_, shared_)},
-      drop_copy_{create_drop_copy<decltype(drop_copy_)>(authenticator_)} {
+    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(config)}, context_{context},
+      shared_{dispatcher}, rest_{*this, context_, ++stream_id_, shared_},
+      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
+      drop_copy_{create_drop_copy<decltype(drop_copy_)>(accounts_)} {
 }
 
 void Gateway::operator()(Event<Start> const &event) {
@@ -166,8 +168,8 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
     log::fatal(R"(Unexpected: account="{}")"sv, account);
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"sv);
-    auto drop_copy = std::make_unique<DropCopy>(
-        *this, context_, ++stream_id_, *authenticator_[account], shared_, token_update.token);
+    auto drop_copy =
+        std::make_unique<DropCopy>(*this, context_, ++stream_id_, *accounts_.at(account), shared_, token_update.token);
     MessageInfo message_info;
     Start start;
     create_event_and_dispatch(*drop_copy, message_info, start);
@@ -197,14 +199,15 @@ void Gateway::ensure_symbol_slices(size_t size) {
 
 template <typename... Args>
 void Gateway::dispatch(Args &&...args) {
-  rest_(std::forward<Args>(args)...);
+  auto helper = [&](auto &target) { target(std::forward<Args>(args)...); };
+  helper(rest_);
   for (auto &[_, item] : order_entry_)
-    (*item)(std::forward<Args>(args)...);
+    helper(*item);
   for (auto &[_, item] : drop_copy_)
     if (static_cast<bool>(item))
-      (*item)(std::forward<Args>(args)...);
+      helper(*item);
   for (auto &item : market_data_)
-    (*item)(std::forward<Args>(args)...);
+    helper(*item);
 }
 
 OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
