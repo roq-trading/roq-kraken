@@ -11,8 +11,8 @@ namespace kraken {
 
 // === IMPLEMENTATION ===
 
-Shared::Shared(server::Dispatcher &dispatcher)
-    : dispatcher_{dispatcher}, symbols{Flags::ws_public_max_subscriptions_per_stream()} {
+Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
+    : dispatcher_{dispatcher}, settings{settings}, symbols{Flags::ws_public_max_subscriptions_per_stream()} {
 }
 
 std::string_view Shared::next_request_id() {

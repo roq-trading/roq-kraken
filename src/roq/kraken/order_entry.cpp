@@ -41,16 +41,16 @@ auto create_name(auto stream_id, auto const &account) {
   return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
 }
 
-auto create_connection(auto &handler, auto &context) {
+auto create_connection(auto &handler, auto &settings, auto &context) {
   auto uri = Flags::rest_uri();
   auto config = web::rest::Client::Config{
       // connection
       .interface = {},
       .uris = {&uri, 1},
-      .validate_certificate = server::Flags::net_tls_validate_certificate(),
+      .validate_certificate = settings.net.tls_validate_certificate,
       // connection manager
       .connection_timeout = {},
-      .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
+      .disconnect_on_idle_timeout = settings.net.disconnect_on_idle_timeout,
       .connection = web::http::Connection::KEEP_ALIVE,
       // proxy
       .proxy = Flags::rest_proxy(),
@@ -69,8 +69,8 @@ auto create_connection(auto &handler, auto &context) {
 }
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(auto const &group, auto const &function)
-      : core::metrics::Factory(server::Flags::name(), group, function) {}
+  explicit create_metrics(auto &settings, auto const &group, auto const &function)
+      : core::metrics::Factory(settings.app.name, group, function) {}
 };
 }  // namespace
 
@@ -78,18 +78,18 @@ struct create_metrics final : public core::metrics::Factory {
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
-      connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
-          .disconnect = create_metrics(name_, "disconnect"sv),
+          .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
       profile_{
-          .get_web_sockets_token = create_metrics(name_, "get_web_sockets_token"sv),
-          .get_web_sockets_token_ack = create_metrics(name_, "get_web_sockets_token_ack"sv),
-          .positions = create_metrics(name_, "positions"sv),
-          .positions_ack = create_metrics(name_, "positions_ack"sv),
+          .get_web_sockets_token = create_metrics(shared.settings, name_, "get_web_sockets_token"sv),
+          .get_web_sockets_token_ack = create_metrics(shared.settings, name_, "get_web_sockets_token_ack"sv),
+          .positions = create_metrics(shared.settings, name_, "positions"sv),
+          .positions_ack = create_metrics(shared.settings, name_, "positions_ack"sv),
       },
       latency_{
-          .ping = create_metrics(name_, "ping"sv),
+          .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
       account_{account}, shared_{shared},
       download_{Flags::rest_request_timeout(), [this](auto state) { return download(state); }} {
