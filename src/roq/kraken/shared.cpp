@@ -2,8 +2,6 @@
 
 #include "roq/kraken/shared.hpp"
 
-#include "roq/kraken/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -12,7 +10,7 @@ namespace kraken {
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
-    : dispatcher_{dispatcher}, settings{settings}, symbols{Flags::ws_public_max_subscriptions_per_stream()} {
+    : dispatcher_{dispatcher}, settings{settings}, symbols{settings.ws.public_max_subscriptions_per_stream} {
 }
 
 std::string_view Shared::next_request_id() {

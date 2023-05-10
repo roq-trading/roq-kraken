@@ -9,8 +9,6 @@
 
 #include "roq/web/socket/client_factory.hpp"
 
-#include "roq/kraken/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -32,7 +30,7 @@ auto create_name(auto stream_id, auto const &account) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::ws_private_uri();
+  auto uri = settings.ws.private_uri;
   auto config = web::socket::Client::Config{
       // connection
       .interface = {},
@@ -48,10 +46,10 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
-      .ping_frequency = Flags::ws_private_ping_freq(),
+      .ping_frequency = settings.ws.private_ping_freq,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,  // XXX need read buffer size
+      .encode_buffer_size = settings.common.encode_buffer_size,
   };
   return web::socket::ClientFactory::create(handler, context, config, []() -> std::string { return {}; });
 }
@@ -72,7 +70,8 @@ DropCopy::DropCopy(
     Shared &shared,
     std::string_view const &token)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())}, token_{token},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -84,7 +83,7 @@ DropCopy::DropCopy(
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
       account_{account}, shared_{shared},
-      download_{Flags::ws_private_request_timeout(), [this](auto state) { return download(state); }} {
+      download_{shared.settings.ws.private_request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void DropCopy::operator()(Event<Start> const &) {

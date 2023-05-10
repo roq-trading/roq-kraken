@@ -6,8 +6,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/kraken/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -35,11 +33,11 @@ namespace {
 auto create_gateway_settings(auto &settings) -> GatewaySettings {
   return {
       .supports = SUPPORTS,
-      .mbp_max_depth = Flags::ws_public_subscribe_book_depth(),
+      .mbp_max_depth = settings.ws.public_subscribe_book_depth,
       .mbp_tick_size_multiplier = NaN,
       .mbp_min_trade_vol_multiplier = NaN,
       .mbp_allow_remove_non_existing = {},
-      .mbp_allow_price_inversion = Flags::mbp_allow_price_inversion(),
+      .mbp_allow_price_inversion = settings.common.mbp_allow_price_inversion,
       .mbp_checksum = settings.cache.mbp_checksum,
       .oms_download_has_state = {},
       .oms_download_has_routing_id = {},
@@ -50,7 +48,8 @@ auto create_gateway_settings(auto &settings) -> GatewaySettings {
 
 // === IMPLEMENTATION ===
 
-Config::Config(Settings const &settings) : gateway_settings_{create_gateway_settings(settings)} {
+Config::Config(Settings const &settings)
+    : exchange_{settings.exchange}, gateway_settings_{create_gateway_settings(settings)} {
   server::config::Reader::parse_file(*this, settings);
   log::info<1>("config={}"sv, *this);
 }
@@ -81,7 +80,7 @@ std::string const &Config::get_access_password(Account const &account) const {
 }
 
 void Config::dispatch(server::config::Handler &handler) const {
-  handler(Flags::exchange());
+  handler(exchange_);
   handler(symbols);
   for (auto &iter : accounts)
     handler(iter.second);

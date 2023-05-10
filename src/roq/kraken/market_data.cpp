@@ -12,8 +12,6 @@
 
 #include "roq/web/socket/client_factory.hpp"
 
-#include "roq/kraken/flags.hpp"
-
 #include "roq/kraken/json/utils.hpp"
 
 using namespace std::literals;
@@ -41,7 +39,7 @@ auto create_name(auto stream_id) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::ws_public_uri();
+  auto uri = settings.ws.public_uri;
   auto config = web::socket::Client::Config{
       // connection
       .interface = {},
@@ -57,10 +55,10 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
-      .ping_frequency = Flags::ws_public_ping_freq(),
+      .ping_frequency = settings.ws.public_ping_freq,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),  // XXX need read buffer size
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,  // XXX need read buffer size
+      .encode_buffer_size = settings.common.encode_buffer_size,
   };
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
@@ -75,7 +73,8 @@ struct create_metrics final : public core::metrics::Factory {
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -184,7 +183,7 @@ void MarketData::subscribe(std::span<Symbol const> const &symbols) {
 
 void MarketData::subscribe(std::string_view const &name, std::span<Symbol const> const &symbols) {
   log::info(R"(subscribe name="{}", len(symbols)={})"sv, name, std::size(symbols));
-  if (Flags::ws_public_subscribe_book_depth() && name.compare("book"sv) == 0) {
+  if (shared_.settings.ws.public_subscribe_book_depth && name.compare("book"sv) == 0) {
     auto message = fmt::format(
         R"({{)"
         R"("event":"subscribe",)"
@@ -196,7 +195,7 @@ void MarketData::subscribe(std::string_view const &name, std::span<Symbol const>
         R"(}})"sv,
         fmt::join(symbols, R"(",")"sv),
         name,
-        Flags::ws_public_subscribe_book_depth());
+        shared_.settings.ws.public_subscribe_book_depth);
     log::info<3>(R"(request="{}")"sv, message);
     (*connection_).send_text(message);
   } else {
@@ -226,7 +225,7 @@ void MarketData::subscribe_book(std::string_view const &symbol) {
       R"(}})"
       R"(}})"sv,
       symbol,
-      Flags::ws_public_subscribe_book_depth());
+      shared_.settings.ws.public_subscribe_book_depth);
   log::info<3>(R"(request="{}")"sv, message);
   (*connection_).send_text(message);
 }
@@ -242,7 +241,7 @@ void MarketData::unsubscribe_book(std::string_view const &symbol) {
       R"(}})"
       R"(}})"sv,
       symbol,
-      Flags::ws_public_subscribe_book_depth());
+      shared_.settings.ws.public_subscribe_book_depth);
   log::info<3>(R"(request="{}")"sv, message);
   (*connection_).send_text(message);
 }
@@ -306,7 +305,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, std::string_view co
   if (!std::empty(shared_.trades)) {
     auto trade_summary = TradeSummary{
         .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = pair,
         .trades = shared_.trades,
         .exchange_time_utc = exchange_time_utc,
@@ -323,7 +322,7 @@ void MarketData::operator()(Trace<json::Spread> const &event, std::string_view c
   (*connection_).touch(trace_info.source_receive_time);
   auto top_of_book = TopOfBook{
       .stream_id = stream_id_,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = pair,
       .layer{
           .bid_price = spread.bid,
@@ -389,7 +388,7 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
   if (!(std::empty(shared_.bids) && std::empty(shared_.asks))) {
     auto market_by_price_update = MarketByPriceUpdate{
         .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = pair,
         .bids = shared_.bids,
         .asks = shared_.asks,
@@ -413,7 +412,7 @@ void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const
   log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"sv, symbol);
   const MarketByPriceUpdate market_by_price_update{
       .stream_id = stream_id_,
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = symbol,
       .bids = {},
       .asks = {},

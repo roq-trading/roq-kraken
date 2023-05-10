@@ -4,8 +4,6 @@
 
 #include <utility>
 
-#include "roq/kraken/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
