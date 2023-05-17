@@ -4,12 +4,12 @@
   "values": [
     {
       "name": "error",
-      "type": "std::span<std::string_view>",
+      "type": "std::span<std::string_view const>",
       "required": false
     },
     {
       "name": "result",
-      "type": "std::span<PositionsItem>",
+      "type": "std::span<PositionsItem const>",
       "map": true,
       "required": false
     }
