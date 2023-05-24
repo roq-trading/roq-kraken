@@ -87,7 +87,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   // web socket
   std::unique_ptr<web::socket::Client> const connection_;
   // buffers
-  core::Buffer decode_buffer_;
+  std::vector<std::byte> decode_buffer_;
   // core::stack::Buffer<char, 32> stack_buffer_;
   // metrics
   struct {

@@ -15,7 +15,10 @@ namespace kraken {
 namespace json {
 
 bool ParserPublic::dispatch(
-    Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
+    Handler &handler,
+    std::string_view const &message,
+    std::span<std::byte> const &buffer,
+    TraceInfo const &trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser{message};
   auto root = parser.root();
@@ -35,7 +38,7 @@ bool ParserPublic::dispatch(
 bool ParserPublic::dispatch(
     Handler &handler,
     std::string_view const &message,
-    core::json::Buffer &,
+    std::span<std::byte> const &,
     core::json::Object &root,
     TraceInfo const &trace_info) {
   bool dispatched = false;
@@ -108,7 +111,7 @@ namespace {
 bool dispatch2(
     ParserPublic::Handler &handler,
     std::string_view const &message,
-    core::json::Buffer &buffer,
+    std::span<std::byte> const &buffer,
     TraceInfo const &trace_info,
     [[maybe_unused]] int64_t channel_id,
     Channel channel,
@@ -146,7 +149,7 @@ bool dispatch2(
       case TRADE: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
-        Trade trade{value, buffer};
+        auto trade = Trade::create(value, buffer);
         Trace event{trace_info, trade};
         handler(event, pair);
         dispatched = true;
@@ -166,10 +169,10 @@ bool dispatch2(
           log::fatal("Unexpected"sv);
         switch (offset) {
           case 2:
-            book_1 = Book{value, buffer};
+            book_1 = Book::create(value, buffer);
             break;
           case 3:
-            book_2 = Book{value, buffer};
+            book_2 = Book::create(value, buffer);
             break;
           default:
             log::fatal("Unexpected"sv);
@@ -207,7 +210,7 @@ bool dispatch2(
 bool ParserPublic::dispatch(
     Handler &handler,
     std::string_view const &message,
-    core::json::Buffer &buffer,
+    std::span<std::byte> const &buffer,
     core::json::Array &root,
     TraceInfo const &trace_info) {
   int64_t channel_id = 0;

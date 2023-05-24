@@ -20,8 +20,7 @@ TEST_CASE("json_token_simple", "[json_token]") {
                        R"(})"
                        R"(})"sv;
   bool found = false;
-  core::Buffer buffer_(8192);
-  core::json::Buffer buffer(buffer_);
+  std::vector<std::byte> buffer(8192);
   json::Result::dispatch<json::Token>(
       message,
       buffer,

@@ -77,7 +77,7 @@ struct create_metrics final : public core::metrics::Factory {
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -252,10 +252,9 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        core::json::Buffer buffer{decode_buffer_};
         json::Result::dispatch<json::Token>(
             body,
-            buffer,
+            decode_buffer_,
             [](const std::span<std::string_view> &e) {  // error
               log::warn("error=[{}]"sv, fmt::join(e, ","sv));
               log::fatal("Unexpected"sv);
@@ -319,7 +318,7 @@ void OrderEntry::get_positions_ack(Trace<web::rest::Response> const &event, uint
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::Positions positions{body, decode_buffer_};
+        auto positions = json::Positions::create(body, decode_buffer_);
         Trace event_2{event, positions};
         (*this)(event_2);
         download_.check(STATE);

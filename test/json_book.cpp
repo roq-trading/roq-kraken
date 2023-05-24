@@ -62,8 +62,7 @@ TEST_CASE("json_book_parse_test_snapshot", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  core::Buffer buffer_(8192);
-  core::json::Buffer buffer(buffer_);
+  std::vector<std::byte> buffer(8192);
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -80,8 +79,7 @@ TEST_CASE("json_book_parse_test_update_bid_1", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  core::Buffer buffer_(8192);
-  core::json::Buffer buffer(buffer_);
+  std::vector<std::byte> buffer(8192);
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -98,8 +96,7 @@ TEST_CASE("json_book_parse_test_update_ask_1", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  core::Buffer buffer_(8192);
-  core::json::Buffer buffer(buffer_);
+  std::vector<std::byte> buffer(8192);
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -198,8 +195,7 @@ TEST_CASE("json_book_parse_test_update_complex", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  core::Buffer buffer_(8192);
-  core::json::Buffer buffer(buffer_);
+  std::vector<std::byte> buffer(8192);
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -271,8 +267,7 @@ TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "[json_boo
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  core::Buffer buffer_(8192);
-  core::json::Buffer buffer(buffer_);
+  std::vector<std::byte> buffer(8192);
   TraceInfo trace_info;
   CHECK_THROWS_AS(
       json::ParserPublic::dispatch(handler, message, buffer, trace_info),

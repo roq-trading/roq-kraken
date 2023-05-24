@@ -15,14 +15,16 @@ namespace json {
 
 struct Result final {
   template <typename T, typename E, typename H>
-  static void dispatch(std::string_view const &message, core::json::Buffer &buffer, E error_handler, H result_handler) {
+  static void dispatch(
+      std::string_view const &message, std::span<std::byte> const &buffer, E error_handler, H result_handler) {
     using namespace std::literals;
     core::json::Parser parser{message};
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::Object>(root)) {
       if (key.compare("error"sv) == 0) {
+        core::json::Buffer buffer_2{buffer};
         auto error = core::json::ArrayParser<std::span<std::string_view>, core::json::Array>::parse(
-            buffer, std::get<core::json::Array>(value));
+            buffer_2, std::get<core::json::Array>(value));
         if (std::size(error) > 0) {
           error_handler(error);
           return;

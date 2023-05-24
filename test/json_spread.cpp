@@ -42,8 +42,7 @@ TEST_CASE("json_spread_simple", "[json_spread]") {
                        R"("MLN/USD")"
                        R"(])"sv;
   Handler handler;
-  core::Buffer buffer_(8192);
-  core::json::Buffer buffer(buffer_);
+  std::vector<std::byte> buffer(8192);
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
   CHECK(handler.found == true);

@@ -74,7 +74,7 @@ struct create_metrics final : public core::metrics::Factory {
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -249,8 +249,7 @@ void MarketData::unsubscribe_book(std::string_view const &symbol) {
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
     TraceInfo trace_info;
-    core::json::Buffer buffer{decode_buffer_};
-    auto result = json::ParserPublic::dispatch(*this, message, buffer, trace_info);
+    auto result = json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info);
     if (!result) [[unlikely]]
       log::warn(R"(Unexpected: message="{}")"sv, message);
   });

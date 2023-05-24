@@ -71,7 +71,7 @@ DropCopy::DropCopy(
     std::string_view const &token)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())}, token_{token},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -214,8 +214,7 @@ uint32_t DropCopy::download(DropCopyState state) {
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
     TraceInfo trace_info;
-    core::json::Buffer buffer{decode_buffer_};
-    auto result = json::ParserPrivate::dispatch(*this, message, buffer, trace_info);
+    auto result = json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info);
     if (!result) [[unlikely]]
       log::warn(R"(Unexpected: message="{}")"sv, message);
   });
