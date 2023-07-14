@@ -13,28 +13,28 @@
     {
       "name": "public_ping_freq",
       "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
+      "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
       "description": "ping frequency"
     },
     {
       "name": "public_request_timeout",
       "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
+      "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
       "description": "request timeout"
     },
     {
       "name": "public_subscribe_book_depth",
       "type": "uint16_t",
-      "validator": "roq::core::flags::Positive<uint16_t>",
+      "validator": "roq::flags::validators::Positive<uint16_t>",
       "default": 10,
       "description": "book depth (size)"
     },
     {
       "name": "public_max_subscriptions_per_stream",
       "type": "uint32_t",
-      "validator": "roq::core::flags::Positive<uint32_t>",
+      "validator": "roq::flags::validators::Positive<uint32_t>",
       "default": 128,
       "description": "max subscriptions per connection (count)"
     },
@@ -48,14 +48,14 @@
     {
       "name": "private_ping_freq",
       "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
+      "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
       "description": "ping frequency"
     },
     {
       "name": "private_request_timeout",
       "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
+      "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
       "description": "request timeout"
     }
