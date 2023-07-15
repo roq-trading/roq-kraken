@@ -27,14 +27,14 @@
     {
       "name": "public_subscribe_book_depth",
       "type": "uint16_t",
-      "validator": "roq::flags::validators::Positive<uint16_t>",
+      "required": true,
       "default": 10,
       "description": "book depth (size)"
     },
     {
       "name": "public_max_subscriptions_per_stream",
       "type": "uint32_t",
-      "validator": "roq::flags::validators::Positive<uint32_t>",
+      "required": true,
       "default": 128,
       "description": "max subscriptions per connection (count)"
     },
