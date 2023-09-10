@@ -4,6 +4,8 @@
 
 #include "roq/logging.hpp"
 
+#include "roq/utils/patterns.hpp"
+
 #include "roq/kraken/json/channel.hpp"
 #include "roq/kraken/json/event.hpp"
 #include "roq/kraken/json/result_field.hpp"
@@ -23,7 +25,7 @@ bool ParserPrivate::dispatch(
   core::json::Parser parser{message};
   auto root = parser.root();
   return std::visit(
-      overloaded{
+      utils::overloaded{
           [](core::json::Null const &) -> bool { throw std::bad_cast{}; },
           [](bool) -> bool { throw std::bad_cast{}; },
           [](int64_t) -> bool { throw std::bad_cast{}; },
