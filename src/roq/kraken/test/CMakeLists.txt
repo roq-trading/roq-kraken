@@ -1,3 +1,5 @@
+include(RoqAutogen)
+
 set(TARGET_NAME ${PROJECT_NAME}-test)
 
 set(SOURCES json_book.cpp json_spread.cpp json_token.cpp main.cpp)
