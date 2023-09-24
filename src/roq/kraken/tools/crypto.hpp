@@ -7,9 +7,9 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/hash/sha256.hpp"
+#include "roq/utils/hash/sha256.hpp"
 
-#include "roq/core/mac/hmac.hpp"
+#include "roq/utils/mac/hmac.hpp"
 
 #include "roq/web/http/method.hpp"
 
@@ -30,8 +30,8 @@ struct Crypto final {
   std::string create_headers(web::http::Method, std::string_view const &path, std::string_view const &body);
 
  private:
-  using Hash = core::hash::SHA256;
-  using MAC = core::mac::HMAC<core::hash::SHA512>;
+  using Hash = utils::hash::SHA256;
+  using MAC = utils::mac::HMAC<utils::hash::SHA512>;
   using Digest = std::array<std::byte, MAC::DIGEST_LENGTH>;
 
   std::string const key_;
