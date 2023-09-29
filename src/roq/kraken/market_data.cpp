@@ -409,7 +409,7 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
 
 void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const &symbol) {
   log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"sv, symbol);
-  const MarketByPriceUpdate market_by_price_update{
+  MarketByPriceUpdate const market_by_price_update{
       .stream_id = stream_id_,
       .exchange = shared_.settings.exchange,
       .symbol = symbol,
