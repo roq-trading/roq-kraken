@@ -141,7 +141,7 @@ uint16_t OrderEntry::operator()(
 }
 
 uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
-  log::warn("*** CANCEL ALL ORDERS *NOT* SUPPORTED ***"sv);
+  throw oms::NotSupported{"CancelAllOrders"sv};
   return stream_id_;
 }
 
