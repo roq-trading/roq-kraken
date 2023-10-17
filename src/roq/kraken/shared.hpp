@@ -10,8 +10,6 @@
 
 #include "roq/core/symbols.hpp"
 
-#include "roq/core/stack/buffer.hpp"
-
 #include "roq/kraken/settings.hpp"
 
 namespace roq {
@@ -49,7 +47,7 @@ struct Shared final {
 
  private:
   uint32_t request_id_ = 0;
-  core::stack::Buffer<char, 32> stack_buffer_;
+  std::string request_id_encode_buffer_;
 
  public:
   core::Symbols symbols;
