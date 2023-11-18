@@ -62,7 +62,7 @@ std::string Crypto::create_body() {
 }
 
 std::string Crypto::create_headers(
-    web::http::Method method, std::string_view const &path, std::string_view const &body) {
+    [[maybe_unused]] web::http::Method method, std::string_view const &path, std::string_view const &body) {
   assert(method == web::http::Method::POST);
   assert(!std::empty(body));
   auto nonce = fmt::format("{}"sv, nonce_.count());
