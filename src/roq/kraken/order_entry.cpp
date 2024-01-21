@@ -109,14 +109,14 @@ void OrderEntry::operator()(Event<Timer> const &event) {
 void OrderEntry::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.get_web_sockets_token, metrics::PROFILE)
-      .write(profile_.get_web_sockets_token_ack, metrics::PROFILE)
-      .write(profile_.positions, metrics::PROFILE)
-      .write(profile_.positions_ack, metrics::PROFILE)
+      .write(profile_.get_web_sockets_token, utils::metrics::PROFILE)
+      .write(profile_.get_web_sockets_token_ack, utils::metrics::PROFILE)
+      .write(profile_.positions, utils::metrics::PROFILE)
+      .write(profile_.positions_ack, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY);
 }
 
 uint16_t OrderEntry::operator()(

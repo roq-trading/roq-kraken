@@ -107,14 +107,14 @@ void Rest::operator()(Event<Timer> const &event) {
 void Rest::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.assets, metrics::PROFILE)
-      .write(profile_.assets_ack, metrics::PROFILE)
-      .write(profile_.asset_pairs, metrics::PROFILE)
-      .write(profile_.asset_pairs_ack, metrics::PROFILE)
+      .write(profile_.assets, utils::metrics::PROFILE)
+      .write(profile_.assets_ack, utils::metrics::PROFILE)
+      .write(profile_.asset_pairs, utils::metrics::PROFILE)
+      .write(profile_.asset_pairs_ack, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY);
 }
 
 void Rest::operator()(ConnectionStatus status) {
