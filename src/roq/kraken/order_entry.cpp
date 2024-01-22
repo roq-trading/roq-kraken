@@ -8,8 +8,6 @@
 
 #include "roq/utils/update.hpp"
 
-#include "roq/utils/metrics/const.hpp"
-
 #include "roq/core/json/parser.hpp"
 
 #include "roq/core/metrics/factory.hpp"
@@ -112,14 +110,14 @@ void OrderEntry::operator()(Event<Timer> const &event) {
 void OrderEntry::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, utils::metrics::COUNTER)
+      .write(counter_.disconnect, metrics::Type::COUNTER)
       // profile
-      .write(profile_.get_web_sockets_token, utils::metrics::PROFILE)
-      .write(profile_.get_web_sockets_token_ack, utils::metrics::PROFILE)
-      .write(profile_.positions, utils::metrics::PROFILE)
-      .write(profile_.positions_ack, utils::metrics::PROFILE)
+      .write(profile_.get_web_sockets_token, metrics::Type::PROFILE)
+      .write(profile_.get_web_sockets_token_ack, metrics::Type::PROFILE)
+      .write(profile_.positions, metrics::Type::PROFILE)
+      .write(profile_.positions_ack, metrics::Type::PROFILE)
       // latency
-      .write(latency_.ping, utils::metrics::LATENCY);
+      .write(latency_.ping, metrics::Type::LATENCY);
 }
 
 uint16_t OrderEntry::operator()(
