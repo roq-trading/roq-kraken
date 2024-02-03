@@ -8,15 +8,15 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/core/download.hpp"
-
-#include "roq/core/metrics/counter.hpp"
-#include "roq/core/metrics/latency.hpp"
-#include "roq/core/metrics/profile.hpp"
+#include "roq/utils/metrics/counter.hpp"
+#include "roq/utils/metrics/latency.hpp"
+#include "roq/utils/metrics/profile.hpp"
 
 #include "roq/io/context.hpp"
 
 #include "roq/web/rest/client.hpp"
+
+#include "roq/core/download.hpp"
 
 #include "roq/server.hpp"
 
@@ -107,13 +107,13 @@ struct OrderEntry final : public web::rest::Client::Handler {
   std::vector<std::byte> decode_buffer_;
   // metrics
   struct {
-    core::metrics::Counter disconnect;
+    utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, positions, positions_ack;
+    utils::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, positions, positions_ack;
   } profile_;
   struct {
-    core::metrics::Latency ping;
+    utils::metrics::Latency ping;
   } latency_;
   // account
   Account &account_;
