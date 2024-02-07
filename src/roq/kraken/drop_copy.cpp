@@ -8,7 +8,7 @@
 
 #include "roq/core/metrics/factory.hpp"
 
-#include "roq/web/socket/client_factory.hpp"
+#include "roq/web/socket/client.hpp"
 
 using namespace std::literals;
 
@@ -52,7 +52,7 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .decode_buffer_size = settings.common.decode_buffer_size,  // XXX need read buffer size
       .encode_buffer_size = settings.common.encode_buffer_size,
   };
-  return web::socket::ClientFactory::create(handler, context, config, []() -> std::string { return {}; });
+  return web::socket::Client::create(handler, context, config, []() -> std::string { return {}; });
 }
 
 struct create_metrics final : public core::metrics::Factory {

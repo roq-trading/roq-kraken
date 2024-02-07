@@ -11,7 +11,7 @@
 
 #include "roq/core/metrics/factory.hpp"
 
-#include "roq/web/socket/client_factory.hpp"
+#include "roq/web/socket/client.hpp"
 
 #include "roq/kraken/json/utils.hpp"
 
@@ -61,7 +61,7 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .decode_buffer_size = settings.common.decode_buffer_size,  // XXX need read buffer size
       .encode_buffer_size = settings.common.encode_buffer_size,
   };
-  return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
+  return web::socket::Client::create(handler, context, config, []() { return std::string(); });
 }
 
 struct create_metrics final : public core::metrics::Factory {
