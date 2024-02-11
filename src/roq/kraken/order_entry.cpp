@@ -6,6 +6,8 @@
 
 #include "roq/mask.hpp"
 
+#include "roq/oms/exceptions.hpp"
+
 #include "roq/utils/update.hpp"
 
 #include "roq/core/json/parser.hpp"
@@ -315,7 +317,7 @@ void OrderEntry::get_positions_ack(Trace<web::rest::Response> const &event, uint
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        auto positions = json::Positions::create(body, decode_buffer_);
+        json::Positions positions{body, decode_buffer_};
         Trace event_2{event, positions};
         (*this)(event_2);
         download_.check(STATE);

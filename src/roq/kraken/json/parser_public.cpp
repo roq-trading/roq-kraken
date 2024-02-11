@@ -151,7 +151,7 @@ bool dispatch2(
       case TRADE: {
         if (data_count != 1) [[unlikely]]
           log::fatal("Unexpected"sv);
-        auto trade = Trade::create(value, buffer);
+        Trade trade{value, buffer};
         Trace event{trace_info, trade};
         handler(event, pair);
         dispatched = true;
@@ -171,10 +171,10 @@ bool dispatch2(
           log::fatal("Unexpected"sv);
         switch (offset) {
           case 2:
-            book_1 = Book::create(value, buffer);
+            book_1 = Book{value, buffer};
             break;
           case 3:
-            book_2 = Book::create(value, buffer);
+            book_2 = Book{value, buffer};
             break;
           default:
             log::fatal("Unexpected"sv);
