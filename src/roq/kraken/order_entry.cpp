@@ -6,7 +6,7 @@
 
 #include "roq/mask.hpp"
 
-#include "roq/oms/exceptions.hpp"
+#include "roq/server/oms/exceptions.hpp"
 
 #include "roq/utils/update.hpp"
 
@@ -125,13 +125,13 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 }
 
 uint16_t OrderEntry::operator()(
-    Event<CreateOrder> const &, oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
+    Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
   throw NotImplemented{"not implemented"sv};
 }
 
 uint16_t OrderEntry::operator()(
     Event<ModifyOrder> const &,
-    oms::Order const &,
+    server::oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   throw NotImplemented{"not implemented"sv};
@@ -139,14 +139,14 @@ uint16_t OrderEntry::operator()(
 
 uint16_t OrderEntry::operator()(
     Event<CancelOrder> const &,
-    oms::Order const &,
+    server::oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   throw NotImplemented{"not implemented"sv};
 }
 
 uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
-  throw oms::NotSupported{"CancelAllOrders"sv};
+  throw server::oms::NotSupported{"CancelAllOrders"sv};
   return stream_id_;
 }
 
@@ -363,7 +363,7 @@ void OrderEntry::process_response(
       default:
         response.expect(web::http::Status::OK);  // throws
     }
-  } catch (oms::Exception &e) {
+  } catch (server::oms::Exception &e) {
     log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
     error_handler(e.origin, e.status, e.error, e.what());
   } catch (NetworkError &e) {
@@ -376,7 +376,8 @@ void OrderEntry::process_response(
 }
 
 template <typename... Args>
-void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint64_t order_id, Args &&...args) {
+void OrderEntry::operator()(
+    Trace<server::oms::Response> const &event, uint8_t user_id, uint64_t order_id, Args &&...args) {
   auto &[trace_info, response] = event;
   if (shared_.update_order(
           user_id,
@@ -391,7 +392,7 @@ void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, 
   }
 }
 
-void OrderEntry::operator()(Trace<oms::OrderUpdate> const &event, std::string_view const &client_order_id) {
+void OrderEntry::operator()(Trace<server::oms::OrderUpdate> const &event, std::string_view const &client_order_id) {
   auto &[trace_info, order_update] = event;
   if (shared_.update_order(
           client_order_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
