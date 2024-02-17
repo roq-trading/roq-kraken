@@ -112,7 +112,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
   // experimental
-  absl::flat_hash_set<Symbol> latch_;
+  utils::unordered_set<std::string> latch_;
 };
 
 }  // namespace kraken
