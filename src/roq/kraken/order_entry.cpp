@@ -257,11 +257,11 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
         json::Result::dispatch<json::Token>(
             body,
             decode_buffer_,
-            [](const std::span<std::string_view> &e) {  // error
+            [](std::span<std::string_view> const &e) {  // error
               log::warn("error=[{}]"sv, fmt::join(e, ","sv));
               log::fatal("Unexpected"sv);
             },
-            [&](const json::Token &token) {  // success
+            [&](json::Token const &token) {  // success
               Trace event_2{event, token};
               (*this)(event_2);
             });
