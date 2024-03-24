@@ -8,56 +8,56 @@
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://beta-ws.kraken.com",
-      "description": "WebSocket end-point (URI)"
+      "description": "Exchange end-point"
     },
     {
       "name": "public_ping_freq",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
-      "description": "ping frequency"
+      "description": "Ping frequency"
     },
     {
       "name": "public_request_timeout",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
-      "description": "request timeout"
+      "description": "Request timeout"
     },
     {
       "name": "public_subscribe_book_depth",
       "type": "uint16_t",
       "required": true,
       "default": 10,
-      "description": "book depth (size)"
+      "description": "Book depth"
     },
     {
       "name": "public_max_subscriptions_per_stream",
       "type": "uint32_t",
       "required": true,
       "default": 128,
-      "description": "max subscriptions per connection (count)"
+      "description": "Maximum number of symbols per connection"
     },
     {
       "name": "private_uri",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://beta-ws-auth.kraken.com",
-      "description": "WebSocket end-point (URI)"
+      "description": "Exchange end-point"
     },
     {
       "name": "private_ping_freq",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
-      "description": "ping frequency"
+      "description": "Ping frequency"
     },
     {
       "name": "private_request_timeout",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
-      "description": "request timeout"
+      "description": "Request timeout"
     }
   ]
 }

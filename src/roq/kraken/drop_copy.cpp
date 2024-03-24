@@ -50,8 +50,8 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .request_timeout = {},
       .ping_frequency = settings.ws.private_ping_freq,
       // implementation
-      .decode_buffer_size = settings.common.decode_buffer_size,  // XXX need read buffer size
-      .encode_buffer_size = settings.common.encode_buffer_size,
+      .decode_buffer_size = settings.misc.decode_buffer_size,  // XXX need read buffer size
+      .encode_buffer_size = settings.misc.encode_buffer_size,
   };
   return web::socket::Client::create(handler, context, config, []() -> std::string { return {}; });
 }
@@ -73,7 +73,7 @@ DropCopy::DropCopy(
     std::string_view const &token)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())}, token_{token},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_(shared.settings.common.decode_buffer_size),
+      decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },

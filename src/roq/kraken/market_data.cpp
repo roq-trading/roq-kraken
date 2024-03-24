@@ -59,8 +59,8 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .request_timeout = {},
       .ping_frequency = settings.ws.public_ping_freq,
       // implementation
-      .decode_buffer_size = settings.common.decode_buffer_size,  // XXX need read buffer size
-      .encode_buffer_size = settings.common.encode_buffer_size,
+      .decode_buffer_size = settings.misc.decode_buffer_size,  // XXX need read buffer size
+      .encode_buffer_size = settings.misc.encode_buffer_size,
   };
   return web::socket::Client::create(handler, context, config, []() { return std::string(); });
 }
@@ -76,7 +76,7 @@ struct create_metrics final : public core::metrics::Factory {
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_(shared.settings.common.decode_buffer_size),
+      decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
