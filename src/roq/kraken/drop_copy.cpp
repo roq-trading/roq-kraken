@@ -8,6 +8,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/core/tools/exception.hpp"
+
 #include "roq/web/socket/client.hpp"
 
 using namespace std::literals;
@@ -26,7 +28,7 @@ auto const SUPPORTS = Mask<SupportType>{};
 // === HELPERS ===
 
 namespace {
-auto create_name(auto stream_id, auto const &account) {
+auto create_name(auto stream_id, auto &account) {
   return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
 }
 
@@ -71,7 +73,7 @@ DropCopy::DropCopy(
     Account &account,
     Shared &shared,
     std::string_view const &token)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())}, token_{token},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)}, token_{token},
       connection_{create_connection(*this, shared.settings, context)},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
@@ -157,7 +159,7 @@ void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = account_.get_name(),
+      .account = account_.name,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -177,7 +179,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
@@ -202,23 +204,28 @@ uint32_t DropCopy::download(DropCopyState state) {
       break;
     case SUBSCRIBE:
       subscribe();
-      return {};
+      return 0;
     case DONE:
       (*this)(ConnectionStatus::READY);
       assert(!ready_);
       ready_ = true;
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
+    auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     TraceInfo trace_info;
-    auto result = json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info);
-    if (!result) [[unlikely]]
-      log::warn(R"(Unexpected: message="{}")"sv, message);
+    try {
+      if (!json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info))
+        log_message();
+    } catch (...) {
+      log_message();
+      core::tools::UnhandledException::terminate();
+    }
   });
 }
 

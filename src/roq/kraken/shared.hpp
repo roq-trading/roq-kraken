@@ -10,6 +10,7 @@
 
 #include "roq/core/symbols.hpp"
 
+#include "roq/kraken/api.hpp"
 #include "roq/kraken/settings.hpp"
 
 namespace roq {
@@ -44,9 +45,10 @@ struct Shared final {
 
  public:
   Settings const &settings;
+  API const api;
 
  private:
-  uint32_t request_id_ = 0;
+  uint32_t request_id_ = {};
   std::string request_id_encode_buffer_;
 
  public:

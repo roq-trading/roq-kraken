@@ -11,6 +11,8 @@
 
 #include "roq/core/metrics/factory.hpp"
 
+#include "roq/core/tools/exception.hpp"
+
 #include "roq/web/socket/client.hpp"
 
 #include "roq/kraken/json/utils.hpp"
@@ -250,10 +252,15 @@ void MarketData::unsubscribe_book(std::string_view const &symbol) {
 
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
+    auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     TraceInfo trace_info;
-    auto result = json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info);
-    if (!result) [[unlikely]]
-      log::warn(R"(Unexpected: message="{}")"sv, message);
+    try {
+      if (!json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info))
+        log_message();
+    } catch (...) {
+      log_message();
+      core::tools::UnhandledException::terminate();
+    }
   });
 }
 
@@ -411,7 +418,7 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
 
 void MarketData::resubscribe(TraceInfo const &trace_info, std::string_view const &symbol) {
   log::warn<1>(R"(*** RESUBSCRIBE *** (symbol="{}"))"sv, symbol);
-  MarketByPriceUpdate const market_by_price_update{
+  auto market_by_price_update = MarketByPriceUpdate{
       .stream_id = stream_id_,
       .exchange = shared_.settings.exchange,
       .symbol = symbol,

@@ -38,7 +38,7 @@ auto const SUPPORTS = Mask{
 // === HELPERS ===
 
 namespace {
-auto create_name(auto stream_id, auto const &account) {
+auto create_name(auto stream_id, auto &account) {
   return fmt::format("{}:{}:{}"sv, stream_id, NAME, account);
 }
 
@@ -81,7 +81,7 @@ struct create_metrics final : public core::metrics::Factory {
 // === IMPLEMENTATION ===
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
       connection_{create_connection(*this, shared.settings, context)},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
@@ -156,7 +156,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
@@ -193,7 +193,7 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = account_.get_name(),
+      .account = account_.name,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -214,10 +214,10 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 // token
@@ -225,7 +225,7 @@ uint32_t OrderEntry::download(OrderEntryState state) {
 void OrderEntry::get_token() {
   profile_.get_web_sockets_token([&]() {
     auto method = web::http::Method::POST;
-    auto path = "/0/private/GetWebSocketsToken"sv;
+    auto path = shared_.api.order_management.get_web_sockets_token;
     auto body = account_.create_body();
     auto headers = account_.create_headers(method, path, body);
     auto request = web::rest::Request{
@@ -239,11 +239,12 @@ void OrderEntry::get_token() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    (*connection_)("token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_token_ack(event, sequence);
-    });
+    (*connection_)(
+        "get-web-sockets-token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+          TraceInfo trace_info;
+          Trace event{trace_info, response};
+          get_token_ack(event, sequence);
+        });
   });
 }
 
@@ -280,7 +281,7 @@ void OrderEntry::operator()(Trace<json::Token> const &event) {
   auto &[trace_info, token] = event;
   log::info<2>(R"(token={})"sv, token);
   auto token_update = TokenUpdate{
-      .account = account_.get_name(),
+      .account = account_.name,
       .token = token.token,
   };
   handler_(token_update);
@@ -291,7 +292,7 @@ void OrderEntry::operator()(Trace<json::Token> const &event) {
 void OrderEntry::get_positions() {
   profile_.positions([&]() {
     auto method = web::http::Method::POST;
-    auto path = "/0/private/OpenPositions"sv;
+    auto path = shared_.api.order_management.open_positions;
     auto body = account_.create_body();
     auto headers = account_.create_headers(method, path, body);
     auto request = web::rest::Request{
@@ -305,7 +306,7 @@ void OrderEntry::get_positions() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    (*connection_)("positions"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+    (*connection_)("open-positions"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
       get_positions_ack(event, sequence);
@@ -345,7 +346,6 @@ void OrderEntry::process_response(
     web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
   try {
     auto [status, category, body] = response.result();
-    log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
     switch (category) {
       using enum web::http::Category;
       case SUCCESS:  // 2xx

@@ -8,7 +8,7 @@ namespace kraken {
 // === IMPLEMENTATION ===
 
 Account::Account(Config const &config, std::string_view const &name)
-    : name_{name},
+    : name{name},
       crypto_{config.get_access_key(name), config.get_access_secret(name), config.get_access_password(name)} {
 }
 

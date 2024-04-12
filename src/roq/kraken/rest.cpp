@@ -184,10 +184,10 @@ uint32_t Rest::download(RestState state) {
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 // assets
@@ -196,7 +196,7 @@ void Rest::get_assets() {
   profile_.assets([&]() {
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
-        .path = "/0/public/Assets"sv,
+        .path = shared_.api.market_data.assets,
         .query = {},
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -246,7 +246,7 @@ void Rest::get_asset_pairs() {
   profile_.asset_pairs([&]() {
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
-        .path = "/0/public/AssetPairs"sv,
+        .path = shared_.api.market_data.asset_pairs,
         .query = {},
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -259,7 +259,7 @@ void Rest::get_asset_pairs() {
       Trace event{trace_info, response};
       get_asset_pairs_ack(event, sequence);
     };
-    (*connection_)("asset_pairs"sv, request, callback);
+    (*connection_)("asset-pairs"sv, request, callback);
   });
 }
 
@@ -366,7 +366,6 @@ void Rest::process_response(
     web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
   try {
     auto [status, category, body] = response.result();
-    log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
     switch (category) {
       using enum web::http::Category;
       case SUCCESS:  // 2xx
