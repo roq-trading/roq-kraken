@@ -4,66 +4,66 @@
   "values": [
     {
       "name": "refid",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "userref",
-      "type": "int64_t"
+      "type": "std/int64"
     },
     {
       "name": "status",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "opentm",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "starttm",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "expiretm",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "descr"
     },
     {
       "name": "vol",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "vol_exec",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "cost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "fee",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "avg_price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "stopprice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "limitprice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "misc",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "oflags",
-      "type": "std::string_view"
+      "type": "std/string_view"
     }
   ]
 }

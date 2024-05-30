@@ -4,23 +4,23 @@
   "values": [
     {
       "name": "bid",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "ask",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::microseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "bidVolume",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "askVolume",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

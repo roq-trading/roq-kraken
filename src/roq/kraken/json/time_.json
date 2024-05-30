@@ -4,11 +4,11 @@
   "values": [
     {
       "name": "unixtime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "rfc1123",
-      "type": "std::string_view"
+      "type": "std/string_view"
     }
   ]
 }

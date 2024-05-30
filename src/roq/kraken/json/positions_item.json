@@ -4,15 +4,15 @@
   "values": [
     {
       "name": "ordertxid",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "pair",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "time",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "type",
@@ -24,31 +24,31 @@
     },
     {
       "name": "cost",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "fee",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "vol",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "vol_closed",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "margin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "value",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "net",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "misc"

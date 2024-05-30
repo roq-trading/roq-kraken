@@ -4,22 +4,26 @@
   "values": [
     {
       "name": "a",
-      "type": "std::span<BookItem const>",
+      "type": "BookItem",
+      "array": "std/span",
       "required": false
     },
     {
       "name": "as",
-      "type": "std::span<BookItem const>",
+      "type": "BookItem",
+      "array": "std/span",
       "required": false
     },
     {
       "name": "b",
-      "type": "std::span<BookItem const>",
+      "type": "BookItem",
+      "array": "std/span",
       "required": false
     },
     {
       "name": "bs",
-      "type": "std::span<BookItem const>",
+      "type": "BookItem",
+      "array": "std/span",
       "required": false
     },
     {

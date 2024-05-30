@@ -4,15 +4,15 @@
   "values": [
     {
       "name": "price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "volume",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "timestamp",
-      "type": "std::chrono::microseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "updateType",

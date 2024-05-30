@@ -4,39 +4,39 @@
   "values": [
     {
       "name": "eb",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "tb",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "m",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "n",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "c",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "v",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "e",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "mf",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "ml",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

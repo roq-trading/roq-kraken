@@ -4,43 +4,43 @@
   "values": [
     {
       "name": "altname",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "wsname",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "aclass_base",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "base",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "aclass_quote",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "quote",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "lot",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "pair_decimals",
-      "type": "uint32_t"
+      "type": "std/uint32"
     },
     {
       "name": "lot_decimals",
-      "type": "uint32_t"
+      "type": "std/uint32"
     },
     {
       "name": "lot_multiplier",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "leverage_buy"
@@ -56,43 +56,43 @@
     },
     {
       "name": "fee_volume_currency",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "margin_call",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "margin_stop",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "ordermin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "cost_decimals",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "costmin",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "tick_size",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "status",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "long_position_limit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "short_position_limit",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

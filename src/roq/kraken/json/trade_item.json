@@ -4,15 +4,15 @@
   "values": [
     {
       "name": "price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "volume",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "time",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "side",
@@ -24,7 +24,7 @@
     },
     {
       "name": "misc",
-      "type": "std::string_view"
+      "type": "std/string_view"
     }
   ]
 }
