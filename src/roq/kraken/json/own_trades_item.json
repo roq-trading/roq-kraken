@@ -1,5 +1,5 @@
 {
-  "name": "OwnTradesItem",
+  "name": "roq/kraken/fix/OwnTradesItem",
   "type": "item2",
   "values": [
     {
@@ -20,11 +20,11 @@
     },
     {
       "name": "type",
-      "type": "Side"
+      "type": "roq/kraken/json/Side"
     },
     {
       "name": "ordertype",
-      "type": "OrderType"
+      "type": "roq/kraken/json/OrderType"
     },
     {
       "name": "price",

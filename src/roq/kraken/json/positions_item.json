@@ -1,5 +1,5 @@
 {
-  "name": "PositionsItem",
+  "name": "roq/kraken/fix/PositionsItem",
   "type": "item2",
   "values": [
     {
@@ -16,11 +16,11 @@
     },
     {
       "name": "type",
-      "type": "Side"
+      "type": "roq/kraken/json/Side"
     },
     {
       "name": "ordertype",
-      "type": "OrderType"
+      "type": "roq/kraken/json/OrderType"
     },
     {
       "name": "cost",

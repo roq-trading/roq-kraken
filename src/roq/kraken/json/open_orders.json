@@ -1,5 +1,5 @@
 {
-  "name": "OpenOrders",
+  "name": "roq/kraken/fix/OpenOrders",
   "type": "comp",
   "values": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "name": "result",
-      "type": "OpenOrdersItem",
+      "type": "roq/kraken/json/OpenOrdersItem",
       "array": "std/span",
       "map": true,
       "required": false

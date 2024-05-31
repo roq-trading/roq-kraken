@@ -1,5 +1,5 @@
 {
-  "name": "Positions",
+  "name": "roq/kraken/fix/Positions",
   "type": "comp",
   "values": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "name": "result",
-      "type": "PositionsItem",
+      "type": "roq/kraken/json/PositionsItem",
       "array": "std/span",
       "map": true,
       "required": false

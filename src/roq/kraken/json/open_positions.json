@@ -1,5 +1,5 @@
 {
-  "name": "OpenPositions",
+  "name": "roq/kraken/fix/OpenPositions",
   "type": "item",
   "values": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "name": "type",
-      "type": "Side"
+      "type": "roq/kraken/json/Side"
     },
     {
       "name": "ordertype",

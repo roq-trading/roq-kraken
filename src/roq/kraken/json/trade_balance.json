@@ -1,5 +1,5 @@
 {
-  "name": "TradeBalance",
+  "name": "roq/kraken/fix/TradeBalance",
   "type": "comp",
   "values": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "name": "result",
-      "type": "TradeBalanceItem",
+      "type": "roq/kraken/json/TradeBalanceItem",
       "array": "std/span",
       "required": false
     }

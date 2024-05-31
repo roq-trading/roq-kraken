@@ -1,5 +1,5 @@
 {
-  "name": "BookItem",
+  "name": "roq/kraken/fix/BookItem",
   "type": "array_item",
   "values": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "name": "updateType",
-      "type": "UpdateType",
+      "type": "roq/kraken/json/UpdateType",
       "required": false
     }
   ]

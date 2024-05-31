@@ -1,28 +1,28 @@
 {
-  "name": "Book",
+  "name": "roq/kraken/fix/Book",
   "type": "comp",
   "values": [
     {
       "name": "a",
-      "type": "BookItem",
+      "type": "roq/kraken/json/BookItem",
       "array": "std/span",
       "required": false
     },
     {
       "name": "as",
-      "type": "BookItem",
+      "type": "roq/kraken/json/BookItem",
       "array": "std/span",
       "required": false
     },
     {
       "name": "b",
-      "type": "BookItem",
+      "type": "roq/kraken/json/BookItem",
       "array": "std/span",
       "required": false
     },
     {
       "name": "bs",
-      "type": "BookItem",
+      "type": "roq/kraken/json/BookItem",
       "array": "std/span",
       "required": false
     },

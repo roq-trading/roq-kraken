@@ -1,5 +1,5 @@
 {
-  "name": "TradeBalanceItem",
+  "name": "roq/kraken/fix/TradeBalanceItem",
   "type": "item",
   "values": [
     {

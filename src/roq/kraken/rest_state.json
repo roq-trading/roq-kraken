@@ -1,5 +1,5 @@
 {
-  "name": "RestState",
+  "name": "roq/kraken/RestState",
   "type": "enum",
   "values": [
     {

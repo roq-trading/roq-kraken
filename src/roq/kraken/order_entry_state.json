@@ -1,5 +1,5 @@
 {
-  "name": "OrderEntryState",
+  "name": "roq/kraken/OrderEntryState",
   "type": "enum",
   "values": [
     {

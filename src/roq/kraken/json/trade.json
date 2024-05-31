@@ -1,10 +1,10 @@
 {
-  "name": "Trade",
+  "name": "roq/kraken/fix/Trade",
   "type": "array",
   "values": [
     {
       "name": "data",
-      "type": "TradeItem",
+      "type": "roq/kraken/json/TradeItem",
       "array": "std/span"
     }
   ]

@@ -1,5 +1,5 @@
 {
-  "name": "AssetPairs",
+  "name": "roq/kraken/fix/AssetPairs",
   "type": "comp",
   "values": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "name": "result",
-      "type": "AssetPairsItem",
+      "type": "roq/kraken/json/AssetPairsItem",
       "array": "std/span",
       "map": true,
       "required": false

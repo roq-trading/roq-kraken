@@ -1,5 +1,5 @@
 {
-  "name": "TradeItem",
+  "name": "roq/kraken/fix/TradeItem",
   "type": "array_item",
   "values": [
     {
@@ -16,11 +16,11 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/kraken/json/Side"
     },
     {
       "name": "orderType",
-      "type": "OrderType"
+      "type": "roq/kraken/json/OrderType"
     },
     {
       "name": "misc",

@@ -1,5 +1,5 @@
 {
-  "name": "OwnTrades",
+  "name": "roq/kraken/fix/OwnTrades",
   "type": "comp",
   "values": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "name": "result",
-      "type": "OwnTradesItem",
+      "type": "roq/kraken/json/OwnTradesItem",
       "array": "std/span",
       "map": true,
       "required": false

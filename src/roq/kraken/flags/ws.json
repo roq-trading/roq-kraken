@@ -1,11 +1,11 @@
 {
-  "name": "WS",
+  "name": "roq/kraken/flags/WS",
   "type": "flags",
   "prefix": "ws_",
   "values": [
     {
       "name": "public_uri",
-      "type": "roq::io::web::URI",
+      "type": "roq/io/web/URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://beta-ws.kraken.com",
       "description": "Exchange end-point"
@@ -40,7 +40,7 @@
     },
     {
       "name": "private_uri",
-      "type": "roq::io::web::URI",
+      "type": "roq/io/web/URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://beta-ws-auth.kraken.com",
       "description": "Exchange end-point"

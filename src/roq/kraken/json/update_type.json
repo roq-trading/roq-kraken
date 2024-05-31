@@ -1,5 +1,5 @@
 {
-  "name": "UpdateType",
+  "name": "roq/kraken/fix/UpdateType",
   "type": "enum",
   "values": [
     {
