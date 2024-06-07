@@ -22,9 +22,6 @@ TEST_CASE("json_token_simple", "[json_token]") {
   bool found = false;
   std::vector<std::byte> buffer(8192);
   json::Result::dispatch<json::Token>(
-      message,
-      buffer,
-      []([[maybe_unused]] std::span<std::string_view> const &errors) { FAIL(); },
-      [&](json::Token const &) { found = true; });
+      message, buffer, []([[maybe_unused]] std::span<std::string_view> const &errors) { FAIL(); }, [&](json::Token const &) { found = true; });
   CHECK(found == true);
 }

@@ -16,11 +16,7 @@ namespace roq {
 namespace kraken {
 namespace json {
 
-bool ParserPrivate::dispatch(
-    Handler &handler,
-    std::string_view const &message,
-    std::span<std::byte> const &buffer,
-    TraceInfo const &trace_info) {
+bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser{message};
   auto root = parser.root();
@@ -38,11 +34,7 @@ bool ParserPrivate::dispatch(
 }
 
 bool ParserPrivate::dispatch(
-    Handler &handler,
-    std::string_view const &message,
-    std::span<std::byte> const &,
-    core::json::Object &root,
-    TraceInfo const &trace_info) {
+    Handler &handler, std::string_view const &message, std::span<std::byte> const &, core::json::Object &root, TraceInfo const &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField{key};
@@ -209,11 +201,7 @@ bool dispatch2(
 }  // namespace
 
 bool ParserPrivate::dispatch(
-    Handler &handler,
-    std::string_view const &message,
-    std::span<std::byte> const &buffer,
-    core::json::Array &root,
-    TraceInfo const &) {
+    Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, core::json::Array &root, TraceInfo const &) {
   Channel channel = Channel::UNDEFINED__;
   size_t offset = 0;
   for (auto value : root) {

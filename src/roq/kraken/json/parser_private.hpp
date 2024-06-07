@@ -40,19 +40,9 @@ struct ParserPrivate final {
   static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, TraceInfo const &);
 
  protected:
-  static bool dispatch(
-      Handler &,
-      std::string_view const &message,
-      std::span<std::byte> const &,
-      core::json::Object &root,
-      TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, core::json::Object &root, TraceInfo const &);
 
-  static bool dispatch(
-      Handler &,
-      std::string_view const &message,
-      std::span<std::byte> const &,
-      core::json::Array &root,
-      TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, core::json::Array &root, TraceInfo const &);
 };
 
 }  // namespace json

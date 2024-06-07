@@ -269,7 +269,6 @@ TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "[json_boo
   Handler handler;
   std::vector<std::byte> buffer(8192);
   TraceInfo trace_info;
-  CHECK_THROWS_AS(
-      json::ParserPublic::dispatch(handler, message, buffer, trace_info),
-      OutOfRange);  //  XXX maybe wrap as core::BadState?
+  CHECK_THROWS_AS(json::ParserPublic::dispatch(handler, message, buffer, trace_info),
+                  OutOfRange);  //  XXX maybe wrap as core::BadState?
 }
