@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/fix/ResultField",
+  "name": "roq/kraken/json/ResultField",
   "type": "enum2",
   "values": [
     {

@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/fix/OpenOrdersItem",
+  "name": "roq/kraken/json/OpenOrdersItem",
   "type": "item2",
   "values": [
     {

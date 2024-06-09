@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/fix/OrderType",
+  "name": "roq/kraken/json/OrderType",
   "type": "enum",
   "values": [
     {

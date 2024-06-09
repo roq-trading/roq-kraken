@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/fix/TradeItem",
+  "name": "roq/kraken/json/TradeItem",
   "type": "array_item",
   "values": [
     {

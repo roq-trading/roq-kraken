@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/fix/Event",
+  "name": "roq/kraken/json/Event",
   "type": "enum",
   "values": [
     {

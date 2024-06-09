@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/fix/Channel",
+  "name": "roq/kraken/json/Channel",
   "type": "enum",
   "values": [
     {
