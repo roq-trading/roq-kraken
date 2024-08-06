@@ -10,9 +10,6 @@
 
 #include "roq/core/charconv/datetime.hpp"
 
-#include "roq/kraken/json/order_type.hpp"
-#include "roq/kraken/json/side.hpp"
-
 namespace roq {
 namespace kraken {
 namespace json {
@@ -50,42 +47,6 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
           [](core::json::Array const &) { throw std::bad_cast{}; },
       },
       value);
-}
-
-inline roq::OrderType map(json::OrderType order_type) {
-  switch (order_type) {
-    using enum json::OrderType::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
-      break;
-    case L:
-      return roq::OrderType::LIMIT;
-    case LIMIT:
-      return roq::OrderType::LIMIT;
-    case M:
-      return roq::OrderType::MARKET;
-    case MARKET:
-      return roq::OrderType::MARKET;
-  }
-  return {};
-}
-
-inline roq::Side map(json::Side side) {
-  switch (side) {
-    using enum json::Side::type_t;
-    case UNDEFINED__:
-    case UNKNOWN__:
-      break;
-    case B:
-      return roq::Side::BUY;
-    case BUY:
-      return roq::Side::BUY;
-    case S:
-      return roq::Side::SELL;
-    case SELL:
-      return roq::Side::SELL;
-  }
-  return {};
 }
 
 }  // namespace json
