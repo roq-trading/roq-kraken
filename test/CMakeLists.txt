@@ -15,8 +15,7 @@ target_link_libraries(
           roq-core::roq-core
           roq-io::roq-io
           roq-logging::roq-logging
-          Catch2::Catch2
-          ${RT_LIBRARIES})
+          Catch2::Catch2)
 
 if(ROQ_BUILD_TYPE STREQUAL "Release")
   set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
