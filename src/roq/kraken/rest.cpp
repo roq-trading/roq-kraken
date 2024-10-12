@@ -311,6 +311,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
         .security_type = {},
         .base_currency = item.aclass_base,
         .quote_currency = item.aclass_quote,
+        .settlement_currency = {},
         .margin_currency = {},
         .commission_currency = item.aclass_base,
         .tick_size = tick_size,
