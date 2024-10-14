@@ -309,6 +309,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
         .symbol = symbol,
         .description = item.altname,
         .security_type = SecurityType::SPOT,
+        .cfi_code = {},
         .base_currency = item.base,
         .quote_currency = item.quote,
         .settlement_currency = {},
