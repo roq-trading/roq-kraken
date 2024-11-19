@@ -316,6 +316,7 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
         .margin_currency = {},
         .commission_currency = {},
         .tick_size = tick_size,
+        .tick_size_steps = {},
         .multiplier = item.lot_multiplier,  // XXX ???
         .min_notional = NaN,
         .min_trade_vol = min_trade_vol,  // XXX FIXME
