@@ -2,43 +2,28 @@
 
 #include "roq/kraken/json/map.hpp"
 
-#include "roq/logging.hpp"
-
 using namespace std::literals;
 
 namespace roq {
-namespace kraken {
-namespace json {
-
-// === HELPERS ===
 
 namespace {
-// note! constexpr helper for static testing
 template <typename... Args>
-struct Helper final {
-  explicit constexpr Helper(std::tuple<Args...> const &args) : args_{args} {}
-  explicit constexpr Helper(Args &&...args_) : args_{std::forward<Args>(args_)...} {}
+using Helper = detail::MapHelper<Args...>;
+}
 
-  template <typename R>
-  constexpr operator R();
+// kraken::json => roq
 
- private:
-  std::tuple<Args...> const args_;
-};
-
-// ==> roq
-
-// OrderType ==> roq::OrderType
+// kraken::json::OrderType => roq::OrderType
 
 template <>
 template <>
-constexpr Helper<OrderType>::operator roq::OrderType() {
+constexpr Helper<kraken::json::OrderType>::operator std::optional<roq::OrderType>() const {
   switch (std::get<0>(args_)) {
-    using enum json::OrderType::type_t;
+    using enum kraken::json::OrderType::type_t;
     case UNDEFINED__:
-      return {};
+      return roq::OrderType::UNDEFINED;
     case UNKNOWN__:
-      break;
+      return roq::OrderType::UNDEFINED;
     case L:
       return roq::OrderType::LIMIT;
     case LIMIT:
@@ -48,26 +33,32 @@ constexpr Helper<OrderType>::operator roq::OrderType() {
     case MARKET:
       return roq::OrderType::MARKET;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::UNDEFINED__}}) == roq::OrderType::UNDEFINED);
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::L}}) == roq::OrderType::LIMIT);
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::LIMIT}}) == roq::OrderType::LIMIT);
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::M}}) == roq::OrderType::MARKET);
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::MARKET}}) == roq::OrderType::MARKET);
-
-// Side ==> roq::Side
+static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::UNDEFINED__}} == roq::OrderType::UNDEFINED);
+static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::L}} == roq::OrderType::LIMIT);
+static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::LIMIT}} == roq::OrderType::LIMIT);
+static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::M}} == roq::OrderType::MARKET);
+static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::MARKET}} == roq::OrderType::MARKET);
 
 template <>
 template <>
-constexpr Helper<Side>::operator roq::Side() {
+std::optional<roq::OrderType> Map<kraken::json::OrderType>::helper() const {
+  return Helper{args_};
+}
+
+// kraken::json::Side => roq::Side
+
+template <>
+template <>
+constexpr Helper<kraken::json::Side>::operator std::optional<roq::Side>() const {
   switch (std::get<0>(args_)) {
-    using enum Side::type_t;
+    using enum kraken::json::Side::type_t;
     case UNDEFINED__:
-      return {};
+      return roq::Side::UNDEFINED;
     case UNKNOWN__:
-      break;
+      return roq::Side::UNDEFINED;
     case B:
       return roq::Side::BUY;
     case BUY:
@@ -77,34 +68,19 @@ constexpr Helper<Side>::operator roq::Side() {
     case SELL:
       return roq::Side::SELL;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<roq::Side>(Helper{Side{Side::UNDEFINED__}}) == roq::Side::UNDEFINED);
-static_assert(static_cast<roq::Side>(Helper{Side{Side::B}}) == roq::Side::BUY);
-static_assert(static_cast<roq::Side>(Helper{Side{Side::BUY}}) == roq::Side::BUY);
-static_assert(static_cast<roq::Side>(Helper{Side{Side::S}}) == roq::Side::SELL);
-static_assert(static_cast<roq::Side>(Helper{Side{Side::SELL}}) == roq::Side::SELL);
-
-// roq ==>
-}  // namespace
-
-// === IMPLEMENTATION ===
-
-// ==> roq
+static_assert(Helper{kraken::json::Side{kraken::json::Side::UNDEFINED__}} == roq::Side::UNDEFINED);
+static_assert(Helper{kraken::json::Side{kraken::json::Side::B}} == roq::Side::BUY);
+static_assert(Helper{kraken::json::Side{kraken::json::Side::BUY}} == roq::Side::BUY);
+static_assert(Helper{kraken::json::Side{kraken::json::Side::S}} == roq::Side::SELL);
+static_assert(Helper{kraken::json::Side{kraken::json::Side::SELL}} == roq::Side::SELL);
 
 template <>
 template <>
-Map<OrderType>::operator roq::OrderType() {
+std::optional<roq::Side> Map<kraken::json::Side>::helper() const {
   return Helper{args_};
 }
 
-template <>
-template <>
-Map<Side>::operator roq::Side() {
-  return Helper{args_};
-}
-
-}  // namespace json
-}  // namespace kraken
 }  // namespace roq

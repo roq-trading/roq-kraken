@@ -295,7 +295,7 @@ void MarketData::operator()(Trace<json::Trade> const &event, std::string_view co
   shared_.trades.clear();
   auto emplace_back = [](auto &result, auto &value) {
     auto trade = Trade{
-        .side = json::Map{value.side},
+        .side = map(value.side),
         .price = value.price,
         .quantity = value.volume,
         .trade_id = {},

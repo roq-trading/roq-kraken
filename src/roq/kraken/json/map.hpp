@@ -2,36 +2,22 @@
 
 #pragma once
 
-#include <tuple>
-
-#include "roq/api.hpp"
-
 #include "roq/kraken/json/order_type.hpp"
 #include "roq/kraken/json/side.hpp"
 
+#include "roq/order_type.hpp"
+#include "roq/side.hpp"
+
+#include "roq/map.hpp"
+
 namespace roq {
-namespace kraken {
-namespace json {
 
-template <typename... Args>
-struct Map final {
-  explicit Map(Args &&...args) : args_{std::forward<Args>(args)...} {}
-  explicit Map(Args const &...args) : args_{args...} {}
+template <>
+template <>
+std::optional<OrderType> Map<kraken::json::OrderType>::helper() const;
 
-  Map(Map const &) = delete;
+template <>
+template <>
+std::optional<Side> Map<kraken::json::Side>::helper() const;
 
-  template <typename R>
-  operator R();
-
- private:
-  std::tuple<Args...> const args_;
-};
-
-template <typename R, typename... Args>
-inline R map(Args &&...args) {
-  return static_cast<R>(Map{std::forward<Args>(args)...});
-}
-
-}  // namespace json
-}  // namespace kraken
 }  // namespace roq
