@@ -115,8 +115,9 @@ void MarketData::operator()(metrics::Writer &writer) {
 }
 
 void MarketData::subscribe(size_t start_from) {
-  if (ready())
+  if (ready()) {
     subscribe(shared_.symbols.get_slice(index_, start_from));
+  }
 }
 
 void MarketData::operator()(web::socket::Client::Connected const &) {
@@ -254,8 +255,9 @@ void MarketData::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     TraceInfo trace_info;
     try {
-      if (!json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info))
+      if (!json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info)) {
         log_message();
+      }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
@@ -360,8 +362,9 @@ void MarketData::operator()(Trace<json::Book> const &event, std::string_view con
     }
   }
   bool live = !std::empty(book.b) && !std::empty(book.a);
-  if (snapshot && live) [[unlikely]]
+  if (snapshot && live) [[unlikely]] {
     log::fatal("Unexpected"sv);
+  }
   shared_.bids.clear();
   shared_.asks.clear();
   auto emplace_back = [](auto &result, auto &value) {

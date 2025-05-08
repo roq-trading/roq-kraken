@@ -18,8 +18,9 @@ template <typename R>
 R create_accounts(auto &config) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
-  for (auto &[_, iter] : config.accounts)
+  for (auto &[_, iter] : config.accounts) {
     result.try_emplace(static_cast<std::string_view>(iter.name), std::make_unique<Account>(config, iter.name));
+  }
   return result;
 }
 
@@ -27,8 +28,9 @@ template <typename R>
 R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
-  for (auto &[name, account] : accounts)
+  for (auto &[name, account] : accounts) {
     result.try_emplace(static_cast<std::string_view>(name), std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
+  }
   return result;
 }
 
@@ -36,8 +38,9 @@ template <typename R>
 R create_drop_copy(auto &accounts) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
-  for (auto &[name, account] : accounts)
+  for (auto &[name, account] : accounts) {
     result.try_emplace(static_cast<std::string_view>(name), nullptr);
+  }
   return result;
 }
 }  // namespace
@@ -155,8 +158,9 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   auto &account = token_update.account;
   assert(!std::empty(account));
   auto iter = drop_copy_.find(account);
-  if (iter == std::end(drop_copy_)) [[unlikely]]
+  if (iter == std::end(drop_copy_)) [[unlikely]] {
     log::fatal(R"(Unexpected: account="{}")"sv, account);
+  }
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"sv);
     auto drop_copy = std::make_unique<DropCopy>(*this, context_, ++stream_id_, *accounts_.at(account), shared_, token_update.token);
@@ -170,8 +174,9 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
 void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);
   ensure_symbol_slices(size);
-  for (auto &iter : market_data_)
+  for (auto &iter : market_data_) {
     (*iter).subscribe(start_from);
+  }
 }
 
 void Gateway::ensure_symbol_slices(size_t size) {
@@ -191,19 +196,24 @@ template <typename... Args>
 void Gateway::dispatch(Args &&...args) {
   auto helper = [&](auto &target) { target(std::forward<Args>(args)...); };
   helper(rest_);
-  for (auto &[_, item] : order_entry_)
+  for (auto &[_, item] : order_entry_) {
     helper(*item);
-  for (auto &[_, item] : drop_copy_)
-    if (static_cast<bool>(item))
+  }
+  for (auto &[_, item] : drop_copy_) {
+    if (static_cast<bool>(item)) {
       helper(*item);
-  for (auto &item : market_data_)
+    }
+  }
+  for (auto &item : market_data_) {
     helper(*item);
+  }
 }
 
 OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
   auto iter = order_entry_.find(account);
-  if (iter != std::end(order_entry_))
+  if (iter != std::end(order_entry_)) {
     return *(*iter).second;
+  }
   throw RuntimeError{R"(Unknown account="{}")"sv, account};
 }
 

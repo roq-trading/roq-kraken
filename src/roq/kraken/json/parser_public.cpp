@@ -126,10 +126,12 @@ bool dispatch2(
   Book book_1, book_2;
   auto &obj = std::get<core::json::Array>(root);
   for (auto value : obj) {
-    if (++offset == 1)
+    if (++offset == 1) {
       continue;
-    if (offset > (1 + data_count))
+    }
+    if (offset > (1 + data_count)) {
       break;
+    }
     switch (channel) {
       using enum Channel::type_t;
       case UNDEFINED__:
@@ -141,8 +143,9 @@ bool dispatch2(
       case OHLC:
         throw RuntimeError{"ohlc not supported"sv};
       case TRADE: {
-        if (data_count != 1) [[unlikely]]
+        if (data_count != 1) [[unlikely]] {
           log::fatal("Unexpected"sv);
+        }
         Trade trade{value, buffer};
         Trace event{trace_info, trade};
         handler(event, pair);
@@ -150,8 +153,9 @@ bool dispatch2(
         break;
       }
       case SPREAD: {
-        if (data_count != 1) [[unlikely]]
+        if (data_count != 1) [[unlikely]] {
           log::fatal("Unexpected"sv);
+        }
         Spread spread{value};
         Trace event{trace_info, spread};
         handler(event, pair);
@@ -159,8 +163,9 @@ bool dispatch2(
         break;
       }
       case BOOK: {
-        if (data_count < 1 || data_count > 2) [[unlikely]]
+        if (data_count < 1 || data_count > 2) [[unlikely]] {
           log::fatal("Unexpected"sv);
+        }
         switch (offset) {
           case 2:
             book_1 = Book{value, buffer};
@@ -182,12 +187,14 @@ bool dispatch2(
   if (!dispatched && channel == Channel::BOOK) {
     if (data_count == 2) {
       if (!std::empty(book_2.a)) {
-        if (!std::empty(book_1.a)) [[unlikely]]
+        if (!std::empty(book_1.a)) [[unlikely]] {
           log::fatal("Unexpected"sv);
+        }
         book_1.a = book_2.a;
       } else if (!std::empty(book_2.b)) {
-        if (!std::empty(book_1.b)) [[unlikely]]
+        if (!std::empty(book_1.b)) [[unlikely]] {
           log::fatal("Unexpected"sv);
+        }
         book_1.b = book_2.b;
       } else {
         log::fatal("Unexpected"sv);
@@ -219,12 +226,14 @@ bool ParserPublic::dispatch(
             auto name = std::get<std::string_view>(value);
             // for example "book-10" --> "book"
             auto pos = name.find_first_of('-');
-            if (pos != name.npos)
+            if (pos != name.npos) {
               name.remove_suffix(std::size(name) - pos);
+            }
             channel = Channel{name};
 #ifndef NDEBUG
-            if (channel == Channel::UNKNOWN__) [[unlikely]]
+            if (channel == Channel::UNKNOWN__) [[unlikely]] {
               log::fatal(R"(Unknown channel="{}")"sv, name);
+            }
 #endif
             break;
           }
@@ -238,8 +247,9 @@ bool ParserPublic::dispatch(
       }
     }
   }
-  if (offset != 3) [[unlikely]]
+  if (offset != 3) [[unlikely]] {
     log::fatal(R"(message="{}")"sv, message);
+  }
   return dispatch2(handler, message, buffer, trace_info, channel_id, channel, pair, data_count);
 }
 

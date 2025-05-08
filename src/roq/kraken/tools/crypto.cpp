@@ -43,12 +43,14 @@ Crypto::Crypto(std::string_view const &key, std::string_view const &secret, std:
 std::string Crypto::create_body() {
   auto now = std::chrono::duration_cast<decltype(nonce_)>(clock::get_realtime());
   auto diff = now - nonce_;
-  if (diff < THRESHOLD) [[unlikely]]
+  if (diff < THRESHOLD) [[unlikely]] {
     log::fatal("Probably something wrong... diff={})"sv, diff);
-  if (diff.count() < 0)  // XXX shouldn't this be <= ?
+  }
+  if (diff.count() < 0) {  // XXX shouldn't this be <= ?
     ++nonce_;
-  else
+  } else {
     nonce_ = now;
+  }
   if (std::empty(passphrase_)) {
     return fmt::format(R"(nonce={})"sv, nonce_.count());
   } else {

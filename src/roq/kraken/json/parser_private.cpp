@@ -210,12 +210,14 @@ bool ParserPrivate::dispatch(
         auto name = std::get<std::string_view>(value);
         // for example "book-10" --> "book"
         auto pos = name.find_first_of('-');
-        if (pos != name.npos)
+        if (pos != name.npos) {
           name.remove_suffix(std::size(name) - pos);
+        }
         channel = Channel{name};
 #ifndef NDEBUG
-        if (channel == Channel::UNKNOWN__) [[unlikely]]
+        if (channel == Channel::UNKNOWN__) [[unlikely]] {
           log::fatal(R"(Unknown channel="{}")"sv, name);
+        }
 #endif
         break;
       }
@@ -224,8 +226,9 @@ bool ParserPrivate::dispatch(
     }
     ++offset;
   }
-  if (offset < 3) [[unlikely]]
+  if (offset < 3) [[unlikely]] {
     log::fatal(R"(Unexpected: message="{}")"sv, message);
+  }
   return dispatch2(handler, message, buffer, channel);
 }
 

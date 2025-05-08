@@ -211,8 +211,9 @@ void DropCopy::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     TraceInfo trace_info;
     try {
-      if (!json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info))
+      if (!json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info)) {
         log_message();
+      }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();

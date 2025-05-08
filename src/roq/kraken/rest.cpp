@@ -153,8 +153,9 @@ void Rest::operator()(Trace<web::rest::Client::Connected> const &) {
 void Rest::operator()(Trace<web::rest::Client::Disconnected> const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
-  if (!download_.downloading())
+  if (!download_.downloading()) {
     download_.reset();
+  }
 }
 
 void Rest::operator()(Trace<web::rest::Client::Latency> const &event) {
@@ -300,8 +301,9 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
     symbol.erase(std::remove(std::begin(symbol), std::end(symbol), '\\'), std::end(symbol));
     auto discard = shared_.discard_symbol(symbol);
     auto tick_size = item.tick_size;
-    if (std::isnan(tick_size))
+    if (std::isnan(tick_size)) {
       tick_size = std::pow(10.0, -static_cast<double>(item.pair_decimals));
+    }
     auto min_trade_vol = std::pow(10.0, -static_cast<double>(item.lot_decimals));  //  XXX FIXME this is wrong...
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
@@ -337,10 +339,12 @@ void Rest::operator()(Trace<json::AssetPairs> const &event) {
         .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
-    if (discard)
+    if (discard) {
       continue;
-    if (all_symbols_.emplace(symbol).second)  // only include new
+    }
+    if (all_symbols_.emplace(symbol).second) {  // only include new
       symbols.emplace_back(symbol);
+    }
     ++counter;
     auto market_status = MarketStatus{
         .stream_id = stream_id_,
