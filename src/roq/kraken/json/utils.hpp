@@ -21,15 +21,14 @@ inline void update(T &result, core::json::Value const &value) {
 
 template <>
 inline void update(std::chrono::milliseconds &result, core::json::Value const &value) {
+  using result_type = std::remove_cvref_t<decltype(result)>;
   return std::visit(
       utils::overloaded{
-          [&](core::json::Null const &) { result = std::chrono::milliseconds{}; },
+          [&](core::json::Null const &) { result = result_type{}; },
           [](bool) { throw std::bad_cast{}; },
-          [&](int64_t value) { result = std::chrono::milliseconds{static_cast<uint64_t>(value * 1000)}; },
-          [&](double value) { result = std::chrono::milliseconds{static_cast<uint64_t>(value * 1.0e3)}; },
-          [&](std::string_view const &value) {
-            result = utils::charconv::from_chars<std::remove_reference<decltype(result)>::type>(value, utils::charconv::Format::DATETIME);
-          },
+          [&](int64_t value) { result = result_type{static_cast<uint64_t>(value * 1000)}; },
+          [&](double value) { result = result_type{static_cast<uint64_t>(value * 1.0e3)}; },
+          [&](std::string_view const &value) { result = utils::charconv::from_chars<result_type>(value, utils::charconv::Format::DATETIME); },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },
       },
@@ -38,15 +37,14 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
 
 template <>
 inline void update(std::chrono::microseconds &result, core::json::Value const &value) {
+  using result_type = std::remove_cvref_t<decltype(result)>;
   return std::visit(
       utils::overloaded{
-          [&](core::json::Null const &) { result = std::chrono::microseconds{}; },
+          [&](core::json::Null const &) { result = result_type{}; },
           [](bool) { throw std::bad_cast{}; },
-          [&](int64_t value) { result = std::chrono::microseconds{static_cast<uint64_t>(value * 1000000)}; },
-          [&](double value) { result = std::chrono::microseconds{static_cast<uint64_t>(value * 1.0e6)}; },
-          [&](std::string_view const &value) {
-            result = utils::charconv::from_chars<std::remove_reference<decltype(result)>::type>(value, utils::charconv::Format::DATETIME);
-          },
+          [&](int64_t value) { result = result_type{static_cast<uint64_t>(value * 1000000)}; },
+          [&](double value) { result = result_type{static_cast<uint64_t>(value * 1.0e6)}; },
+          [&](std::string_view const &value) { result = utils::charconv::from_chars<result_type>(value, utils::charconv::Format::DATETIME); },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },
       },
