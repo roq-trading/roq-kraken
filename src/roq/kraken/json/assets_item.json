@@ -25,6 +25,10 @@
     {
       "name": "status",
       "type": "std/string_view"
+    },
+    {
+      "name": "margin_rate",
+      "type": "std/double"
     }
   ]
 }
