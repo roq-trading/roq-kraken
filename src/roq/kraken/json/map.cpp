@@ -20,9 +20,9 @@ template <>
 constexpr Helper<kraken::json::OrderType>::operator std::optional<roq::OrderType>() const {
   switch (std::get<0>(args_)) {
     using enum kraken::json::OrderType::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::OrderType::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::OrderType::UNDEFINED;
     case L:
       return roq::OrderType::LIMIT;
@@ -36,7 +36,7 @@ constexpr Helper<kraken::json::OrderType>::operator std::optional<roq::OrderType
   return {};
 }
 
-static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::UNDEFINED__}} == roq::OrderType::UNDEFINED);
+static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::_UNDEFINED}} == roq::OrderType::UNDEFINED);
 static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::L}} == roq::OrderType::LIMIT);
 static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::LIMIT}} == roq::OrderType::LIMIT);
 static_assert(Helper{kraken::json::OrderType{kraken::json::OrderType::M}} == roq::OrderType::MARKET);
@@ -55,9 +55,9 @@ template <>
 constexpr Helper<kraken::json::Side>::operator std::optional<roq::Side>() const {
   switch (std::get<0>(args_)) {
     using enum kraken::json::Side::type_t;
-    case UNDEFINED__:
+    case _UNDEFINED:
       return roq::Side::UNDEFINED;
-    case UNKNOWN__:
+    case _UNKNOWN:
       return roq::Side::UNDEFINED;
     case B:
       return roq::Side::BUY;
@@ -71,7 +71,7 @@ constexpr Helper<kraken::json::Side>::operator std::optional<roq::Side>() const 
   return {};
 }
 
-static_assert(Helper{kraken::json::Side{kraken::json::Side::UNDEFINED__}} == roq::Side::UNDEFINED);
+static_assert(Helper{kraken::json::Side{kraken::json::Side::_UNDEFINED}} == roq::Side::UNDEFINED);
 static_assert(Helper{kraken::json::Side{kraken::json::Side::B}} == roq::Side::BUY);
 static_assert(Helper{kraken::json::Side{kraken::json::Side::BUY}} == roq::Side::BUY);
 static_assert(Helper{kraken::json::Side{kraken::json::Side::S}} == roq::Side::SELL);
