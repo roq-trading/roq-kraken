@@ -40,17 +40,17 @@ bool ParserPrivate::dispatch(
     auto field = ResultField{key};
     switch (field) {
       using enum ResultField::type_t;
-      case _UNDEFINED:
-      case _UNKNOWN:
+      case UNDEFINED_INTERNAL:
+      case UNKNOWN_INTERNAL:
         break;
       case EVENT: {
         auto event = Event{value};
         switch (event) {
           using enum Event::type_t;
-          case _UNDEFINED:
+          case UNDEFINED_INTERNAL:
             log::fatal("Unexpected"sv);
             break;
-          case _UNKNOWN:
+          case UNKNOWN_INTERNAL:
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
           case ERROR: {
@@ -128,8 +128,8 @@ bool dispatch2(
       break;
     switch (channel) {
       using enum Channel::type_t;
-      case _UNDEFINED:
-      case _UNKNOWN:
+      case UNDEFINED_INTERNAL:
+      case UNKNOWN_INTERNAL:
         log::fatal("Unexpected"sv);
         break;
       case TICKER: {
@@ -202,7 +202,7 @@ bool dispatch2(
 
 bool ParserPrivate::dispatch(
     Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, core::json::Array &root, TraceInfo const &) {
-  Channel channel = Channel::_UNDEFINED;
+  Channel channel = Channel::UNDEFINED_INTERNAL;
   size_t offset = 0;
   for (auto value : root) {
     switch (offset) {
@@ -215,7 +215,7 @@ bool ParserPrivate::dispatch(
         }
         channel = Channel{name};
 #ifndef NDEBUG
-        if (channel == Channel::_UNKNOWN) [[unlikely]] {
+        if (channel == Channel::UNKNOWN_INTERNAL) [[unlikely]] {
           log::fatal(R"(Unknown channel="{}")"sv, name);
         }
 #endif
