@@ -16,6 +16,8 @@
 
 #include "roq/core/download.hpp"
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/server.hpp"
 
 #include "roq/kraken/account.hpp"
@@ -92,7 +94,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   // connection
   std::unique_ptr<web::rest::Client> const connection_;
   // buffers
-  std::vector<std::byte> decode_buffer_;
+  core::json::BufferStack decode_buffer_;
   // metrics
   struct {
     utils::metrics::Counter disconnect;

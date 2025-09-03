@@ -6,6 +6,8 @@
 
 #include "roq/trace_info.hpp"
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken/json/error.hpp"
 #include "roq/kraken/json/heartbeat.hpp"
 #include "roq/kraken/json/pong.hpp"
@@ -37,12 +39,12 @@ struct ParserPrivate final {
     virtual void operator()(Trace<OwnTrades> const &) = 0;
   };
 
-  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &);
 
  protected:
-  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, core::json::Object &root, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, core::json::Object &root, TraceInfo const &);
 
-  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, core::json::Array &root, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, core::json::Array &root, TraceInfo const &);
 };
 
 }  // namespace json

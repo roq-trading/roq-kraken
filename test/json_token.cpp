@@ -3,6 +3,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken/json/result.hpp"
 #include "roq/kraken/json/token.hpp"
 
@@ -20,7 +22,7 @@ TEST_CASE("json_token_simple", "[json_token]") {
                        R"(})"
                        R"(})"sv;
   bool found = false;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Result::dispatch<json::Token>(
       message, buffer, []([[maybe_unused]] std::span<std::string_view> const &errors) { FAIL(); }, [&](json::Token const &) { found = true; });
   CHECK(found == true);

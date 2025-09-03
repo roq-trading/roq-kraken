@@ -5,6 +5,8 @@
 
 #include "roq/core/datetime.hpp"
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/kraken/json/parser_public.hpp"
 
 using namespace roq;
@@ -62,7 +64,7 @@ TEST_CASE("json_book_parse_test_snapshot", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -79,7 +81,7 @@ TEST_CASE("json_book_parse_test_update_bid_1", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -96,7 +98,7 @@ TEST_CASE("json_book_parse_test_update_ask_1", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -195,7 +197,7 @@ TEST_CASE("json_book_parse_test_update_complex", "[json_book]") {
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   TraceInfo trace_info;
   json::ParserPublic::dispatch(handler, message, buffer, trace_info);
 }
@@ -267,7 +269,7 @@ TEST_CASE("json_book_parse_bad_datetime_beta_20200502_180439_374940", "[json_boo
                        R"("EOS/USD")"
                        R"(])"sv;
   Handler handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   TraceInfo trace_info;
   CHECK_THROWS_AS(json::ParserPublic::dispatch(handler, message, buffer, trace_info),
                   OutOfRange);  //  XXX maybe wrap as core::BadState?

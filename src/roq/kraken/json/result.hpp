@@ -7,6 +7,7 @@
 
 #include "roq/core/json/array_parser.hpp"
 #include "roq/core/json/buffer.hpp"
+#include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
 namespace roq {
@@ -15,14 +16,13 @@ namespace json {
 
 struct Result final {
   template <typename T, typename E, typename H>
-  static void dispatch(std::string_view const &message, std::span<std::byte> const &buffer, E error_handler, H result_handler) {
+  static void dispatch(std::string_view const &message, core::json::BufferStack &buffer_stack, E error_handler, H result_handler) {
     using namespace std::literals;
     core::json::Parser parser{message};
     auto root = parser.root();
     for (auto [key, value] : std::get<core::json::Object>(root)) {
       if (key.compare("error"sv) == 0) {
-        core::json::Buffer buffer_2{buffer};
-        auto error = core::json::ArrayParser<std::span<std::string_view>, core::json::Array>::parse(buffer_2, std::get<core::json::Array>(value));
+        auto error = core::json::ArrayParser<std::span<std::string_view>, core::json::Array>::parse(buffer_stack, std::get<core::json::Array>(value));
         if (std::size(error) > 0) {
           error_handler(error);
           return;

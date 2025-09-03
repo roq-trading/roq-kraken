@@ -16,7 +16,7 @@ namespace roq {
 namespace kraken {
 namespace json {
 
-bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
+bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
   // different parsing depending on object or array representation
   core::json::Parser parser{message};
   auto root = parser.root();
@@ -27,14 +27,14 @@ bool ParserPublic::dispatch(Handler &handler, std::string_view const &message, s
           [](int64_t) -> bool { throw std::bad_cast{}; },
           [](double) -> bool { throw std::bad_cast{}; },
           [](std::string_view const &) -> bool { throw std::bad_cast{}; },
-          [&](core::json::Object &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
-          [&](core::json::Array &value) -> bool { return dispatch(handler, message, buffer, value, trace_info); },
+          [&](core::json::Object &value) -> bool { return dispatch(handler, message, buffer_stack, value, trace_info); },
+          [&](core::json::Array &value) -> bool { return dispatch(handler, message, buffer_stack, value, trace_info); },
       },
       root);
 }
 
 bool ParserPublic::dispatch(
-    Handler &handler, std::string_view const &message, std::span<std::byte> const &, core::json::Object &root, TraceInfo const &trace_info) {
+    Handler &handler, std::string_view const &message, core::json::BufferStack &, core::json::Object &root, TraceInfo const &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField{key};
@@ -105,7 +105,7 @@ namespace {
 bool dispatch2(
     ParserPublic::Handler &handler,
     std::string_view const &message,
-    std::span<std::byte> const &buffer,
+    core::json::BufferStack &buffer_stack,
     TraceInfo const &trace_info,
     [[maybe_unused]] int64_t channel_id,
     Channel channel,
@@ -146,7 +146,7 @@ bool dispatch2(
         if (data_count != 1) [[unlikely]] {
           log::fatal("Unexpected"sv);
         }
-        Trade trade{value, buffer};
+        Trade trade{value, buffer_stack};
         Trace event{trace_info, trade};
         handler(event, pair);
         dispatched = true;
@@ -168,10 +168,10 @@ bool dispatch2(
         }
         switch (offset) {
           case 2:
-            book_1 = Book{value, buffer};
+            book_1 = Book{value, buffer_stack};
             break;
           case 3:
-            book_2 = Book{value, buffer};
+            book_2 = Book{value, buffer_stack};
             break;
           default:
             log::fatal("Unexpected"sv);
@@ -209,7 +209,7 @@ bool dispatch2(
 }  // namespace
 
 bool ParserPublic::dispatch(
-    Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, core::json::Array &root, TraceInfo const &trace_info) {
+    Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, core::json::Array &root, TraceInfo const &trace_info) {
   int64_t channel_id = 0;
   Channel channel = Channel::UNDEFINED_INTERNAL;
   std::string_view pair;
@@ -250,7 +250,7 @@ bool ParserPublic::dispatch(
   if (offset != 3) [[unlikely]] {
     log::fatal(R"(message="{}")"sv, message);
   }
-  return dispatch2(handler, message, buffer, trace_info, channel_id, channel, pair, data_count);
+  return dispatch2(handler, message, buffer_stack, trace_info, channel_id, channel, pair, data_count);
 }
 
 }  // namespace json
