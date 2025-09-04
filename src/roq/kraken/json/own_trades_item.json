@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken/json/OwnTradesItem",
-  "type": "item2",
+  "type": "key_value",
   "values": [
     {
       "name": "ordertxid",

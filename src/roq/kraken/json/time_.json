@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken/json/Time_",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "unixtime",

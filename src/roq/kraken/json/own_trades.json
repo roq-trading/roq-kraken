@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken/json/OwnTrades",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "error",

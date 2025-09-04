@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken/json/OpenPositions",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "ordertxid",

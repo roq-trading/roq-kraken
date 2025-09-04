@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken/json/ResultField",
-  "type": "enum2",
+  "type": "enum",
   "values": [
     {
       "name": "event"

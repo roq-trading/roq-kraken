@@ -1,6 +1,6 @@
 {
   "name": "roq/kraken/json/Error",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "event",
