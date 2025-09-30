@@ -35,7 +35,7 @@ struct ParserPublic final {
     virtual void operator()(Trace<Book> const &, std::string_view const &pair) = 0;
   };
 
-  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &, bool allow_unknown_event_types);
 
  protected:
   static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, core::json::Object &root, TraceInfo const &);

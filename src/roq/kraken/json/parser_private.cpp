@@ -16,7 +16,20 @@ namespace roq {
 namespace kraken {
 namespace json {
 
-bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
+// === HELPERS ===
+
+namespace {
+template <typename T>
+void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info) {
+  T obj{message, buffer_stack};
+  create_trace_and_dispatch(handler, trace_info, obj);
+}
+}  // namespace
+
+// === IMPLEMENTATION ===
+
+bool ParserPrivate::dispatch(
+    Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info, bool allow_unknown_event_types) {
   // different parsing depending on object or array representation
   core::json::Parser parser{message};
   auto root = parser.root();
@@ -34,13 +47,14 @@ bool ParserPrivate::dispatch(Handler &handler, std::string_view const &message, 
 }
 
 bool ParserPrivate::dispatch(
-    Handler &handler, std::string_view const &message, core::json::BufferStack &, core::json::Object &root, TraceInfo const &trace_info) {
+    Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, core::json::Object &root, TraceInfo const &trace_info) {
   bool dispatched = false;
   for (auto [key, value] : root) {
     auto field = ResultField{key};
     switch (field) {
       using enum ResultField::type_t;
       case UNDEFINED_INTERNAL:
+        break;
       case UNKNOWN_INTERNAL:
         break;
       case EVENT: {
@@ -53,52 +67,32 @@ bool ParserPrivate::dispatch(
           case UNKNOWN_INTERNAL:
             log::fatal(R"(Unknown key="{}")"sv, key);
             break;
-          case ERROR: {
-            Error error{message};
-            Trace event{trace_info, error};
-            handler(event);
+          case ERROR:
+            dispatch_helper<Error>(handler, message, buffer_stack, trace_info);
             dispatched = true;
             break;
-          }
-          case SYSTEM_STATUS: {
-            SystemStatus system_status{message};
-            Trace event{trace_info, system_status};
-            handler(event);
+          case SYSTEM_STATUS:
+            dispatch_helper<SystemStatus>(handler, message, buffer_stack, trace_info);
             dispatched = true;
             break;
-          }
-          case PONG: {
-            Pong pong{message};
-            Trace event{trace_info, pong};
-            handler(event);
+          case PONG:
+            dispatch_helper<Pong>(handler, message, buffer_stack, trace_info);
             dispatched = true;
             break;
-          }
-          case HEARTBEAT: {
-            Heartbeat heartbeat{message};
-            Trace event{trace_info, heartbeat};
-            handler(event);
+          case HEARTBEAT:
+            dispatch_helper<Heartbeat>(handler, message, buffer_stack, trace_info);
             dispatched = true;
             break;
-          }
-          case SUBSCRIPTION_STATUS: {
-            SubscriptionStatus subscription_status{message};
-            Trace event{trace_info, subscription_status};
-            handler(event);
+          case SUBSCRIPTION_STATUS:
+            dispatch_helper<SubscriptionStatus>(handler, message, buffer_stack, trace_info);
             dispatched = true;
             break;
-          }
-          case ADD_ORDER_STATUS: {
-            AddOrderStatus add_order_status{message};
-            Trace event{trace_info, add_order_status};
-            handler(event);
+          case ADD_ORDER_STATUS:
+            dispatch_helper<AddOrderStatus>(handler, message, buffer_stack, trace_info);
             dispatched = true;
             break;
-          }
           case CANCEL_ORDER_STATUS:
-            CancelOrderStatus cancel_order_status{message};
-            Trace event{trace_info, cancel_order_status};
-            handler(event);
+            dispatch_helper<CancelOrderStatus>(handler, message, buffer_stack, trace_info);
             dispatched = true;
             break;
         }

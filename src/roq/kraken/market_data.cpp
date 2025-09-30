@@ -254,10 +254,10 @@ void MarketData::unsubscribe_book(std::string_view const &symbol) {
 
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
-    auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
+    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     TraceInfo trace_info;
     try {
-      if (!json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info)) {
+      if (!json::ParserPublic::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {

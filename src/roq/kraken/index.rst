@@ -6,13 +6,34 @@ roq-kraken
 ==========
 
 
-Links
------
+.. tab:: Unstable
 
-* `Website <https://www.kraken.com/>`__
-* `Status <https://status.kraken.com/>`__
-* `Support <https://support.kraken.com/hc/en-us>`__
-* `API <https://www.kraken.com/features/api>`__
+  .. code-block:: shell
+
+     $ conda install \
+           --channel https://roq-trading.com/conda/unstable \
+           roq-kraken
+
+.. tab:: Stable
+
+  .. code-block:: shell
+
+     $ conda install \
+           --channel https://roq-trading.com/conda/stable \
+           roq-kraken
+
+:code:`roq-kraken`
+------------------
+
+.. code-block:: shell
+
+   $ roq-kraken [FLAGS]
+
+
+Description
+~~~~~~~~~~~
+
+:code:`roq-kraken` is a gateway
 
 
 Supports
@@ -82,40 +103,6 @@ Supports
         - |checkmark|
       * - Funds
         - |checkmark|
-
-
-Installing
-----------
-
-* :ref:`Using Conda <tutorial-conda>`
-
-.. tab:: Unstable
-
-  .. code-block:: shell
-
-     $ conda install \
-           --channel https://roq-trading.com/conda/unstable \
-           roq-kraken
-
-.. tab:: Stable
-
-  .. code-block:: shell
-
-     $ conda install \
-           --channel https://roq-trading.com/conda/stable \
-           roq-kraken
-
-
-Using
------
-
-.. code-block:: shell
-
-   $ roq-kraken \
-         --name "kraken" \
-         --config_file $CONFIG_FILE_PATH \
-         --client_listen_address $UNIX_SOCKET_PATH \
-         --flagfile $ENVIRONMENT_FLAGFILE
 
 
 .. _roq-kraken-flags:
