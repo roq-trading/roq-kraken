@@ -1,3 +1,5 @@
+# config template for the roq-kraken gateway
+
 symbols = [
   "^ETH/USD[A-Z]?$",
   "^XBT/USD[A-Z]?$"

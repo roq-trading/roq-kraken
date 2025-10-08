@@ -1,6 +1,17 @@
 .. _roq-kraken:
 
-.. |checkmark| unicode:: U+2713
+.. |dagger| unicode:: U+2020
+.. |double-dagger| unicode:: U+2021
+.. |right-arrow| unicode:: U+2192
+.. |right-double-arrow| unicode:: U+21D2
+.. |left-right-double-arrow| unicode:: U+21D4
+.. |check-mark| unicode:: U+2705
+.. |cross-mark| unicode:: U+274C
+.. |negative-cross-mark| unicode:: U+274E
+.. |footnote-1| unicode:: U+2776
+.. |footnote-2| unicode:: U+2777
+.. |footnote-3| unicode:: U+2778
+
 
 roq-kraken
 ==========
@@ -22,20 +33,6 @@ roq-kraken
            --channel https://roq-trading.com/conda/stable \
            roq-kraken
 
-:code:`roq-kraken`
-------------------
-
-.. code-block:: shell
-
-   $ roq-kraken [FLAGS]
-
-
-Description
-~~~~~~~~~~~
-
-:code:`roq-kraken` is a gateway
-
-
 Supports
 --------
 
@@ -46,72 +43,113 @@ Supports
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Spot
-        - |checkmark|
-      * - Futures
+      * - :cpp:enumerator:`Spot <roq::SecurityType::SPOT>`
+        - |check-mark|
         -
-      * - Options
+      * - :cpp:enumerator:`Futures <roq::SecurityType::FUTURES>`
+        - |cross-mark|
         -
-      * - Combos
+      * - :cpp:enumerator:`Swap <roq::SecurityType::SWAP>`
+        - |cross-mark|
+        -
+      * - :cpp:enumerator:`Option <roq::SecurityType::OPTION>`
+        - |cross-mark|
         -
 
   .. grid-item-card::  Market Data
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Reference Data
-        - |checkmark|
-      * - Market Status
+      * - :cpp:class:`ReferenceData <roq::ReferenceData>`
+        - |check-mark|
+        - |footnote-1|
+      * - :cpp:class:`MarketStatus <roq::MarketStatus>`
+        - |check-mark|
+        - |footnote-1|
+      * - :cpp:class:`TopOfBook <roq::TopOfBook>`
+        - |check-mark|
         -
-      * - Top of Book
-        - |checkmark|
-      * - Market by Price
-        - |checkmark|
-      * - Market by Order
+      * - :cpp:class:`MarketByPrice <roq::MarketByPriceUpdate>`
+        - |check-mark|
         -
-      * - Trade Summary
-        - |checkmark|
-      * - Statistics
+      * - :cpp:class:`MarketByOrder <roq::MarketByOrderUpdate>`
+        - |cross-mark|
         -
-      * - Time Series
+      * - :cpp:class:`TradeSummary <roq::TradeSummary>`
+        - |check-mark|
+        -
+      * - :cpp:class:`Statistics <roq::StatisticsUpdate>`
+        - |cross-mark|
+        -
+      * - :cpp:class:`TimeSeries <roq::TimeSeriesUpdate>`
+        - |cross-mark|
         -
 
-  .. grid-item-card::  Order Management
+  .. grid-item-card::  Orders
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Create
-        - |checkmark|
-      * - Modify
+      * - :cpp:class:`CreateOrder <roq::CreateOrder>`
+        - |negative-cross-mark|
         -
-      * - Cancel
-        - |checkmark|
-      * - Cancel All
-        - |checkmark|
-      * - Auto-Cancel
-        - |checkmark|
+      * - :cpp:class:`ModifyOrder <roq::ModifyOrder>`
+        - |cross-mark|
+        -
+      * - :cpp:class:`CancelOrder <roq::CancelOrder>`
+        - |negative-cross-mark|
+        -
+      * - :cpp:class:`CancelAllOrders <roq::CancelAllOrders>`
+        - |negative-cross-mark|
+        -
+      * - :cpp:class:`MassQuote <roq::MassQuote>`
+        - |cross-mark|
+        -
+      * - :cpp:class:`CancelQuotes <roq::CancelQuotes>`
+        - |cross-mark|
+        -
 
-  .. grid-item-card::  Account Management
+  .. grid-item-card::  Account
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Positions
-        - |checkmark|
-      * - Funds
-        - |checkmark|
+      * - :cpp:class:`Funds <roq::FundsUpdate>`
+        - |check-mark|
+        -
+      * - :cpp:class:`Position <roq::PositionUpdate>`
+        - |cross-mark|
+        -
+
+.. note::
+
+   |check-mark| = Available.
+
+   |negative-cross-mark| = Not implemented.
+
+   |cross-mark| = Unavailable.
+
+   |footnote-1| The exchange protocol does not support streaming updates for reference data and market status.
+
+
+Using
+-----
+
+.. code-block:: shell
+
+   $ roq-kraken [FLAGS]
 
 
 .. _roq-kraken-flags:
 
 Flags
 -----
-
-* :ref:`Using Flags <abseil-cpp>`
-* :ref:`Gateway Flags <gateway-flags>`
 
 .. code-block:: shell
 
@@ -159,16 +197,14 @@ Environments
 Configuration
 -------------
 
-* :ref:`Gateway Config <gateway-config>`
-
 .. code-block:: shell
 
    $ $CONDA_PREFIX/share/roq-kraken/config.toml
 
 .. important::
 
-   The template will be replaced when the software is upgraded.
-   Make a copy and modify to your needs.
+   This template will be replaced when the software is upgraded.
+   Make a copy and modify to your own needs.
 
 .. include:: config.toml
    :code: toml
@@ -177,330 +213,25 @@ Configuration
 Market Data
 -----------
 
-.. tab:: Live
 
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::ReferenceData`
-      -
-      -
-      - Unavailable
-
-    * - :cpp:class:`roq::MarketStatus`
-      -
-      -
-      - Unavailable
-
-    * - :cpp:class:`roq::TopOfBook`
-      - MarketData
-      - spread
-      -
-
-    * - :cpp:class:`roq::MarketByPriceUpdate`
-      - MarketData
-      - book
-      -
-
-    * - :cpp:class:`roq::MarketByOrderUpdate`
-      -
-      -
-      - Unavailable
-
-    * - :cpp:class:`roq::TradeSummary`
-      - MarketData
-      - trade
-      -
-
-    * - :cpp:class:`roq::StatisticsUpdate`
-      -
-      -
-      - Not supported
-
-.. tab:: Download
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::ReferenceData`
-      - OrderEntry
-      - /0/public/AssetPairs
-      -
-
-    * - :cpp:class:`roq::MarketStatus`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::TopOfBook`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::MarketByPriceUpdate`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::MarketByOrderUpdate`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::TradeSummary`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::StatisticsUpdate`
-      -
-      -
-      -
-
-Statistics
-~~~~~~~~~~
+Inbound
+~~~~~~~
 
 
 Order Management
 ----------------
 
-.. tab:: Live
 
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
+Inbound
+~~~~~~~
 
-    * - Event
-      - Stream
-      - Messages
-      - Comments
 
-    * - :cpp:class:`roq::OrderUpdate`
-      - DropCopy
-      - openOrders
-      - Not implemented
+Outbound
+~~~~~~~~
 
-    * - :cpp:class:`roq::TradeUpdate`
-      - DropCopy
-      - ownTrades
-      - Not implemented
 
-.. tab:: Download
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::OrderUpdate`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::TradeUpdate`
-      -
-      -
-      -
-
-.. tab:: Request
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::CreateOrder`
-      - DropCopy
-      - addOrder
-      - Not implemented
-
-    * - :cpp:class:`roq::ModifyOrder`
-      -
-      -
-      - Unavailable
-
-    * - :cpp:class:`roq::CancelOrder`
-      - DropCopy
-      - cancelOrder
-      - Not implemented
-
-    * - :cpp:class:`roq::CancelAllOrders`
-      - DropCopy
-      - cancelAll
-      - Not implemented
-
-.. tab:: Response
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::OrderAck`
-      - DropCopy
-      - addOrder, cancelOrder
-      - Not implemented
-
-
-Order Types
-~~~~~~~~~~~
-
-TBD
-
-
-Time in Force
-~~~~~~~~~~~~~
-
-TBD
-
-
-Position Effect
-~~~~~~~~~~~~~~~
-
-TBD
-
-
-Execution Instructions
-~~~~~~~~~~~~~~~~~~~~~~
-
-TBD
-
-
-Account Management
-------------------
-
-.. tab:: Live
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::PositionUpdate`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::FundsUpdate`
-      -
-      -
-      -
-
-.. tab:: Download
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::PositionUpdate`
-      - OrderEntry
-      - /0/private/OpenPositions
-      - Not implemented
-
-    * - :cpp:class:`roq::FundsUpdate`
-      - OrderEntry
-      - /0/private/Balance, /0/private/TradeBalance
-      - Not implemented
-
-
-Streams
--------
-
-.. tab:: OrderEntry
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Type
-      - Comments
-
-    * - REST
-      - Primary purpose
-
-        * support order management
-
-        Each connection
-
-        * supports a single account
-        * maintains a listen key (used by the DropCopy stream)
-
-        The master account is used to
-
-        * discover the full list of symbols (by downloading asset pairs)
-
-.. tab:: DropCopy
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Type
-      - Comments
-
-    * - WebSocket
-      - Primary purpose
-
-        * live account updates, including orders and fills
-
-        Each connection
-
-        * supports a single account
-
-.. tab:: MarketData
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Type
-      - Comments
-
-    * - WebSocket
-      - Primary purpose
-
-        * live market data
-
-        Each connection
-
-        * supports a slice of the symbols
-
-
-Constraints
------------
+Comments
+--------
 
 * Rate-limit usage is not communicated by the exchange
 
@@ -514,3 +245,22 @@ Order book ends up in bad state
   We currently have no means to detect bad order book updates.
   At best, a parse exception will terminate your gateway with an unhandled excpetion.
 
+
+References
+----------
+
+
+Common
+~~~~~~
+
+* :ref:`Using Conda <tutorial-conda>`
+* :ref:`Using Flags <abseil-cpp>`
+* :ref:`Gateway Flags <gateway-flags>`
+* :ref:`Gateway Config <gateway-config>`
+
+
+Exchange
+~~~~~~~~
+
+* `Website <https://www.kraken.com/>`__
+* `Documentation <https://docs.kraken.com/api/>`__
