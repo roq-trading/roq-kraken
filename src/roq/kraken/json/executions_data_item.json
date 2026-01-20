@@ -16,7 +16,7 @@
     },
     {
       "name": "status",
-      "type": "roq/kraken/json/Status2"
+      "type": "roq/kraken/json/PairsStatus"
     },
     {
       "name": "qty_precision",

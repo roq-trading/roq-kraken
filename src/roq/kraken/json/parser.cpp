@@ -55,11 +55,11 @@ bool Parser::dispatch(
         auto value_2 = utils::hash::FNV::compute(std::get<std::string_view>(value));
         switch (value_2) {
           case utils::hash::FNV::compute(METHOD_ERROR): {
-            result = dispatch_helper<Error2>(handler, message, buffer_stack, trace_info);
+            result = dispatch_helper<Error>(handler, message, buffer_stack, trace_info);
             break;
           }
           case utils::hash::FNV::compute(METHOD_PONG): {
-            result = dispatch_helper<Pong2>(handler, message, buffer_stack, trace_info);
+            result = dispatch_helper<Pong>(handler, message, buffer_stack, trace_info);
             break;
           }
           case utils::hash::FNV::compute(METHOD_SUBSCRIBE): {
@@ -77,7 +77,7 @@ bool Parser::dispatch(
             break;
           }
           case utils::hash::FNV::compute(CHANNEL_HEARTBEAT): {
-            result = dispatch_helper<Heartbeat2>(handler, message, buffer_stack, trace_info);
+            result = dispatch_helper<Heartbeat>(handler, message, buffer_stack, trace_info);
             break;
           }
           case utils::hash::FNV::compute(CHANNEL_INSTRUMENT): {

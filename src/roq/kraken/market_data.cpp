@@ -280,18 +280,18 @@ void MarketData::operator()(Trace<json::Status> const &event) {
   subscribe();
 }
 
-void MarketData::operator()(Trace<json::Heartbeat2> const &event) {
+void MarketData::operator()(Trace<json::Heartbeat> const &event) {
   auto &[trace_info, heartbeat] = event;
   log::info<5>("heartbeat={}"sv, heartbeat);
   (*connection_).touch(trace_info.source_receive_time);
 }
 
-void MarketData::operator()(Trace<json::Error2> const &event) {
+void MarketData::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::error("error={}"sv, error);
 }
 
-void MarketData::operator()(Trace<json::Pong2> const &event) {
+void MarketData::operator()(Trace<json::Pong> const &event) {
   auto &[trace_info, pong] = event;
   log::info<5>("pong={}"sv, pong);
   auto external_latency = trace_info.origin_create_time - std::chrono::nanoseconds{pong.req_id};
@@ -317,7 +317,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event) {
   size_t counter = 0;
   for (auto &item : instrument.data.pairs) {
     auto discard = [&]() {
-      if (item.status == json::Status2::DELISTED) {
+      if (item.status == json::PairsStatus::DELISTED) {
         return true;
       }
       return shared_.discard_symbol(item.symbol);

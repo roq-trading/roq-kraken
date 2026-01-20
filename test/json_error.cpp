@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Error2;
+using value_type = json::Error;
 
 TEST_CASE("snapshot", "[json_error]") {
   auto message = R"({)"

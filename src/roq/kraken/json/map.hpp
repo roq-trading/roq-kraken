@@ -3,8 +3,8 @@
 #pragma once
 
 #include "roq/kraken/json/order_type.hpp"
+#include "roq/kraken/json/pairs_status.hpp"
 #include "roq/kraken/json/side.hpp"
-#include "roq/kraken/json/status2.hpp"
 #include "roq/kraken/json/type.hpp"
 
 #include "roq/order_type.hpp"
@@ -26,7 +26,7 @@ std::optional<Side> Map<kraken::json::Side>::helper() const;
 
 template <>
 template <>
-std::optional<TradingStatus> Map<kraken::json::Status2>::helper() const;
+std::optional<TradingStatus> Map<kraken::json::PairsStatus>::helper() const;
 
 template <>
 template <>

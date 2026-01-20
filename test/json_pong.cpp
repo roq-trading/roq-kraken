@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Pong2;
+using value_type = json::Pong;
 
 TEST_CASE("snapshot", "[json_pong]") {
   auto message = R"({)"

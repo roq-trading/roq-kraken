@@ -14,11 +14,11 @@ set(AUTOGEN_SCHEMAS
     book_data.json
     book.json
     channel.json
-    error_2.json
+    error.json
     event.json
     executions_data_item.json
     executions.json
-    heartbeat_2.json
+    heartbeat.json
     instrument_data_assets_item.json
     instrument_data.json
     instrument_data_pairs_item.json
@@ -27,11 +27,10 @@ set(AUTOGEN_SCHEMAS
     open_positions_ack_result_item.json
     order.json
     order_type.json
+    pairs_status.json
     ping.json
-    pong_2.json
-    result_field.json
+    pong.json
     side.json
-    status2.json
     status_data_item.json
     status.json
     subscribe.json

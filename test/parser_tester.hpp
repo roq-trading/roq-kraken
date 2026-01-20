@@ -29,10 +29,10 @@ struct ParserTester final : public json::Parser::Handler {
  protected:
   explicit ParserTester(callback_type const &callback) : callback_{callback} {}
 
-  void operator()(Trace<json::Error2> const &event) override { dispatch(event); }
+  void operator()(Trace<json::Error> const &event) override { dispatch(event); }
   void operator()(Trace<json::Status> const &event) override { dispatch(event); }
-  void operator()(Trace<json::Heartbeat2> const &event) override { dispatch(event); }
-  void operator()(Trace<json::Pong2> const &event) override { dispatch(event); }
+  void operator()(Trace<json::Heartbeat> const &event) override { dispatch(event); }
+  void operator()(Trace<json::Pong> const &event) override { dispatch(event); }
   void operator()(Trace<json::Subscribe> const &event) override { dispatch(event); }
 
   void operator()(Trace<json::Instrument> const &event) override { dispatch(event); }

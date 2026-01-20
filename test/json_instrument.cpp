@@ -141,7 +141,7 @@ TEST_CASE("snapshot", "[json_instrument]") {
     CHECK(p0.symbol == "VET/USDC"sv);
     CHECK(p0.base == "VET"sv);
     CHECK(p0.quote == "USDC"sv);
-    CHECK(p0.status == json::Status2::POST_ONLY);
+    CHECK(p0.status == json::PairsStatus::POST_ONLY);
     CHECK(p0.qty_precision == 5);
     CHECK(p0.qty_increment == 0.00001_a);
     CHECK(p0.price_precision == 6);

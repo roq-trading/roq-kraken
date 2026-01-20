@@ -83,13 +83,13 @@ std::optional<roq::Side> Map<kraken::json::Side>::helper() const {
   return Helper{args_};
 }
 
-// kraken::json::Status2 => roq::TradingStatus
+// kraken::json::PairsStatus => roq::TradingStatus
 
 template <>
 template <>
-constexpr Helper<kraken::json::Status2>::operator std::optional<roq::TradingStatus>() const {
+constexpr Helper<kraken::json::PairsStatus>::operator std::optional<roq::TradingStatus>() const {
   switch (std::get<0>(args_)) {
-    using enum kraken::json::Status2::type_t;
+    using enum kraken::json::PairsStatus::type_t;
     case UNDEFINED_INTERNAL:
       return roq::TradingStatus::UNDEFINED;
     case UNKNOWN_INTERNAL:
@@ -114,19 +114,19 @@ constexpr Helper<kraken::json::Status2>::operator std::optional<roq::TradingStat
   return {};
 }
 
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::UNDEFINED_INTERNAL}} == roq::TradingStatus::UNDEFINED);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::CANCEL_ONLY}} == roq::TradingStatus::CLOSE);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::DELISTED}} == roq::TradingStatus::CLOSE);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::LIMIT_ONLY}} == roq::TradingStatus::CLOSE);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::MAINTENANCE}} == roq::TradingStatus::CLOSE);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::ONLINE}} == roq::TradingStatus::OPEN);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::POST_ONLY}} == roq::TradingStatus::CLOSE);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::REDUCE_ONLY}} == roq::TradingStatus::CLOSE);
-static_assert(Helper{kraken::json::Status2{kraken::json::Status2::WORK_IN_PROGRESS}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::UNDEFINED_INTERNAL}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::CANCEL_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::DELISTED}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::LIMIT_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::MAINTENANCE}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::ONLINE}} == roq::TradingStatus::OPEN);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::POST_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::REDUCE_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::PairsStatus{kraken::json::PairsStatus::WORK_IN_PROGRESS}} == roq::TradingStatus::CLOSE);
 
 template <>
 template <>
-std::optional<roq::TradingStatus> Map<kraken::json::Status2>::helper() const {
+std::optional<roq::TradingStatus> Map<kraken::json::PairsStatus>::helper() const {
   return Helper{args_};
 }
 

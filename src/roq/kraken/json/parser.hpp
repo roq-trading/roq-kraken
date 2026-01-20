@@ -10,11 +10,11 @@
 
 #include "roq/kraken/json/balances.hpp"
 #include "roq/kraken/json/book.hpp"
-#include "roq/kraken/json/error_2.hpp"
+#include "roq/kraken/json/error.hpp"
 #include "roq/kraken/json/executions.hpp"
-#include "roq/kraken/json/heartbeat_2.hpp"
+#include "roq/kraken/json/heartbeat.hpp"
 #include "roq/kraken/json/instrument.hpp"
-#include "roq/kraken/json/pong_2.hpp"
+#include "roq/kraken/json/pong.hpp"
 #include "roq/kraken/json/status.hpp"
 #include "roq/kraken/json/subscribe.hpp"
 #include "roq/kraken/json/ticker.hpp"
@@ -27,10 +27,10 @@ namespace json {
 struct Parser final {
   struct Handler {
     virtual void operator()(Trace<Status> const &) = 0;
-    virtual void operator()(Trace<Heartbeat2> const &) = 0;
+    virtual void operator()(Trace<Heartbeat> const &) = 0;
 
-    virtual void operator()(Trace<Error2> const &) = 0;
-    virtual void operator()(Trace<Pong2> const &) = 0;
+    virtual void operator()(Trace<Error> const &) = 0;
+    virtual void operator()(Trace<Pong> const &) = 0;
     virtual void operator()(Trace<Subscribe> const &) = 0;
 
     virtual void operator()(Trace<Instrument> const &) = 0;

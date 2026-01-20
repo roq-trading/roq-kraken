@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/json/Status2",
+  "name": "roq/kraken/json/PairsStatus",
   "type": "enum",
   "values": [
     {

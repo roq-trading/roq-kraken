@@ -287,18 +287,18 @@ void DropCopy::operator()(Trace<json::Status> const &event) {
   subscribe();
 }
 
-void DropCopy::operator()(Trace<json::Heartbeat2> const &event) {
+void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
   auto &[trace_info, heartbeat] = event;
   log::info<5>("heartbeat={}"sv, heartbeat);
   (*connection_).touch(trace_info.source_receive_time);
 }
 
-void DropCopy::operator()(Trace<json::Error2> const &event) {
+void DropCopy::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::error("error={}"sv, error);
 }
 
-void DropCopy::operator()(Trace<json::Pong2> const &event) {
+void DropCopy::operator()(Trace<json::Pong> const &event) {
   auto &[trace_info, pong] = event;
   log::info<5>("pong={}"sv, pong);
   auto external_latency = trace_info.origin_create_time - std::chrono::nanoseconds{pong.req_id};

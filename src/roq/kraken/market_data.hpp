@@ -84,10 +84,10 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   // json::Parser::Handler
 
   void operator()(Trace<json::Status> const &) override;
-  void operator()(Trace<json::Heartbeat2> const &) override;
+  void operator()(Trace<json::Heartbeat> const &) override;
 
-  void operator()(Trace<json::Error2> const &) override;
-  void operator()(Trace<json::Pong2> const &) override;
+  void operator()(Trace<json::Error> const &) override;
+  void operator()(Trace<json::Pong> const &) override;
   void operator()(Trace<json::Subscribe> const &) override;
 
   void operator()(Trace<json::Instrument> const &) override;
