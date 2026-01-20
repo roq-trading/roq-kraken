@@ -1,43 +1,34 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES map.cpp parser_private.cpp parser.cpp)
+set(SOURCES map.cpp parser.cpp)
 
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
-    balances.json
-    balances_data_item.json
-    balances_data_item_wallets_item.json
-    add_order_status.json
     balance_ack.json
     balance_ack_result_item.json
+    balances_data_item.json
+    balances_data_item_wallets_item.json
+    balances.json
     book_data_bids_asks_item.json
     book_data.json
     book.json
-    cancel_order_status.json
     channel.json
     error_2.json
-    error.json
     event.json
     executions_data_item.json
     executions.json
     heartbeat_2.json
-    heartbeat.json
     instrument_data_assets_item.json
     instrument_data.json
     instrument_data_pairs_item.json
     instrument.json
-    open_orders_item.json
-    open_orders.json
     open_positions_ack.json
     open_positions_ack_result_item.json
     order.json
     order_type.json
-    own_trades_item.json
-    own_trades.json
     ping.json
     pong_2.json
-    pong.json
     result_field.json
     side.json
     status2.json
@@ -45,8 +36,6 @@ set(AUTOGEN_SCHEMAS
     status.json
     subscribe.json
     subscribe_result.json
-    subscription_status.json
-    system_status.json
     ticker_data_item.json
     ticker.json
     time_.json
