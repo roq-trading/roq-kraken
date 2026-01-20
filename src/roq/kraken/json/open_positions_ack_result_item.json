@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/json/PositionsItem",
+  "name": "roq/kraken/json/OpenPositionsAckResultItem",
   "type": "key_value",
   "values": [
     {

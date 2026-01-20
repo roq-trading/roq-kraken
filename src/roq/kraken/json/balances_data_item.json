@@ -1,0 +1,23 @@
+{
+  "name": "roq/kraken/json/BalancesDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "asset",
+      "type": "std/string_view"
+    },
+    {
+      "name": "asset_class",
+      "type": "std/string_view"
+    },
+    {
+      "name": "wallets",
+      "type": "roq/kraken/json/BalancesDataItemWalletsItem",
+      "array": "std/span"
+    },
+    {
+      "name": "balance",
+      "type": "std/double"
+    }
+  ]
+}

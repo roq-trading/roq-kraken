@@ -6,7 +6,10 @@
       "name": "token"
     },
     {
-      "name": "positions"
+      "name": "balance"
+    },
+    {
+      "name": "open_positions"
     },
     {
       "name": "done"

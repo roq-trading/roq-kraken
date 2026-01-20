@@ -25,6 +25,15 @@ R create_accounts(auto &config) {
 }
 
 template <typename R>
+R create_market_data(auto &gateway, auto &context, auto &stream_id, auto &shared) {
+  using result_type = std::remove_cvref_t<R>;
+  result_type result;
+  auto market_data = std::make_unique<MarketData>(gateway, context, ++stream_id, shared, 0);
+  result.emplace_back(std::move(market_data));
+  return result;
+}
+
+template <typename R>
 R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   using result_type = std::remove_cvref_t<R>;
   result_type result;
@@ -49,7 +58,8 @@ R create_drop_copy(auto &accounts) {
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(config)}, context_{context}, shared_{dispatcher, settings},
-      rest_{*this, context_, ++stream_id_, shared_}, order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
+      market_data_{create_market_data<decltype(market_data_)>(*this, context_, stream_id_, shared_)},
+      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(accounts_)} {
 }
 
@@ -154,6 +164,18 @@ void Gateway::operator()(Trace<TradeSummary> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
+void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
+void Gateway::operator()(MarketData::SymbolsUpdate &symbols_update) {
+  auto [size, start_from] = shared_.symbols(symbols_update.symbols);
+  ensure_symbol_slices(size);
+  for (auto &iter : market_data_) {
+    (*iter).subscribe(start_from);
+  }
+}
+
 void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   auto &account = token_update.account;
   assert(!std::empty(account));
@@ -171,13 +193,7 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   }
 }
 
-void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
-  auto [size, start_from] = shared_.symbols(symbols_update.symbols);
-  ensure_symbol_slices(size);
-  for (auto &iter : market_data_) {
-    (*iter).subscribe(start_from);
-  }
-}
+// helpers
 
 void Gateway::ensure_symbol_slices(size_t size) {
   while (std::size(market_data_) < size) {
@@ -200,7 +216,9 @@ void Gateway::dispatch(Args &&...args) {
 template <typename... Args>
 void Gateway::dispatch_helper(auto &self, Args &&...args) {
   auto helper = [&](auto &target) { target(std::forward<Args>(args)...); };
-  helper(self.rest_);
+  for (auto &item : self.market_data_) {
+    helper(*item);
+  }
   for (auto &[_, item] : self.order_entry_) {
     helper(*item);
   }
@@ -208,9 +226,6 @@ void Gateway::dispatch_helper(auto &self, Args &&...args) {
     if (static_cast<bool>(item)) {
       helper(*item);
     }
-  }
-  for (auto &item : self.market_data_) {
-    helper(*item);
   }
 }
 

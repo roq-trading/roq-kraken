@@ -11,12 +11,12 @@ namespace kraken {
 
 struct API final {
   struct {
-    std::string_view assets;
-    std::string_view asset_pairs;
-  } market_data;
-  struct {
     std::string_view get_web_sockets_token;
+    std::string_view balance;
     std::string_view open_positions;
+    std::string_view open_orders;
+    std::string_view trades;
+    std::string_view trade_balance;
   } order_management;
 
   // factory

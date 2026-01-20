@@ -83,4 +83,80 @@ std::optional<roq::Side> Map<kraken::json::Side>::helper() const {
   return Helper{args_};
 }
 
+// kraken::json::Status2 => roq::TradingStatus
+
+template <>
+template <>
+constexpr Helper<kraken::json::Status2>::operator std::optional<roq::TradingStatus>() const {
+  switch (std::get<0>(args_)) {
+    using enum kraken::json::Status2::type_t;
+    case UNDEFINED_INTERNAL:
+      return roq::TradingStatus::UNDEFINED;
+    case UNKNOWN_INTERNAL:
+      return roq::TradingStatus::UNDEFINED;
+    case CANCEL_ONLY:
+      return roq::TradingStatus::CLOSE;
+    case DELISTED:
+      return roq::TradingStatus::CLOSE;  // ???
+    case LIMIT_ONLY:
+      return roq::TradingStatus::CLOSE;
+    case MAINTENANCE:
+      return roq::TradingStatus::CLOSE;
+    case ONLINE:
+      return roq::TradingStatus::OPEN;
+    case POST_ONLY:
+      return roq::TradingStatus::CLOSE;
+    case REDUCE_ONLY:
+      return roq::TradingStatus::CLOSE;
+    case WORK_IN_PROGRESS:
+      return roq::TradingStatus::CLOSE;
+  }
+  return {};
+}
+
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::UNDEFINED_INTERNAL}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::CANCEL_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::DELISTED}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::LIMIT_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::MAINTENANCE}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::ONLINE}} == roq::TradingStatus::OPEN);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::POST_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::REDUCE_ONLY}} == roq::TradingStatus::CLOSE);
+static_assert(Helper{kraken::json::Status2{kraken::json::Status2::WORK_IN_PROGRESS}} == roq::TradingStatus::CLOSE);
+
+template <>
+template <>
+std::optional<roq::TradingStatus> Map<kraken::json::Status2>::helper() const {
+  return Helper{args_};
+}
+
+// kraken::json::Type => roq::UpdateType
+
+template <>
+template <>
+constexpr Helper<kraken::json::Type>::operator std::optional<roq::UpdateType>() const {
+  switch (std::get<0>(args_)) {
+    using enum kraken::json::Type::type_t;
+    case UNDEFINED_INTERNAL:
+      return roq::UpdateType::UNDEFINED;
+    case UNKNOWN_INTERNAL:
+      return roq::UpdateType::UNDEFINED;
+    case SNAPSHOT:
+      return roq::UpdateType::SNAPSHOT;
+    case UPDATE:
+      return roq::UpdateType::INCREMENTAL;
+  }
+  return {};
+}
+
+static_assert(Helper{kraken::json::Type{kraken::json::Type::UNDEFINED_INTERNAL}} == roq::UpdateType::UNDEFINED);
+static_assert(Helper{kraken::json::Type{kraken::json::Type::SNAPSHOT}} == roq::UpdateType::SNAPSHOT);
+static_assert(Helper{kraken::json::Type{kraken::json::Type::UPDATE}} == roq::UpdateType::INCREMENTAL);
+
+template <>
+template <>
+std::optional<roq::UpdateType> Map<kraken::json::Type>::helper() const {
+  return Helper{args_};
+}
+
 }  // namespace roq

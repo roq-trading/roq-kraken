@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/json/Assets",
+  "name": "roq/kraken/json/BalanceAck",
   "type": "dictionary",
   "values": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "name": "result",
-      "type": "roq/kraken/json/AssetsItem",
+      "type": "roq/kraken/json/BalanceAckResultItem",
       "array": "std/span",
       "map": true,
       "required": false

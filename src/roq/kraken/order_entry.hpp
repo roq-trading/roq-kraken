@@ -24,8 +24,9 @@
 #include "roq/kraken/order_entry_state.hpp"
 #include "roq/kraken/shared.hpp"
 
-#include "roq/kraken/json/positions.hpp"
-#include "roq/kraken/json/token.hpp"
+#include "roq/kraken/json/balance_ack.hpp"
+#include "roq/kraken/json/open_positions_ack.hpp"
+#include "roq/kraken/json/token_ack.hpp"
 
 namespace roq {
 namespace kraken {
@@ -62,6 +63,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
   uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
 
  protected:
+  // web::rest::Client::Handler
+
   void operator()(Trace<web::rest::Client::Connected> const &) override;
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
@@ -72,11 +75,15 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   void get_token();
   void get_token_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::Token> const &);
+  void operator()(Trace<json::TokenAck> const &);
 
-  void get_positions();
-  void get_positions_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::Positions> const &);
+  void get_balance();
+  void get_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::BalanceAck> const &);
+
+  void get_open_positions();
+  void get_open_positions_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::OpenPositionsAck> const &);
 
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
@@ -100,7 +107,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, positions, positions_ack;
+    utils::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, balance, balance_ack, open_positions, open_positions_ack;
   } profile_;
   struct {
     utils::metrics::Latency ping;

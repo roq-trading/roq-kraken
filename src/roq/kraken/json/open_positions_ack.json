@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/json/AssetPairs",
+  "name": "roq/kraken/json/OpenPositionsAck",
   "type": "dictionary",
   "values": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "name": "result",
-      "type": "roq/kraken/json/AssetPairsItem",
+      "type": "roq/kraken/json/OpenPositionsAckResultItem",
       "array": "std/span",
       "map": true,
       "required": false

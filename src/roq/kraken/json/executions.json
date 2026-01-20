@@ -1,0 +1,23 @@
+{
+  "name": "roq/kraken/json/Executions",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "channel",
+      "type": "std/string_view"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken/json/Type"
+    },
+    {
+      "name": "data",
+      "type": "roq/kraken/json/ExecutionsDataItem",
+      "array": "std/span"
+    },
+    {
+      "name": "sequence",
+      "type": "std/int64"
+    }
+  ]
+}

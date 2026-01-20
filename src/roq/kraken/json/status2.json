@@ -1,0 +1,30 @@
+{
+  "name": "roq/kraken/json/Status2",
+  "type": "enum",
+  "values": [
+    {
+      "name": "cancel_only"
+    },
+    {
+      "name": "delisted"
+    },
+    {
+      "name": "limit_only"
+    },
+    {
+      "name": "maintenance"
+    },
+    {
+      "name": "online"
+    },
+    {
+      "name": "post_only"
+    },
+    {
+      "name": "reduce_only"
+    },
+    {
+      "name": "work_in_progress"
+    }
+  ]
+}

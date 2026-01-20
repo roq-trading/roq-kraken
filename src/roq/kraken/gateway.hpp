@@ -15,14 +15,13 @@
 #include "roq/kraken/drop_copy.hpp"
 #include "roq/kraken/market_data.hpp"
 #include "roq/kraken/order_entry.hpp"
-#include "roq/kraken/rest.hpp"
 #include "roq/kraken/settings.hpp"
 #include "roq/kraken/shared.hpp"
 
 namespace roq {
 namespace kraken {
 
-struct Gateway final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
+struct Gateway final : public server::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
   Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
   Gateway(Gateway const &) = delete;
@@ -58,9 +57,11 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
   void operator()(Trace<TopOfBook> const &, bool is_last) override;
   void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) override;
   void operator()(Trace<TradeSummary> const &, bool is_last) override;
+  void operator()(Trace<StatisticsUpdate> const &, bool is_last) override;
+
+  void operator()(MarketData::SymbolsUpdate &) override;
 
   void operator()(OrderEntry::TokenUpdate &) override;
-  void operator()(Rest::SymbolsUpdate &) override;
 
   void ensure_symbol_slices(size_t size);
 
@@ -85,10 +86,9 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
   // seed
   uint16_t stream_id_ = {};
   // streams
-  Rest rest_;
+  std::vector<std::unique_ptr<MarketData>> market_data_;
   utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
-  std::vector<std::unique_ptr<MarketData>> market_data_;
   // cache
   std::vector<MBPUpdate> bids_, asks_;
 };

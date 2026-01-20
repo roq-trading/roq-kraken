@@ -1,5 +1,5 @@
 {
-  "name": "roq/kraken/json/Token",
+  "name": "roq/kraken/json/TokenAckResult",
   "type": "dictionary",
   "values": [
     {

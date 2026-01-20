@@ -2,7 +2,22 @@ include(RoqAutogen)
 
 set(TARGET_NAME ${PROJECT_NAME}-test)
 
-set(SOURCES json_book.cpp json_spread.cpp json_token.cpp main.cpp)
+set(SOURCES
+    # json_balance_ack.cpp  XXX FIXME need key-double
+    json_balances.cpp
+    json_book.cpp
+    json_error.cpp
+    json_executions.cpp
+    json_heartbeat.cpp
+    json_instrument.cpp
+    json_open_positions_ack.cpp
+    json_pong.cpp
+    json_status.cpp
+    json_subscribe.cpp
+    json_ticker.cpp
+    json_token_ack.cpp
+    json_trade.cpp
+    main.cpp)
 
 roq_gitignore(OUTPUT .gitignore SOURCES ${TARGET_NAME})
 

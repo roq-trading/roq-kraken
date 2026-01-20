@@ -4,6 +4,8 @@
 
 #include "roq/mask.hpp"
 
+#include "roq/logging.hpp"
+
 #include "roq/utils/update.hpp"
 
 #include "roq/utils/exceptions/unhandled.hpp"
@@ -24,7 +26,7 @@ auto const NAME = "ex"sv;
 
 auto const SUPPORTS = Mask<SupportType>{};
 
-size_t const MAX_DECODE_BUFFER_DEPTH = 1;
+size_t const MAX_DECODE_BUFFER_DEPTH = 2;
 }  // namespace
 
 // === HELPERS ===
@@ -80,7 +82,7 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
           .ping = create_metrics(shared.settings, name_, "ping"sv),
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
-      account_{account}, shared_{shared}, download_{shared.settings.ws.private_request_timeout, [this](auto state) { return download(state); }} {
+      account_{account}, shared_{shared} {
 }
 
 void DropCopy::operator()(Event<Start> const &) {
@@ -107,26 +109,39 @@ void DropCopy::operator()(metrics::Writer &writer) const {
 }
 
 void DropCopy::subscribe() {
-  subscribe("ownTrades"sv);
-  subscribe("openOrders"sv);
+  subscribe("executions"sv);
+  subscribe("balances"sv);
 }
 
-void DropCopy::subscribe(std::string_view const &name) {
-  log::info(R"(subscribe name="{}", token="{}")"sv, name, token_);
+void DropCopy::subscribe(std::string_view const &channel) {
+  log::info(R"(subscribe channel="{}", token="{}")"sv, channel, token_);
   assert(!std::empty(token_));
-  auto message = fmt::format(
+  std::string message;
+  fmt::format_to(
+      std::back_inserter(message),
       R"({{)"
-      R"("event":"subscribe",)"
-      R"("subscription":{{)"
-      R"("name":"{}",)"
-      R"("token":"{}")"
-      R"(}})"
-      R"(}})"sv,
-      name,
+      R"("method":"subscribe",)"
+      R"("params":{{)"
+      R"("channel":"{}",)"
+      R"("token":"{}")"sv,
+      channel,
       token_);
+  if (channel == "executions"sv) {
+    fmt::format_to(
+        std::back_inserter(message),
+        R"(,"snap_orders":true)"
+        R"(,"snap_trades":true)"sv);
+  }
+  fmt::format_to(
+      std::back_inserter(message),
+      R"(}})"
+      R"(}})"sv);
   log::info<3>(R"(request="{}")"sv, message);
+  log::warn(R"(DEBUG request="{}")"sv, message);
   (*connection_).send_text(message);
 }
+
+// web::socket::Client::Handler
 
 void DropCopy::operator()(web::socket::Client::Connected const &) {
   // note! wait for upgrade
@@ -137,12 +152,11 @@ void DropCopy::operator()(web::socket::Client::Disconnected const &) {
   ready_ = false;
   next_heartbeat_ = {};
   (*this)(ConnectionStatus::DISCONNECTED);
-  download_.reset();
 }
 
 void DropCopy::operator()(web::socket::Client::Ready const &) {
   (*this)(ConnectionStatus::DOWNLOADING);
-  download_.begin();
+  // wait for status
 }
 
 void DropCopy::operator()(web::socket::Client::Close const &) {
@@ -189,31 +203,13 @@ void DropCopy::operator()(ConnectionStatus status) {
   }
 }
 
-uint32_t DropCopy::download(DropCopyState state) {
-  switch (state) {
-    using enum DropCopyState;
-    case UNDEFINED:
-      assert(false);
-      break;
-    case SUBSCRIBE:
-      subscribe();
-      return 0;
-    case DONE:
-      (*this)(ConnectionStatus::READY);
-      assert(!ready_);
-      ready_ = true;
-      return 0;
-  }
-  assert(false);
-  return 0;
-}
-
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
+    log::warn("DEBUG message={}"sv, message);
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     TraceInfo trace_info;
     try {
-      if (!json::ParserPrivate::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -221,6 +217,15 @@ void DropCopy::parse(std::string_view const &message) {
       utils::exceptions::Unhandled::terminate();
     }
   });
+}
+/*
+// json::ParserPrivate::Handler
+
+void DropCopy::operator()(Trace<json::Status> const &event) {
+  auto &[trace_info, status] = event;
+  log::info("status={}"sv, status);
+  (*this)(ConnectionStatus::READY);
+  subscribe();
 }
 
 void DropCopy::operator()(Trace<json::Error> const &event) {
@@ -270,6 +275,70 @@ void DropCopy::operator()(Trace<json::OwnTrades> const &event) {
   auto &[trace_info, own_trades] = event;
   log::info("own_trades={}"sv, own_trades);
   throw NotImplemented{"not implemented"sv};
+}
+*/
+// json::Parser::Handler
+
+void DropCopy::operator()(Trace<json::Status> const &event) {
+  auto &[trace_info, status] = event;
+  log::info("status={}"sv, status);
+  (*this)(ConnectionStatus::READY);
+  // download_.begin();
+  subscribe();
+}
+
+void DropCopy::operator()(Trace<json::Heartbeat2> const &event) {
+  auto &[trace_info, heartbeat] = event;
+  log::info<5>("heartbeat={}"sv, heartbeat);
+  (*connection_).touch(trace_info.source_receive_time);
+}
+
+void DropCopy::operator()(Trace<json::Error2> const &event) {
+  auto &[trace_info, error] = event;
+  log::error("error={}"sv, error);
+}
+
+void DropCopy::operator()(Trace<json::Pong2> const &event) {
+  auto &[trace_info, pong] = event;
+  log::info<5>("pong={}"sv, pong);
+  auto external_latency = trace_info.origin_create_time - std::chrono::nanoseconds{pong.req_id};
+  log::warn("DEBUG external_latency={}"sv, external_latency);
+  (*connection_).touch(trace_info.source_receive_time);
+}
+
+void DropCopy::operator()(Trace<json::Subscribe> const &event) {
+  auto &[trace_info, subscribe] = event;
+  if (subscribe.success) {
+    log::info<5>("subscribe={}"sv, subscribe);
+  } else {
+    log::error("subscribe={}"sv, subscribe);
+  }
+}
+
+void DropCopy::operator()(Trace<json::Instrument> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Ticker> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Trade> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Book> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void DropCopy::operator()(Trace<json::Balances> const &event) {
+  auto &[trace_info, balances] = event;
+  log::warn("DEBUG balances={}"sv, balances);
+}
+
+void DropCopy::operator()(Trace<json::Executions> const &event) {
+  auto &[trace_info, executions] = event;
+  log::warn("DEBUG executions={}"sv, executions);
 }
 
 }  // namespace kraken

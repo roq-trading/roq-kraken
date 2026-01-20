@@ -1,0 +1,10 @@
+{
+  "name": "roq/kraken/json/BalanceAckResultItem",
+  "type": "key_value",
+  "values": [
+    {
+      "name": "balance",
+      "type": "std/double"
+    }
+  ]
+}

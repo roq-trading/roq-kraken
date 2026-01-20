@@ -1,0 +1,12 @@
+{
+  "name": "roq/kraken/json/Type",
+  "type": "enum",
+  "values": [
+    {
+      "name": "snapshot"
+    },
+    {
+      "name": "update"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "roq/kraken/json/StatusDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "version",
+      "type": "std/string_view"
+    },
+    {
+      "name": "system",
+      "type": "std/string_view"
+    },
+    {
+      "name": "api_version",
+      "type": "std/string_view"
+    },
+    {
+      "name": "connection_id",
+      "type": "std/int64"
+    }
+  ]
+}

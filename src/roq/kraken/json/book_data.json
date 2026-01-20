@@ -1,0 +1,28 @@
+{
+  "name": "roq/kraken/json/BookData",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "bids",
+      "type": "roq/kraken/json/BookDataBidsAsksItem",
+      "array": "std/span"
+    },
+    {
+      "name": "asks",
+      "type": "roq/kraken/json/BookDataBidsAsksItem",
+      "array": "std/span"
+    },
+    {
+      "name": "checksum",
+      "type": "std/int64"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/microseconds"
+    }
+  ]
+}

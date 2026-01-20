@@ -1,0 +1,43 @@
+{
+  "name": "roq/kraken/json/SubscribeResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "channel",
+      "type": "std/string_view"
+    },
+    {
+      "name": "event_trigger",
+      "type": "std/string_view"
+    },
+    {
+      "name": "depth",
+      "type": "std/int32"
+    },
+    {
+      "name": "maxratecount",
+      "type": "std/int32"
+    },
+    {
+      "name": "snap_orders",
+      "type": "std/bool"
+    },
+    {
+      "name": "snap_trades",
+      "type": "std/bool"
+    },
+    {
+      "name": "snapshot",
+      "type": "std/bool"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "warnings",
+      "type": "std/string_view",
+      "array": "std/span"
+    }
+  ]
+}

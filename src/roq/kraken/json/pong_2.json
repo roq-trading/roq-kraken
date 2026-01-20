@@ -1,0 +1,22 @@
+{
+  "name": "roq/kraken/json/Pong2",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "method",
+      "type": "std/string_view"
+    },
+    {
+      "name": "req_id",
+      "type": "std/int64"
+    },
+    {
+      "name": "time_in",
+      "type": "std/microseconds"
+    },
+    {
+      "name": "time_out",
+      "type": "std/microseconds"
+    }
+  ]
+}

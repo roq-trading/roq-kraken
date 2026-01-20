@@ -1,0 +1,34 @@
+{
+  "name": "roq/kraken/json/TradeDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "side",
+      "type": "roq/kraken/json/Side"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "qty",
+      "type": "std/double"
+    },
+    {
+      "name": "ord_type",
+      "type": "roq/kraken/json/OrderType"
+    },
+    {
+      "name": "trade_id",
+      "type": "std/int64"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/microseconds"
+    }
+  ]
+}

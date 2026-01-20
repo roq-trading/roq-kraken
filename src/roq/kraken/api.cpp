@@ -13,13 +13,13 @@ namespace kraken {
 
 API API::create(Settings const &) {
   return {
-      .market_data{
-          .assets = "/0/public/Assets"sv,
-          .asset_pairs = "/0/public/AssetPairs"sv,
-      },
       .order_management{
           .get_web_sockets_token = "/0/private/GetWebSocketsToken"sv,
+          .balance = "/0/private/Balance"sv,
           .open_positions = "/0/private/OpenPositions"sv,
+          .open_orders = "/0/private/OpenOrders"sv,
+          .trades = "/0/private/QueryTrades"sv,
+          .trade_balance = "/0/private/TradeBalance"sv,
       },
   };
 }

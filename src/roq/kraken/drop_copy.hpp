@@ -14,22 +14,19 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/core/download.hpp"
-
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/server.hpp"
 
 #include "roq/kraken/account.hpp"
-#include "roq/kraken/drop_copy_state.hpp"
 #include "roq/kraken/shared.hpp"
 
-#include "roq/kraken/json/parser_private.hpp"
+#include "roq/kraken/json/parser.hpp"
 
 namespace roq {
 namespace kraken {
 
-struct DropCopy final : public web::socket::Client::Handler, public json::ParserPrivate::Handler {
+struct DropCopy final : public web::socket::Client::Handler, public json::Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
@@ -48,6 +45,8 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void subscribe(std::string_view const &name, std::string_view const &token);
 
  protected:
+  // web::socket::Client::Handler
+
   void operator()(web::socket::Client::Connected const &) override;
   void operator()(web::socket::Client::Disconnected const &) override;
   void operator()(web::socket::Client::Ready const &) override;
@@ -58,26 +57,28 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
 
   void operator()(ConnectionStatus);
 
-  uint32_t download(DropCopyState);
-
   void subscribe();
-  void subscribe(std::string_view const &name);
+  void subscribe(std::string_view const &channel);
 
   void parse(std::string_view const &message);
 
-  void operator()(Trace<json::Error> const &) override;
-  void operator()(Trace<json::SystemStatus> const &) override;
-  void operator()(Trace<json::Pong> const &) override;
-  void operator()(Trace<json::Heartbeat> const &) override;
-  void operator()(Trace<json::SubscriptionStatus> const &) override;
+  // json::Parser::Handler
 
-  void operator()(Trace<json::AddOrderStatus> const &) override;
-  void operator()(Trace<json::CancelOrderStatus> const &) override;
+  void operator()(Trace<json::Status> const &) override;
+  void operator()(Trace<json::Heartbeat2> const &) override;
 
-  void operator()(Trace<json::OpenOrders> const &) override;
-  void operator()(Trace<json::OwnTrades> const &) override;
+  void operator()(Trace<json::Error2> const &) override;
+  void operator()(Trace<json::Pong2> const &) override;
+  void operator()(Trace<json::Subscribe> const &) override;
 
-  void reset();
+  void operator()(Trace<json::Instrument> const &) override;
+
+  void operator()(Trace<json::Ticker> const &) override;
+  void operator()(Trace<json::Trade> const &) override;
+  void operator()(Trace<json::Book> const &) override;
+
+  void operator()(Trace<json::Balances> const &) override;
+  void operator()(Trace<json::Executions> const &) override;
 
  private:
   Handler &handler_;
@@ -108,7 +109,6 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
-  core::Download<DropCopyState> download_;
 };
 
 }  // namespace kraken

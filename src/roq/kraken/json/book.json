@@ -3,33 +3,17 @@
   "type": "dictionary",
   "values": [
     {
-      "name": "a",
-      "type": "roq/kraken/json/BookItem",
-      "array": "std/span",
-      "required": false
+      "name": "channel",
+      "type": "std/string_view"
     },
     {
-      "name": "as",
-      "type": "roq/kraken/json/BookItem",
-      "array": "std/span",
-      "required": false
+      "name": "type",
+      "type": "roq/kraken/json/Type"
     },
     {
-      "name": "b",
-      "type": "roq/kraken/json/BookItem",
-      "array": "std/span",
-      "required": false
-    },
-    {
-      "name": "bs",
-      "type": "roq/kraken/json/BookItem",
-      "array": "std/span",
-      "required": false
-    },
-    {
-      "name": "c",
-      "required": false,
-      "undoc": true
+      "name": "data",
+      "type": "roq/kraken/json/BookData",
+      "array": "std/span"
     }
   ]
 }

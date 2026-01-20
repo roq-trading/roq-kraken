@@ -1,44 +1,62 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES map.cpp parser_private.cpp parser_public.cpp)
+set(SOURCES map.cpp parser_private.cpp parser.cpp)
 
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
+    balances.json
+    balances_data_item.json
+    balances_data_item_wallets_item.json
     add_order_status.json
-    asset_pairs.json
-    asset_pairs_item.json
-    assets.json
-    assets_item.json
+    balance_ack.json
+    balance_ack_result_item.json
+    book_data_bids_asks_item.json
+    book_data.json
     book.json
-    book_item.json
     cancel_order_status.json
     channel.json
+    error_2.json
     error.json
     event.json
+    executions_data_item.json
+    executions.json
+    heartbeat_2.json
     heartbeat.json
-    open_orders.json
+    instrument_data_assets_item.json
+    instrument_data.json
+    instrument_data_pairs_item.json
+    instrument.json
     open_orders_item.json
-    open_positions.json
+    open_orders.json
+    open_positions_ack.json
+    open_positions_ack_result_item.json
     order.json
     order_type.json
-    own_trades.json
     own_trades_item.json
+    own_trades.json
     ping.json
+    pong_2.json
     pong.json
-    positions.json
-    positions_item.json
     result_field.json
     side.json
-    spread.json
+    status2.json
+    status_data_item.json
+    status.json
+    subscribe.json
+    subscribe_result.json
     subscription_status.json
     system_status.json
+    ticker_data_item.json
+    ticker.json
     time_.json
-    token.json
-    trade.json
-    trade_balance.json
+    token_ack.json
+    token_ack_result.json
     trade_balance_item.json
-    trade_item.json
+    trade_balance.json
+    trade_data_item.json
+    trade.json
+    type.json
     update_type.json)
 
 roq_autogen_hpp(
