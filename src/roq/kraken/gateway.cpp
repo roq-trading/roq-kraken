@@ -237,5 +237,13 @@ OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
   throw RuntimeError{R"(Unknown account="{}")"sv, account};
 }
 
+DropCopy &Gateway::get_drop_copy(std::string_view const &account) {
+  auto iter = drop_copy_.find(account);
+  if (iter != std::end(drop_copy_)) {
+    return *(*iter).second;
+  }
+  throw RuntimeError{R"(Unknown account="{}")"sv, account};
+}
+
 }  // namespace kraken
 }  // namespace roq

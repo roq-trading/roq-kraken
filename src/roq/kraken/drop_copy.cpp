@@ -14,6 +14,8 @@
 
 #include "roq/web/socket/client.hpp"
 
+#include "roq/server/oms/exceptions.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -106,6 +108,31 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       // latency
       .write(latency_.ping, metrics::Type::LATENCY)
       .write(latency_.heartbeat, metrics::Type::LATENCY);
+}
+
+uint16_t DropCopy::operator()(Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
+  throw NotImplemented{"not implemented"sv};
+}
+
+uint16_t DropCopy::operator()(
+    Event<ModifyOrder> const &,
+    server::oms::Order const &,
+    [[maybe_unused]] std::string_view const &request_id,
+    [[maybe_unused]] std::string_view const &previous_request_id) {
+  throw NotImplemented{"not implemented"sv};
+}
+
+uint16_t DropCopy::operator()(
+    Event<CancelOrder> const &,
+    server::oms::Order const &,
+    [[maybe_unused]] std::string_view const &request_id,
+    [[maybe_unused]] std::string_view const &previous_request_id) {
+  throw NotImplemented{"not implemented"sv};
+}
+
+uint16_t DropCopy::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
+  throw server::oms::NotSupported{"CancelAllOrders"sv};
+  return stream_id_;
 }
 
 void DropCopy::subscribe() {
