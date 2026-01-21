@@ -233,17 +233,8 @@ Outbound
 Comments
 --------
 
-* Rate-limit usage is not communicated by the exchange
-
-Order book ends up in bad state
-  Downtime (scheduled or not) appears to *not* shutdown existing connections *nor* are established
-  subscriptions unsubscribed.
-  Worse, during downtime, what appears to be uninitialized order book data can be disseminated.
-  (This was confirmed with Kraken support early May 2020).
-
-.. warning::
-  We currently have no means to detect bad order book updates.
-  At best, a parse exception will terminate your gateway with an unhandled excpetion.
+* Choice prices appear to be possible
+* Limited length of ClOrdId
 
 
 References
