@@ -32,6 +32,7 @@ subscribe.hpp
 subscribe_result.hpp
 ticker_data_item.hpp
 ticker.hpp
+time_in_force.hpp
 time_.hpp
 token_ack.hpp
 token_ack_result.hpp
@@ -73,6 +74,7 @@ subscribe.cpp
 subscribe_result.cpp
 ticker_data_item.cpp
 ticker.cpp
+time_in_force.cpp
 time_.cpp
 token_ack.cpp
 token_ack_result.cpp

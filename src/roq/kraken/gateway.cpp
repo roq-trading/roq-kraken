@@ -101,26 +101,42 @@ void Gateway::operator()(Event<Disconnected> const &) {
 
 uint16_t Gateway::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  return get_order_entry(event.value.account)(event, order, request_id);
+  if (shared_.settings.ws_api) {
+    return get_drop_copy(event.value.account)(event, order, request_id);
+  } else {
+    return get_order_entry(event.value.account)(event, order, request_id);
+  }
 }
 
 uint16_t Gateway::operator()(
     Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
+  if (shared_.settings.ws_api) {
+    return get_drop_copy(event.value.account)(event, order, request_id, previous_request_id);
+  } else {
+    return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
+  }
 }
 
 uint16_t Gateway::operator()(
     Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
-  return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
+  if (shared_.settings.ws_api) {
+    return get_drop_copy(event.value.account)(event, order, request_id, previous_request_id);
+  } else {
+    return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
+  }
 }
 
 uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  return get_order_entry(event.value.account)(event, request_id);
+  if (shared_.settings.ws_api) {
+    return get_drop_copy(event.value.account)(event, request_id);
+  } else {
+    return get_order_entry(event.value.account)(event, request_id);
+  }
 }
 
 uint16_t Gateway::operator()(Event<MassQuote> const &) {

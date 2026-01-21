@@ -16,6 +16,8 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
+#include "roq/kraken/json/encoder.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -110,8 +112,11 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
 
-uint16_t DropCopy::operator()(Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
-  throw NotImplemented{"not implemented"sv};
+uint16_t DropCopy::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+  auto message = json::Encoder::add_order_json(encode_buffer_, event, order, request_id, token_);
+  log::warn("DEBUG {}"sv, message);
+  (*connection_).send_text(message);
+  return stream_id_;
 }
 
 uint16_t DropCopy::operator()(
@@ -123,11 +128,11 @@ uint16_t DropCopy::operator()(
 }
 
 uint16_t DropCopy::operator()(
-    Event<CancelOrder> const &,
-    server::oms::Order const &,
-    [[maybe_unused]] std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previous_request_id) {
-  throw NotImplemented{"not implemented"sv};
+    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+  auto message = json::Encoder::cancel_order_json(encode_buffer_, event, order, request_id, previous_request_id, token_);
+  log::warn("DEBUG {}"sv, message);
+  (*connection_).send_text(message);
+  return stream_id_;
 }
 
 uint16_t DropCopy::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {

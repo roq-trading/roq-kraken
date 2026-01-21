@@ -3,16 +3,34 @@
   "type": "enum",
   "values": [
     {
-      "name": "l"
-    },
-    {
       "name": "limit"
     },
     {
-      "name": "m"
+      "name": "market"
     },
     {
-      "name": "market"
+      "name": "iceberg"
+    },
+    {
+      "name": "stop-loss"
+    },
+    {
+      "name": "stop-loss-limit"
+    },
+    {
+      "name": "take-profit"
+    },
+    {
+      "name": "take-profit-limit"
+    },
+    {
+      "name": "trailing-stop"
+    },
+    {
+      "name": "trailing-stop-limit"
+    },
+    {
+      "name": "settle-position"
     }
   ]
 }

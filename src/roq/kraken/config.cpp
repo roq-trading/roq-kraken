@@ -24,7 +24,7 @@ auto const SUPPORTS = Mask{
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
 };
-auto const OMS_REQUEST_ID_TYPE = RequestIdType::BASE64;
+auto const OMS_REQUEST_ID_TYPE = RequestIdType::HEX;
 auto const OMS_CANCEL_ALL_ORDERS = Mask<Filter>{};
 }  // namespace
 
