@@ -5,6 +5,8 @@ set(SOURCES encoder.cpp map.cpp parser.cpp)
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
+    add_order.json
+    add_order_result.json
     balance_ack.json
     balance_ack_result_item.json
     balances_data_item.json
@@ -13,9 +15,14 @@ set(AUTOGEN_SCHEMAS
     book_data_bids_asks_item.json
     book_data.json
     book.json
+    cancel_all.json
+    cancel_all_result.json
+    cancel_order.json
+    cancel_order_result.json
     channel.json
     error.json
     event.json
+    exec_type.json
     executions_data_item.json
     executions.json
     heartbeat.json
@@ -23,9 +30,11 @@ set(AUTOGEN_SCHEMAS
     instrument_data.json
     instrument_data_pairs_item.json
     instrument.json
+    limit_price_type.json
     open_positions_ack.json
     open_positions_ack_result_item.json
     order.json
+    order_status.json
     order_type.json
     pairs_status.json
     ping.json

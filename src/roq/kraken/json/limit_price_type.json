@@ -1,0 +1,15 @@
+{
+  "name": "roq/kraken/json/LimitPriceType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "static"
+    },
+    {
+      "name": "pct"
+    },
+    {
+      "name": "quote"
+    }
+  ]
+}

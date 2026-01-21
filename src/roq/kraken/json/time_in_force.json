@@ -3,13 +3,13 @@
   "type": "enum",
   "values": [
     {
-      "name": "gtc"
+      "name": "GTC"
     },
     {
-      "name": "gtd"
+      "name": "GTD"
     },
     {
-      "name": "ioc"
+      "name": "IOC"
     }
   ]
 }

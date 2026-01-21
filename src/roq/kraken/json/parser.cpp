@@ -21,6 +21,9 @@ constexpr auto const KEY_CHANNEL = "channel"sv;
 constexpr auto const METHOD_ERROR = "error"sv;
 constexpr auto const METHOD_PONG = "pong"sv;
 constexpr auto const METHOD_SUBSCRIBE = "subscribe"sv;
+constexpr auto const METHOD_ADD_ORDER = "add_order"sv;
+constexpr auto const METHOD_CANCEL_ORDER = "cancel_order"sv;
+constexpr auto const METHOD_CANCEL_ALL = "cancel_all"sv;
 // channels
 constexpr auto const CHANNEL_STATUS = "status"sv;
 constexpr auto const CHANNEL_HEARTBEAT = "heartbeat"sv;
@@ -64,6 +67,18 @@ bool Parser::dispatch(
           }
           case utils::hash::FNV::compute(METHOD_SUBSCRIBE): {
             result = dispatch_helper<Subscribe>(handler, message, buffer_stack, trace_info);
+            break;
+          }
+          case utils::hash::FNV::compute(METHOD_ADD_ORDER): {
+            result = dispatch_helper<AddOrder>(handler, message, buffer_stack, trace_info);
+            break;
+          }
+          case utils::hash::FNV::compute(METHOD_CANCEL_ORDER): {
+            result = dispatch_helper<CancelOrder>(handler, message, buffer_stack, trace_info);
+            break;
+          }
+          case utils::hash::FNV::compute(METHOD_CANCEL_ALL): {
+            result = dispatch_helper<CancelAll>(handler, message, buffer_stack, trace_info);
             break;
           }
         }

@@ -13,7 +13,7 @@ using namespace Catch::literals;
 
 using value_type = json::Error;
 
-TEST_CASE("snapshot", "[json_error]") {
+TEST_CASE("malformed_request", "[json_error]") {
   auto message = R"({)"
                  R"("error":"Malformed request",)"
                  R"("method":"error",)"

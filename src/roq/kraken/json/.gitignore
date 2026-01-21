@@ -1,5 +1,7 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-kraken-json
+add_order.hpp
+add_order_result.hpp
 balance_ack.hpp
 balance_ack_result_item.hpp
 balances_data_item.hpp
@@ -8,9 +10,14 @@ balances.hpp
 book_data_bids_asks_item.hpp
 book_data.hpp
 book.hpp
+cancel_all.hpp
+cancel_all_result.hpp
+cancel_order.hpp
+cancel_order_result.hpp
 channel.hpp
 error.hpp
 event.hpp
+exec_type.hpp
 executions_data_item.hpp
 executions.hpp
 heartbeat.hpp
@@ -18,9 +25,11 @@ instrument_data_assets_item.hpp
 instrument_data.hpp
 instrument_data_pairs_item.hpp
 instrument.hpp
+limit_price_type.hpp
 open_positions_ack.hpp
 open_positions_ack_result_item.hpp
 order.hpp
+order_status.hpp
 order_type.hpp
 pairs_status.hpp
 ping.hpp
@@ -42,6 +51,8 @@ trade_data_item.hpp
 trade.hpp
 type.hpp
 update_type.hpp
+add_order.cpp
+add_order_result.cpp
 balance_ack.cpp
 balance_ack_result_item.cpp
 balances_data_item.cpp
@@ -50,9 +61,14 @@ balances.cpp
 book_data_bids_asks_item.cpp
 book_data.cpp
 book.cpp
+cancel_all.cpp
+cancel_all_result.cpp
+cancel_order.cpp
+cancel_order_result.cpp
 channel.cpp
 error.cpp
 event.cpp
+exec_type.cpp
 executions_data_item.cpp
 executions.cpp
 heartbeat.cpp
@@ -60,9 +76,11 @@ instrument_data_assets_item.cpp
 instrument_data.cpp
 instrument_data_pairs_item.cpp
 instrument.cpp
+limit_price_type.cpp
 open_positions_ack.cpp
 open_positions_ack_result_item.cpp
 order.cpp
+order_status.cpp
 order_type.cpp
 pairs_status.cpp
 ping.cpp

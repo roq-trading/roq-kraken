@@ -8,8 +8,11 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
+#include "roq/kraken/json/add_order.hpp"
 #include "roq/kraken/json/balances.hpp"
 #include "roq/kraken/json/book.hpp"
+#include "roq/kraken/json/cancel_all.hpp"
+#include "roq/kraken/json/cancel_order.hpp"
 #include "roq/kraken/json/error.hpp"
 #include "roq/kraken/json/executions.hpp"
 #include "roq/kraken/json/heartbeat.hpp"
@@ -41,6 +44,10 @@ struct Parser final {
 
     virtual void operator()(Trace<Balances> const &) = 0;
     virtual void operator()(Trace<Executions> const &) = 0;
+
+    virtual void operator()(Trace<AddOrder> const &) = 0;
+    virtual void operator()(Trace<CancelOrder> const &) = 0;
+    virtual void operator()(Trace<CancelAll> const &) = 0;
   };
 
   static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &, bool allow_unknown_event_types);

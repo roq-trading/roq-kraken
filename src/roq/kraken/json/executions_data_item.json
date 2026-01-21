@@ -3,76 +3,84 @@
   "type": "dictionary",
   "values": [
     {
+      "name": "order_id",
+      "type": "std/string_view"
+    },
+    {
       "name": "symbol",
       "type": "std/string_view"
     },
     {
-      "name": "base",
+      "name": "order_qty",
+      "type": "std/double"
+    },
+    {
+      "name": "cum_qty",
+      "type": "std/double"
+    },
+    {
+      "name": "cum_cost",
+      "type": "std/double"
+    },
+    {
+      "name": "time_in_force",
+      "type": "roq/kraken/json/TimeInForce"
+    },
+    {
+      "name": "exec_type",
+      "type": "roq/kraken/json/ExecType"
+    },
+    {
+      "name": "side",
+      "type": "roq/kraken/json/Side"
+    },
+    {
+      "name": "order_type",
+      "type": "roq/kraken/json/OrderType"
+    },
+    {
+      "name": "cl_ord_id",
       "type": "std/string_view"
     },
     {
-      "name": "quote",
+      "name": "limit_price_type",
+      "type": "roq/kraken/json/LimitPriceType"
+    },
+    {
+      "name": "limit_price",
+      "type": "std/double"
+    },
+    {
+      "name": "stop_price",
+      "type": "std/double"
+    },
+    {
+      "name": "order_status",
+      "type": "roq/kraken/json/OrderStatus"
+    },
+    {
+      "name": "fee_usd_equiv",
+      "type": "std/double"
+    },
+    {
+      "name": "avg_price",
+      "type": "std/double"
+    },
+    {
+      "name": "fee_ccy_pref",
       "type": "std/string_view"
     },
     {
-      "name": "status",
-      "type": "roq/kraken/json/PairsStatus"
+      "name": "timestamp",
+      "type": "std/microseconds"
     },
     {
-      "name": "qty_precision",
-      "type": "std/int32"
+      "name": "cancel_reason",
+      "type": "std/string_view"
     },
     {
-      "name": "qty_increment",
-      "type": "std/double"
-    },
-    {
-      "name": "price_precision",
-      "type": "std/int32"
-    },
-    {
-      "name": "cost_precision",
-      "type": "std/int32"
-    },
-    {
-      "name": "marginable",
-      "type": "std/bool"
-    },
-    {
-      "name": "has_index",
-      "type": "std/bool"
-    },
-    {
-      "name": "ws_display_price_precision",
-      "type": "std/int32"
-    },
-    {
-      "name": "cost_min",
-      "type": "std/double"
-    },
-    {
-      "name": "tick_size",
-      "type": "std/double"
-    },
-    {
-      "name": "price_increment",
-      "type": "std/double"
-    },
-    {
-      "name": "qty_min",
-      "type": "std/double"
-    },
-    {
-      "name": "margin_initial",
-      "type": "std/double"
-    },
-    {
-      "name": "position_limit_long",
-      "type": "std/double"
-    },
-    {
-      "name": "position_limit_short",
-      "type": "std/double"
+      "name": "reason",
+      "type": "std/string_view"
     }
   ]
 }

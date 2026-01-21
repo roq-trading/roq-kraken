@@ -44,6 +44,10 @@ struct ParserTester final : public json::Parser::Handler {
   void operator()(Trace<json::Balances> const &event) override { dispatch(event); }
   void operator()(Trace<json::Executions> const &event) override { dispatch(event); }
 
+  void operator()(Trace<json::AddOrder> const &event) override { dispatch(event); }
+  void operator()(Trace<json::CancelOrder> const &event) override { dispatch(event); }
+  void operator()(Trace<json::CancelAll> const &event) override { dispatch(event); }
+
   template <typename U>
   void dispatch(Trace<U> const &event) {
     if constexpr (std::is_invocable_v<callback_type, U>) {

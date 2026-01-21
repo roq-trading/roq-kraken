@@ -1,0 +1,36 @@
+{
+  "name": "roq/kraken/json/ExecType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "pending_new"
+    },
+    {
+      "name": "new"
+    },
+    {
+      "name": "trade"
+    },
+    {
+      "name": "filled"
+    },
+    {
+      "name": "canceled"
+    },
+    {
+      "name": "iceberg_refill"
+    },
+    {
+      "name": "expired"
+    },
+    {
+      "name": "amended"
+    },
+    {
+      "name": "restated"
+    },
+    {
+      "name": "status"
+    }
+  ]
+}

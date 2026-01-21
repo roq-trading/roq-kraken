@@ -135,8 +135,10 @@ uint16_t DropCopy::operator()(
   return stream_id_;
 }
 
-uint16_t DropCopy::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
-  throw server::oms::NotSupported{"CancelAllOrders"sv};
+uint16_t DropCopy::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
+  auto message = json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
+  log::warn("DEBUG {}"sv, message);
+  (*connection_).send_text(message);
   return stream_id_;
 }
 
@@ -371,6 +373,21 @@ void DropCopy::operator()(Trace<json::Balances> const &event) {
 void DropCopy::operator()(Trace<json::Executions> const &event) {
   auto &[trace_info, executions] = event;
   log::warn("DEBUG executions={}"sv, executions);
+}
+
+void DropCopy::operator()(Trace<json::AddOrder> const &event) {
+  auto &[trace_info, add_order] = event;
+  log::warn("DEBUG add_order={}"sv, add_order);
+}
+
+void DropCopy::operator()(Trace<json::CancelOrder> const &event) {
+  auto &[trace_info, cancel_order] = event;
+  log::warn("DEBUG cancel_order={}"sv, cancel_order);
+}
+
+void DropCopy::operator()(Trace<json::CancelAll> const &event) {
+  auto &[trace_info, cancel_all] = event;
+  log::warn("DEBUG cancel_all={}"sv, cancel_all);
 }
 
 }  // namespace kraken

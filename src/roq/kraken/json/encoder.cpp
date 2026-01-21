@@ -292,6 +292,24 @@ std::string_view Encoder::cancel_order_json(
   return result;
 }
 
+// cancel-all
+
+std::string_view Encoder::cancel_all_json(
+    std::string &buffer, roq::CancelAllOrders const &, [[maybe_unused]] std::string_view const &request_id, std::string_view const &token) {
+  buffer.clear();
+  fmt::format_to(
+      std::back_inserter(buffer),
+      R"({{)"
+      R"("method":"cancel_all",)"
+      R"("params":{{)"
+      R"("token":"{}")"
+      R"(}})"
+      R"(}})"sv,
+      token);
+  std::string_view result{std::data(buffer), std::size(buffer)};
+  return result;
+}
+
 }  // namespace json
 }  // namespace kraken
 }  // namespace roq

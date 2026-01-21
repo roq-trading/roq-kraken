@@ -1,0 +1,24 @@
+{
+  "name": "roq/kraken/json/OrderStatus",
+  "type": "enum",
+  "values": [
+    {
+      "name": "pending_new"
+    },
+    {
+      "name": "new"
+    },
+    {
+      "name": "partially_filled"
+    },
+    {
+      "name": "filled"
+    },
+    {
+      "name": "canceled"
+    },
+    {
+      "name": "expired"
+    }
+  ]
+}
