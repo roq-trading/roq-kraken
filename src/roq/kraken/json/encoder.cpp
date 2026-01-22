@@ -16,6 +16,17 @@ namespace roq {
 namespace kraken {
 namespace json {
 
+// === HELPERS ===
+
+namespace {
+uint64_t pack_req_id(uint8_t user_id, uint64_t order_id) {
+  assert(order_id <= ORDER_ID_MAX);
+  return (static_cast<uint64_t>(user_id) << 56) | order_id;
+}
+}  // namespace
+
+// === IMPLEMENTATION ===
+
 // URL
 
 // add-order
@@ -206,11 +217,13 @@ std::string_view Encoder::add_order_json(
   if (!std::isnan(create_order.price)) {
     fmt::format_to(std::back_inserter(buffer), R"(,"limit_price":{})"sv, Decimal{create_order.price, order.price_precision.precision});
   }
-  // req_id: integer
+  auto req_id = pack_req_id(order.user_id, order.order_id);
   fmt::format_to(
       std::back_inserter(buffer),
-      R"(}})"
-      R"(}})"sv);
+      R"(}},)"
+      R"("req_id":{})"
+      R"(}})"sv,
+      req_id);
   std::string_view result{std::data(buffer), std::size(buffer)};
   return result;
 }
@@ -240,10 +253,13 @@ std::string_view Encoder::amend_order_json(
   if (!std::isnan(modify_order.price)) {
     fmt::format_to(std::back_inserter(buffer), R"(,"limit_price":{})"sv, Decimal{modify_order.price, order.price_precision.precision});
   }
+  auto req_id = pack_req_id(order.user_id, order.order_id);
   fmt::format_to(
       std::back_inserter(buffer),
-      R"(}})"
-      R"(}})"sv);
+      R"(}},)"
+      R"("req_id":{})"
+      R"(}})"sv,
+      req_id);
   std::string_view result{std::data(buffer), std::size(buffer)};
   return result;
 }
@@ -270,10 +286,13 @@ std::string_view Encoder::cancel_order_json(
   } else {
     fmt::format_to(std::back_inserter(buffer), R"("order_id":["{}"])"sv, order.external_order_id);
   }
+  auto req_id = pack_req_id(order.user_id, order.order_id);
   fmt::format_to(
       std::back_inserter(buffer),
-      R"(}})"
-      R"(}})"sv);
+      R"(}},)"
+      R"("req_id":{})"
+      R"(}})"sv,
+      req_id);
   std::string_view result{std::data(buffer), std::size(buffer)};
   return result;
 }
@@ -289,11 +308,21 @@ std::string_view Encoder::cancel_all_json(
       R"("method":"cancel_all",)"
       R"("params":{{)"
       R"("token":"{}")"
-      R"(}})"
+      R"(}},)"
+      R"("req_id":123)"
       R"(}})"sv,
       token);
   std::string_view result{std::data(buffer), std::size(buffer)};
   return result;
+}
+
+// helpers
+
+std::pair<uint8_t, uint64_t> Encoder::unpack_req_id(uint64_t req_id) {
+  return {
+      static_cast<uint8_t>(req_id >> 56),
+      req_id & ((uint64_t{1} << 48) - 1),
+  };
 }
 
 }  // namespace json

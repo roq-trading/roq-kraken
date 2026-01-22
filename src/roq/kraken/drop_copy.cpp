@@ -387,97 +387,79 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
 void DropCopy::operator()(Trace<json::AddOrder> const &event) {
   auto &[trace_info, add_order] = event;
   log::warn("DEBUG add_order={}"sv, add_order);
-  auto request_or_exchange_id = [&]() {
-    if (std::empty(add_order.result.cl_ord_id)) {
-      return add_order.result.order_id;
-    }
-    return add_order.result.cl_ord_id;
-  }();
-  auto helper = [&](auto request_status, Error error, std::string_view const &text) {
+  if (std::empty(add_order.error)) {
+    // note! using executions
+  } else {
+    auto error = json::guess_error(add_order.error);
     auto response = server::oms::Response{
         .request_type = RequestType::CREATE_ORDER,
         .origin = Origin::EXCHANGE,
-        .request_status = request_status,
+        .request_status = RequestStatus::REJECTED,
         .error = error,
-        .text = text,
+        .text = add_order.error,
         .version = 1,  // note!
         .request_id = {},
-        .external_order_id = add_order.result.order_id,
+        .external_order_id = {},
         .quantity = NaN,
         .price = NaN,
     };
-    shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
-  };
-  if (std::empty(add_order.error)) {
-    helper(RequestStatus::ACCEPTED, {}, {});
-  } else {
-    auto error = json::guess_error(add_order.error);
-    helper(RequestStatus::ACCEPTED, error, add_order.error);
+    auto [user_id, order_id] = json::Encoder::unpack_req_id(add_order.req_id);
+    shared_.update_order(user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
   }
 }
 
 void DropCopy::operator()(Trace<json::AmendOrder> const &event) {
   auto &[trace_info, amend_order] = event;
   log::warn("DEBUG amend_order={}"sv, amend_order);
-  auto request_or_exchange_id = [&]() { return amend_order.result.cl_ord_id; }();  // XXX no order_id ?
-  auto helper = [&](auto request_status, Error error, std::string_view const &text) {
+  if (std::empty(amend_order.error)) {
+    // note! using executions
+  } else {
+    auto error = json::guess_error(amend_order.error);
     auto response = server::oms::Response{
         .request_type = RequestType::MODIFY_ORDER,
         .origin = Origin::EXCHANGE,
-        .request_status = request_status,
+        .request_status = RequestStatus::REJECTED,
         .error = error,
-        .text = text,
-        .version = {},
+        .text = amend_order.error,
+        .version = {},  // note! we don't have space in req_id => use heuristics
         .request_id = {},
         .external_order_id = {},
         .quantity = NaN,
         .price = NaN,
     };
-    shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
-  };
-  if (std::empty(amend_order.error)) {
-    helper(RequestStatus::ACCEPTED, {}, {});
-  } else {
-    auto error = json::guess_error(amend_order.error);
-    helper(RequestStatus::ACCEPTED, error, amend_order.error);
+    auto [user_id, order_id] = json::Encoder::unpack_req_id(amend_order.req_id);
+    shared_.update_order(user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
   }
 }
 
 void DropCopy::operator()(Trace<json::CancelOrder> const &event) {
   auto &[trace_info, cancel_order] = event;
   log::warn("DEBUG cancel_order={}"sv, cancel_order);
-  auto request_or_exchange_id = [&]() {
-    if (std::empty(cancel_order.result.cl_ord_id)) {
-      return cancel_order.result.order_id;
-    }
-    return cancel_order.result.cl_ord_id;
-  }();
-  auto helper = [&](auto request_status, Error error, std::string_view const &text) {
+  if (std::empty(cancel_order.error)) {
+    // note! using executions
+  } else {
+    auto error = json::guess_error(cancel_order.error);
     auto response = server::oms::Response{
         .request_type = RequestType::CANCEL_ORDER,
         .origin = Origin::EXCHANGE,
-        .request_status = request_status,
+        .request_status = RequestStatus::REJECTED,
         .error = error,
-        .text = text,
-        .version = {},
+        .text = cancel_order.error,
+        .version = {},  // note! we don't have space in req_id => use heuristics
         .request_id = {},
         .external_order_id = {},
         .quantity = NaN,
         .price = NaN,
     };
-    shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
-  };
-  if (std::empty(cancel_order.error)) {
-    helper(RequestStatus::ACCEPTED, {}, {});
-  } else {
-    auto error = json::guess_error(cancel_order.error);
-    helper(RequestStatus::ACCEPTED, error, cancel_order.error);
+    auto [user_id, order_id] = json::Encoder::unpack_req_id(cancel_order.req_id);
+    shared_.update_order(user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
   }
 }
 
 void DropCopy::operator()(Trace<json::CancelAll> const &event) {
   auto &[trace_info, cancel_all] = event;
   log::warn("DEBUG cancel_all={}"sv, cancel_all);
+  // XXX FIXME TODO ack
 }
 
 }  // namespace kraken

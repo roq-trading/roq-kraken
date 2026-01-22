@@ -73,6 +73,10 @@ struct Encoder final {
   // cancel-all
 
   static std::string_view cancel_all_json(std::string &buffer, roq::CancelAllOrders const &, std::string_view const &request_id, std::string_view const &token);
+
+  // helpers
+
+  static std::pair<uint8_t, uint64_t> unpack_req_id(uint64_t req_id);
 };
 
 }  // namespace json

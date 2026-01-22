@@ -19,6 +19,10 @@
       "type": "std/string_view"
     },
     {
+      "name": "req_id",
+      "type": "std/uint64"
+    },
+    {
       "name": "time_in",
       "type": "std/microseconds"
     },
