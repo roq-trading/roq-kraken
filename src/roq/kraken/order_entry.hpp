@@ -28,6 +28,7 @@
 #include "roq/kraken/json/open_orders_ack.hpp"
 #include "roq/kraken/json/open_positions_ack.hpp"
 #include "roq/kraken/json/token_ack.hpp"
+#include "roq/kraken/json/trade_balance_ack.hpp"
 
 namespace roq {
 namespace kraken {
@@ -82,6 +83,10 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void get_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::BalanceAck> const &);
 
+  void get_trade_balance();
+  void get_trade_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::TradeBalanceAck> const &);
+
   void get_open_positions();
   void get_open_positions_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::OpenPositionsAck> const &);
@@ -114,8 +119,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, balance, balance_ack, open_positions, open_positions_ack, open_orders,
-        open_orders_ack;
+    utils::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, balance, balance_ack, trade_balance, trade_balance_ack, open_positions,
+        open_positions_ack, open_orders, open_orders_ack;
   } profile_;
   struct {
     utils::metrics::Latency ping;

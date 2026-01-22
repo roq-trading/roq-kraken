@@ -53,6 +53,8 @@ time_in_force.hpp
 time_.hpp
 token_ack.hpp
 token_ack_result.hpp
+trade_balance_ack.hpp
+trade_balance_ack_result.hpp
 trade_balance_item.hpp
 trade_balance.hpp
 trade_data_item.hpp
@@ -112,6 +114,8 @@ time_in_force.cpp
 time_.cpp
 token_ack.cpp
 token_ack_result.cpp
+trade_balance_ack.cpp
+trade_balance_ack_result.cpp
 trade_balance_item.cpp
 trade_balance.cpp
 trade_data_item.cpp

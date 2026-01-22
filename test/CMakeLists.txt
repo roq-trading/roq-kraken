@@ -3,10 +3,10 @@ include(RoqAutogen)
 set(TARGET_NAME ${PROJECT_NAME}-test)
 
 set(SOURCES
-    # json_balance_ack.cpp  XXX FIXME need key-double
     json_add_order.cpp
     json_amend_order.cpp
     json_amend_order.cpp
+    # json_balance_ack.cpp  XXX FIXME need key-double
     json_balances.cpp
     json_book.cpp
     json_cancel_order.cpp
@@ -21,6 +21,7 @@ set(SOURCES
     json_subscribe.cpp
     json_ticker.cpp
     json_token_ack.cpp
+    json_trade_balance_ack.cpp
     json_trade.cpp
     main.cpp)
 

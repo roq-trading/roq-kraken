@@ -58,6 +58,8 @@ set(AUTOGEN_SCHEMAS
     time_.json
     token_ack.json
     token_ack_result.json
+    trade_balance_ack.json
+    trade_balance_ack_result.json
     trade_balance_item.json
     trade_balance.json
     trade_data_item.json

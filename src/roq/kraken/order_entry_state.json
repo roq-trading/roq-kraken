@@ -9,6 +9,9 @@
       "name": "balance"
     },
     {
+      "name": "trade_balance"
+    },
+    {
       "name": "open_positions"
     },
     {
