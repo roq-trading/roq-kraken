@@ -2,6 +2,8 @@
 
 #include "roq/kraken/json/utils.hpp"
 
+#include "roq/utils/hash/fnv.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -14,7 +16,12 @@ roq::Error guess_error([[maybe_unused]] int32_t code) {
   return {};
 }
 
-roq::Error guess_error([[maybe_unused]] std::string_view const &error) {
+roq::Error guess_error(std::string_view const &error) {
+  auto key = utils::hash::FNV::compute(error);
+  switch (key) {
+    case utils::hash::FNV::compute("EOrder:Unknown order"sv):
+      return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
+  }
   return {};
 }
 

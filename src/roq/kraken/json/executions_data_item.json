@@ -85,6 +85,37 @@
     {
       "name": "amended",
       "type": "std/bool"
+    },
+    {
+      "name": "exec_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "trade_id",
+      "type": "std/int64"
+    },
+    {
+      "name": "last_qty",
+      "type": "std/double"
+    },
+    {
+      "name": "last_price",
+      "type": "std/double"
+    },
+    {
+      "name": "liquidity_ind",
+      "type": "roq/kraken/json/LiquidityInd"
+    },
+    {
+      "name": "cost",
+      "type": "std/double"
+    },
+    {
+      "name": "fees"
+    },
+    {
+      "name": "order_userref",
+      "type": "std/int64"
     }
   ]
 }

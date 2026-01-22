@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken/json/LiquidityInd",
+  "type": "enum",
+  "values": [
+    {
+      "raw": "m",
+      "name": "maker"
+    },
+    {
+      "raw": "t",
+      "name": "taker"
+    }
+  ]
+}

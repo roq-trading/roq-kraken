@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "roq/kraken/json/liquidity_ind.hpp"
 #include "roq/kraken/json/order_status.hpp"
 #include "roq/kraken/json/order_type.hpp"
 #include "roq/kraken/json/pairs_status.hpp"
@@ -10,6 +11,7 @@
 #include "roq/kraken/json/time_in_force2.hpp"
 #include "roq/kraken/json/type.hpp"
 
+#include "roq/liquidity.hpp"
 #include "roq/order_status.hpp"
 #include "roq/order_type.hpp"
 #include "roq/side.hpp"
@@ -22,6 +24,10 @@
 namespace roq {
 
 // kraken => roq
+
+template <>
+template <>
+std::optional<roq::Liquidity> Map<kraken::json::LiquidityInd>::helper() const;
 
 template <>
 template <>

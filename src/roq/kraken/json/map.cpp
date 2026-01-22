@@ -13,6 +13,35 @@ using Helper = detail::MapHelper<Args...>;
 
 // kraken::json => roq
 
+// kraken::json::LiquidityInd => roq::Liquidity
+
+template <>
+template <>
+constexpr Helper<kraken::json::LiquidityInd>::operator std::optional<roq::Liquidity>() const {
+  switch (std::get<0>(args_)) {
+    using enum kraken::json::LiquidityInd::type_t;
+    case UNDEFINED_INTERNAL:
+      return roq::Liquidity::UNDEFINED;
+    case UNKNOWN_INTERNAL:
+      return roq::Liquidity::UNDEFINED;
+    case MAKER:
+      return roq::Liquidity::MAKER;
+    case TAKER:
+      return roq::Liquidity::TAKER;
+  }
+  return {};
+}
+
+static_assert(Helper{kraken::json::LiquidityInd{kraken::json::LiquidityInd::UNDEFINED_INTERNAL}} == roq::Liquidity::UNDEFINED);
+static_assert(Helper{kraken::json::LiquidityInd{kraken::json::LiquidityInd::MAKER}} == roq::Liquidity::MAKER);
+static_assert(Helper{kraken::json::LiquidityInd{kraken::json::LiquidityInd::TAKER}} == roq::Liquidity::TAKER);
+
+template <>
+template <>
+std::optional<roq::Liquidity> Map<kraken::json::LiquidityInd>::helper() const {
+  return Helper{args_};
+}
+
 // kraken::json::OrderStatus => roq::OrderStatus
 
 template <>

@@ -33,10 +33,11 @@ set(AUTOGEN_SCHEMAS
     instrument_data_pairs_item.json
     instrument.json
     limit_price_type.json
+    liquidity_ind.json
     open_orders_ack.json
     open_orders_ack_result.json
-    open_orders_ack_result_open_item.json
     open_orders_ack_result_open_item_descr.json
+    open_orders_ack_result_open_item.json
     open_positions_ack.json
     open_positions_ack_result_item.json
     order.json
@@ -52,8 +53,8 @@ set(AUTOGEN_SCHEMAS
     subscribe_result.json
     ticker_data_item.json
     ticker.json
-    time_in_force.json
     time_in_force2.json
+    time_in_force.json
     time_.json
     token_ack.json
     token_ack_result.json

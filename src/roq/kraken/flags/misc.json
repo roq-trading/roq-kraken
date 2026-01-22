@@ -19,7 +19,7 @@
     {
       "name": "mbp_allow_price_inversion",
       "type": "std/bool",
-      "default": false,
+      "default": true,
       "description": "Allow price inversion?"
     }
   ]

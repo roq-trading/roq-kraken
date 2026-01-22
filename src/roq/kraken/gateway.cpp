@@ -184,6 +184,14 @@ void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
+void Gateway::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
+  dispatcher_(event, is_last, user_id, request_id);
+}
+
+void Gateway::operator()(Trace<FundsUpdate> const &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
 void Gateway::operator()(MarketData::SymbolsUpdate &symbols_update) {
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);
   ensure_symbol_slices(size);

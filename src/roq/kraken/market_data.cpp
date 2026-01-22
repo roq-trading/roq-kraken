@@ -295,7 +295,7 @@ void MarketData::operator()(Trace<json::Pong> const &event) {
   auto &[trace_info, pong] = event;
   log::info<5>("pong={}"sv, pong);
   auto external_latency = trace_info.origin_create_time - std::chrono::nanoseconds{pong.req_id};
-  log::warn("DEBUG external_latency={}"sv, external_latency);
+  log::info<5>("external_latency={}"sv, external_latency);
   (*connection_).touch(trace_info.source_receive_time);
 }
 

@@ -458,6 +458,8 @@ void OrderEntry::operator()(Trace<json::OpenOrdersAck> const &event) {
   auto &[trace_info, open_orders_ack] = event;
   log::info<4>("open_orders_ack={}"sv, open_orders_ack);
   assert(std::empty(open_orders_ack.error));
+  // note! we can't use because symbols are different
+  /*
   for (auto &item : open_orders_ack.result.open) {
     auto order_update = server::oms::OrderUpdate{
         .account = account_.name,
@@ -496,6 +498,7 @@ void OrderEntry::operator()(Trace<json::OpenOrdersAck> const &event) {
     Trace event_2{trace_info, order_update};
     (*this)(event_2, order_update.client_order_id);
   }
+  */
 }
 
 // helpers

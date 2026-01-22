@@ -18,6 +18,42 @@
     {
       "name": "balance",
       "type": "std/double"
+    },
+    {
+      "name": "ledger_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "ref_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/microseconds"
+    },
+    {
+      "name": "type",
+      "type": "std/string_view"
+    },
+    {
+      "name": "category",
+      "type": "std/string_view"
+    },
+    {
+      "name": "wallet_type",
+      "type": "std/string_view"
+    },
+    {
+      "name": "wallet_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "amount",
+      "type": "std/double"
+    },
+    {
+      "name": "fee",
+      "type": "std/double"
     }
   ]
 }

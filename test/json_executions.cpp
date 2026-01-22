@@ -13,7 +13,7 @@ using namespace Catch::literals;
 
 using value_type = json::Executions;
 
-TEST_CASE("empty", "[json_executions]") {
+TEST_CASE("snapshot_empty", "[json_executions]") {
   auto message = R"({)"
                  R"("channel":"executions",)"
                  R"("type":"snapshot",)"
@@ -24,6 +24,44 @@ TEST_CASE("empty", "[json_executions]") {
     CHECK(obj.channel == "executions"sv);
     CHECK(obj.type == json::Type::SNAPSHOT);
     REQUIRE(std::empty(obj.data));
+    CHECK(obj.sequence == 1);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
+}
+
+TEST_CASE("snapshot_trade", "[json_executions]") {
+  auto message = R"({)"
+                 R"("channel":"executions",)"
+                 R"("type":"snapshot",)"
+                 R"("data":[{)"
+                 R"("order_id":"OHS47E-VEKOV-BTNQES",)"
+                 R"("exec_id":"TMMPIN-ECDGJ-PNJZIQ",)"
+                 R"("exec_type":"trade",)"
+                 R"("trade_id":10563454,)"
+                 R"("symbol":"BTC/USDT",)"
+                 R"("side":"buy",)"
+                 R"("last_qty":0.00010000,)"
+                 R"("last_price":89961.1,)"
+                 R"("liquidity_ind":"t",)"
+                 R"("cost":8.99611,)"
+                 R"("order_userref":0,)"
+                 R"("order_status":"filled",)"
+                 R"("order_type":"limit",)"
+                 R"("fee_usd_equiv":0.0359,)"
+                 R"("fees":[{)"
+                 R"("asset":"USDT",)"
+                 R"("qty":0.03598)"
+                 R"(})"
+                 R"(],)"
+                 R"("timestamp":"2026-01-22T07:33:59.394265Z")"
+                 R"(})"
+                 R"(],)"
+                 R"("sequence":1)"
+                 R"(})"sv;
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.channel == "executions"sv);
+    CHECK(obj.type == json::Type::SNAPSHOT);
+    REQUIRE(std::size(obj.data) == 1);
     CHECK(obj.sequence == 1);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
@@ -174,6 +212,76 @@ TEST_CASE("canceled", "[json_executions]") {
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 6);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
+}
+
+TEST_CASE("trade_and_partially_filled", "[json_executions]") {
+  auto message = R"({)"
+                 R"("channel":"executions",)"
+                 R"("type":"update",)"
+                 R"("data":[{)"
+                 R"("order_id":"OHS47E-VEKOV-BTNQES",)"
+                 R"("cl_ord_id":"68dd9cb64d000200",)"
+                 R"("exec_id":"TMMPIN-ECDGJ-PNJZIQ",)"
+                 R"("exec_type":"trade",)"
+                 R"("trade_id":10563454,)"
+                 R"("symbol":"BTC/USDT",)"
+                 R"("side":"buy",)"
+                 R"("last_qty":0.00010000,)"
+                 R"("last_price":89961.1,)"
+                 R"("liquidity_ind":"t",)"
+                 R"("cost":8.99611,)"
+                 R"("order_type":"limit",)"
+                 R"("timestamp":"2026-01-22T07:33:59.394265Z",)"
+                 R"("order_status":"partially_filled",)"
+                 R"("cum_qty":0.00010000,)"
+                 R"("cum_cost":8.99611,)"
+                 R"("avg_price":89961.1,)"
+                 R"("fee_usd_equiv":0.0359,)"
+                 R"("fees":[{)"
+                 R"("asset":"USDT",)"
+                 R"("qty":0.03598)"
+                 R"(})"
+                 R"(])"
+                 R"(})"
+                 R"(],)"
+                 R"("sequence":4)"
+                 R"(})"sv;
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.channel == "executions"sv);
+    CHECK(obj.type == json::Type::UPDATE);
+    REQUIRE(std::size(obj.data) == 1);
+    //
+    CHECK(obj.sequence == 4);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
+}
+
+TEST_CASE("filled", "[json_executions]") {
+  auto message = R"({)"
+                 R"("channel":"executions",)"
+                 R"("type":"update",)"
+                 R"("data":[{)"
+                 R"("timestamp":"2026-01-22T07:33:59.394265Z",)"
+                 R"("order_status":"filled",)"
+                 R"("exec_type":"filled",)"
+                 R"("cum_qty":0.00010000,)"
+                 R"("cum_cost":8.99611,)"
+                 R"("fee_usd_equiv":0.0359,)"
+                 R"("avg_price":89961.1,)"
+                 R"("cl_ord_id":"68dd9cb64d000200",)"
+                 R"("order_id":"OHS47E-VEKOV-BTNQES")"
+                 R"(})"
+                 R"(],)"
+                 R"("sequence":5)"
+                 R"(})"sv;
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.channel == "executions"sv);
+    CHECK(obj.type == json::Type::UPDATE);
+    REQUIRE(std::size(obj.data) == 1);
+    //
+    CHECK(obj.sequence == 5);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

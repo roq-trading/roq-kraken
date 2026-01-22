@@ -12,6 +12,8 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
+#include "roq/utils/charconv/to_string.hpp"
+
 #include "roq/web/socket/client.hpp"
 
 #include "roq/server/oms/exceptions.hpp"
@@ -36,6 +38,7 @@ auto const SUPPORTS = Mask{
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
     SupportType::ORDER,
+    SupportType::FUNDS,
 };
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 2;
@@ -317,17 +320,68 @@ void DropCopy::operator()(Trace<json::Book> const &) {
 void DropCopy::operator()(Trace<json::Balances> const &event) {
   auto &[trace_info, balances] = event;
   log::warn("DEBUG balances={}"sv, balances);
+  for (auto &item : balances.data) {
+    auto funds_update = FundsUpdate{
+        .stream_id = stream_id_,
+        .account = account_.name,
+        .currency = item.asset,
+        .margin_mode = {},
+        .balance = item.amount,
+        .hold = NaN,
+        .borrowed = NaN,
+        .external_account = {},
+        .update_type = UpdateType::INCREMENTAL,
+        .exchange_time_utc = item.timestamp,
+        .exchange_sequence = balances.sequence,
+        .sending_time_utc = {},
+    };
+    create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+  }
 }
 
 void DropCopy::operator()(Trace<json::Executions> const &event) {
   auto &[trace_info, executions] = event;
   log::warn("DEBUG executions={}"sv, executions);
+  auto update_type = map(executions.type).get<UpdateType>();
   for (auto &item : executions.data) {
+    auto discard = [&]() {
+      switch (item.exec_type) {
+        using enum json::ExecType::type_t;
+        case UNDEFINED_INTERNAL:
+        case UNKNOWN_INTERNAL:
+          break;
+        case PENDING_NEW:
+        case NEW:
+          return false;
+        case TRADE:
+        case FILLED:
+        case CANCELED:
+        case ICEBERG_REFILL:
+        case EXPIRED:
+        case AMENDED:
+        case RESTATED:
+        case STATUS:  // ???
+          break;
+      }
+      return executions.type == json::Type::SNAPSHOT;
+    }();
+    if (discard) {
+      continue;  // note!
+    }
+    auto side = map(item.side).get<Side>();
+    auto traded_quantity = [&]() {
+      if (std::isnan(item.cum_qty)) {
+        return 0.0;
+      }
+      return item.cum_qty;
+    }();
+    auto remaining_quantity = item.order_qty - traded_quantity;
+    auto last_liquidity = map(item.liquidity_ind).get<Liquidity>();
     auto order_update = server::oms::OrderUpdate{
         .account = account_.name,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
-        .side = map(item.side),
+        .side = side,
         .position_effect = {},
         .margin_mode = {},
         .max_show_quantity = NaN,
@@ -344,20 +398,68 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
         .price = item.limit_price,
         .stop_price = NaN,
         .leverage = NaN,
-        .remaining_quantity = NaN,
-        .traded_quantity = NaN,
-        .average_traded_price = {},
-        .last_traded_quantity = {},
-        .last_traded_price = {},
-        .last_liquidity = {},
+        .remaining_quantity = remaining_quantity,
+        .traded_quantity = traded_quantity,
+        .average_traded_price = item.avg_price,
+        .last_traded_quantity = item.last_qty,
+        .last_traded_price = item.last_price,
+        .last_liquidity = last_liquidity,
         .routing_id = {},
         .max_request_version = {},
         .max_response_version = {},
         .max_accepted_version = {},
-        .update_type = UpdateType::INCREMENTAL,
+        .update_type = update_type,
         .sending_time_utc = {},
     };
-    shared_.update_order(item.cl_ord_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {});
+    log::warn("DEBUG order_update={}"sv, order_update);
+    auto user_id = SOURCE_NONE;
+    auto order_id = ORDER_ID_NONE;
+    auto strategy_id = STRATEGY_ID_NONE;
+    if (shared_.update_order(item.cl_ord_id, stream_id_, trace_info, order_update, [&](auto &order) {
+          user_id = order.user_id;
+          order_id = order.order_id;
+          strategy_id = order.strategy_id;
+        })) {
+    } else {
+      log::warn("*** EXTERNAL ORDER ***"sv);
+    }
+    if (item.exec_type == json::ExecType::TRADE && user_id != SOURCE_NONE) {
+      auto fill = Fill{
+          .exchange_time_utc = item.timestamp,
+          .external_trade_id = {},
+          .quantity = item.last_qty,
+          .price = item.last_price,
+          .liquidity = last_liquidity,
+          .commission_amount = NaN,  // note! we only have it per TRADE
+          .commission_currency = {},
+          .base_amount = NaN,
+          .quote_amount = NaN,
+          .profit_loss_amount = NaN,
+      };
+      utils::charconv::to_string(std::back_inserter(fill.external_trade_id), item.trade_id);
+      auto trade_update = TradeUpdate{
+          .stream_id = stream_id_,
+          .account = account_.name,
+          .order_id = order_id,
+          .exchange = shared_.settings.exchange,
+          .symbol = item.symbol,
+          .side = side,
+          .position_effect = {},
+          .margin_mode = {},
+          .create_time_utc = item.timestamp,
+          .update_time_utc = item.timestamp,
+          .external_account = {},
+          .external_order_id = item.order_id,
+          .client_order_id = {},
+          .fills = {&fill, 1},
+          .routing_id = {},
+          .update_type = update_type,
+          .sending_time_utc = {},
+          .user = {},
+          .strategy_id = strategy_id,
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, user_id, item.cl_ord_id);
+    }
     /*
     switch (item.exec_type) {
       using json::ExecType::type_t;
