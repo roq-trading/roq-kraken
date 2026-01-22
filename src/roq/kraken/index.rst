@@ -234,7 +234,11 @@ Comments
 --------
 
 * Choice prices appear to be possible
-* Limited length of ClOrdId
+* Limited length of ClOrdId => we use HEX encoding and limit the fields we can download
+* Downloaded balance can't currently be decoded
+* Unsure how expensive it is to get snapshot of orders from WS
+* Issue with downloading open orders from REST (using :code:`pair` which has different encoding than :code:`symbol`)
+* Unresolved issue with wrong code:`traded_quantity`
 
 
 References
