@@ -22,6 +22,7 @@ constexpr auto const METHOD_ERROR = "error"sv;
 constexpr auto const METHOD_PONG = "pong"sv;
 constexpr auto const METHOD_SUBSCRIBE = "subscribe"sv;
 constexpr auto const METHOD_ADD_ORDER = "add_order"sv;
+constexpr auto const METHOD_AMEND_ORDER = "amend_order"sv;
 constexpr auto const METHOD_CANCEL_ORDER = "cancel_order"sv;
 constexpr auto const METHOD_CANCEL_ALL = "cancel_all"sv;
 // channels
@@ -71,6 +72,10 @@ bool Parser::dispatch(
           }
           case utils::hash::FNV::compute(METHOD_ADD_ORDER): {
             result = dispatch_helper<AddOrder>(handler, message, buffer_stack, trace_info);
+            break;
+          }
+          case utils::hash::FNV::compute(METHOD_AMEND_ORDER): {
+            result = dispatch_helper<AmendOrder>(handler, message, buffer_stack, trace_info);
             break;
           }
           case utils::hash::FNV::compute(METHOD_CANCEL_ORDER): {

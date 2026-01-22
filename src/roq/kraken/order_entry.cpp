@@ -16,6 +16,8 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
+#include "roq/kraken/json/map.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -27,9 +29,7 @@ namespace {
 auto const NAME = "om"sv;
 
 auto const SUPPORTS = Mask{
-    SupportType::CREATE_ORDER,
-    SupportType::CANCEL_ORDER,
-    SupportType::ORDER_ACK,
+    SupportType::ORDER,
 };
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 1;
@@ -92,6 +92,8 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
           .balance_ack = create_metrics(shared.settings, name_, "balance_ack"sv),
           .open_positions = create_metrics(shared.settings, name_, "open_positions"sv),
           .open_positions_ack = create_metrics(shared.settings, name_, "open_positions_ack"sv),
+          .open_orders = create_metrics(shared.settings, name_, "open_orders"sv),
+          .open_orders_ack = create_metrics(shared.settings, name_, "open_orders_ack"sv),
       },
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
@@ -122,6 +124,8 @@ void OrderEntry::operator()(metrics::Writer &writer) const {
       .write(profile_.balance_ack, metrics::Type::PROFILE)
       .write(profile_.open_positions, metrics::Type::PROFILE)
       .write(profile_.open_positions_ack, metrics::Type::PROFILE)
+      .write(profile_.open_orders, metrics::Type::PROFILE)
+      .write(profile_.open_orders_ack, metrics::Type::PROFILE)
       // latency
       .write(latency_.ping, metrics::Type::LATENCY);
 }
@@ -215,6 +219,9 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       return 1;
     case OPEN_POSITIONS:
       get_open_positions();
+      return 1;
+    case OPEN_ORDERS:
+      get_open_orders();
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
@@ -396,6 +403,99 @@ void OrderEntry::operator()(Trace<json::OpenPositionsAck> const &event) {
   auto &[trace_info, open_positions_ack] = event;
   log::info<4>("open_positions_ack={}"sv, open_positions_ack);
   assert(std::empty(open_positions_ack.error));
+}
+
+// open-orders
+
+void OrderEntry::get_open_orders() {
+  profile_.open_orders([&]() {
+    auto method = web::http::Method::POST;
+    auto path = shared_.api.order_management.open_orders;
+    auto body = account_.create_body();
+    auto headers = account_.create_headers(method, path, body);
+    auto request = web::rest::Request{
+        .method = method,
+        .path = path,
+        .query = {},
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = web::http::ContentType::APPLICATION_X_WWW_FORM_URLENCODED,
+        .headers = headers,
+        .body = body,
+        .quality_of_service = {},
+    };
+    auto sequence = download_.sequence();
+    (*connection_)("open-orders"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
+      TraceInfo trace_info;
+      Trace event{trace_info, response};
+      get_open_orders_ack(event, sequence);
+    });
+  });
+}
+
+void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  auto const STATE = OrderEntryState::OPEN_ORDERS;
+  profile_.open_orders_ack([&]() {
+    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
+      log::warn(R"(account="{}", origin={}, error={}, status={}, text="{}")"sv, account_.name, origin, error, status, text);
+      download_.retry(STATE);
+    };
+    auto handle_success = [&](auto &body) {
+      log::warn("DEBUG body={}"sv, body);
+      if (download_.skip(sequence, STATE)) {
+        log::info("Download state={} has already been processed"sv, STATE);
+      } else {
+        json::OpenOrdersAck open_orders_ack{body, decode_buffer_};
+        Trace event_2{event, open_orders_ack};
+        (*this)(event_2);
+        download_.check(STATE);
+      }
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+void OrderEntry::operator()(Trace<json::OpenOrdersAck> const &event) {
+  auto &[trace_info, open_orders_ack] = event;
+  log::info<4>("open_orders_ack={}"sv, open_orders_ack);
+  assert(std::empty(open_orders_ack.error));
+  for (auto &item : open_orders_ack.result.open) {
+    auto order_update = server::oms::OrderUpdate{
+        .account = account_.name,
+        .exchange = shared_.settings.exchange,
+        .symbol = item.descr.pair,
+        .side = map(item.descr.type),
+        .position_effect = {},
+        .margin_mode = {},
+        .max_show_quantity = NaN,
+        .order_type = map(item.descr.ordertype),
+        .time_in_force = map(item.time_in_force),
+        .execution_instructions = {},
+        .create_time_utc = item.opentm,
+        .update_time_utc = {},
+        .external_account = {},
+        .external_order_id = item.KEY,
+        .client_order_id = item.cl_ord_id,
+        .order_status = OrderStatus::WORKING,
+        .quantity = item.vol,
+        .price = item.price,
+        .stop_price = NaN,
+        .leverage = NaN,
+        .remaining_quantity = NaN,
+        .traded_quantity = NaN,  // XXX
+        .average_traded_price = {},
+        .last_traded_quantity = {},
+        .last_traded_price = {},
+        .last_liquidity = {},
+        .routing_id = {},
+        .max_request_version = {},
+        .max_response_version = {},
+        .max_accepted_version = {},
+        .update_type = UpdateType::SNAPSHOT,
+        .sending_time_utc = {},
+    };
+    Trace event_2{trace_info, order_update};
+    (*this)(event_2, order_update.client_order_id);
+  }
 }
 
 // helpers

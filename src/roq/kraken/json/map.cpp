@@ -13,6 +13,47 @@ using Helper = detail::MapHelper<Args...>;
 
 // kraken::json => roq
 
+// kraken::json::OrderStatus => roq::OrderStatus
+
+template <>
+template <>
+constexpr Helper<kraken::json::OrderStatus>::operator std::optional<roq::OrderStatus>() const {
+  switch (std::get<0>(args_)) {
+    using enum kraken::json::OrderStatus::type_t;
+    case UNDEFINED_INTERNAL:
+      return roq::OrderStatus::UNDEFINED;
+    case UNKNOWN_INTERNAL:
+      return roq::OrderStatus::UNDEFINED;
+    case PENDING_NEW:
+      return roq::OrderStatus::ACCEPTED;
+    case NEW:
+      return roq::OrderStatus::WORKING;
+    case PARTIALLY_FILLED:
+      return roq::OrderStatus::WORKING;
+    case FILLED:
+      return roq::OrderStatus::COMPLETED;
+    case CANCELED:
+      return roq::OrderStatus::CANCELED;
+    case EXPIRED:
+      return roq::OrderStatus::EXPIRED;
+  }
+  return {};
+}
+
+static_assert(Helper{kraken::json::OrderStatus{kraken::json::OrderStatus::UNDEFINED_INTERNAL}} == roq::OrderStatus::UNDEFINED);
+static_assert(Helper{kraken::json::OrderStatus{kraken::json::OrderStatus::PENDING_NEW}} == roq::OrderStatus::ACCEPTED);
+static_assert(Helper{kraken::json::OrderStatus{kraken::json::OrderStatus::NEW}} == roq::OrderStatus::WORKING);
+static_assert(Helper{kraken::json::OrderStatus{kraken::json::OrderStatus::PARTIALLY_FILLED}} == roq::OrderStatus::WORKING);
+static_assert(Helper{kraken::json::OrderStatus{kraken::json::OrderStatus::FILLED}} == roq::OrderStatus::COMPLETED);
+static_assert(Helper{kraken::json::OrderStatus{kraken::json::OrderStatus::CANCELED}} == roq::OrderStatus::CANCELED);
+static_assert(Helper{kraken::json::OrderStatus{kraken::json::OrderStatus::EXPIRED}} == roq::OrderStatus::EXPIRED);
+
+template <>
+template <>
+std::optional<roq::OrderStatus> Map<kraken::json::OrderStatus>::helper() const {
+  return Helper{args_};
+}
+
 // kraken::json::OrderType => roq::OrderType
 
 template <>
@@ -124,6 +165,38 @@ static_assert(Helper{kraken::json::TimeInForce{kraken::json::TimeInForce::IOC}} 
 template <>
 template <>
 std::optional<roq::TimeInForce> Map<kraken::json::TimeInForce>::helper() const {
+  return Helper{args_};
+}
+
+// kraken::json::TimeInForce2 => roq::TimeInForce
+
+template <>
+template <>
+constexpr Helper<kraken::json::TimeInForce2>::operator std::optional<roq::TimeInForce>() const {
+  switch (std::get<0>(args_)) {
+    using enum kraken::json::TimeInForce2::type_t;
+    case UNDEFINED_INTERNAL:
+      return roq::TimeInForce::UNDEFINED;
+    case UNKNOWN_INTERNAL:
+      return roq::TimeInForce::UNDEFINED;
+    case GTC:
+      return roq::TimeInForce::GTC;
+    case GTD:
+      return roq::TimeInForce::GTD;
+    case IOC:
+      return roq::TimeInForce::IOC;
+  }
+  return {};
+}
+
+static_assert(Helper{kraken::json::TimeInForce2{kraken::json::TimeInForce2::UNDEFINED_INTERNAL}} == roq::TimeInForce::UNDEFINED);
+static_assert(Helper{kraken::json::TimeInForce2{kraken::json::TimeInForce2::GTC}} == roq::TimeInForce::GTC);
+static_assert(Helper{kraken::json::TimeInForce2{kraken::json::TimeInForce2::GTD}} == roq::TimeInForce::GTD);
+static_assert(Helper{kraken::json::TimeInForce2{kraken::json::TimeInForce2::IOC}} == roq::TimeInForce::IOC);
+
+template <>
+template <>
+std::optional<roq::TimeInForce> Map<kraken::json::TimeInForce2>::helper() const {
   return Helper{args_};
 }
 

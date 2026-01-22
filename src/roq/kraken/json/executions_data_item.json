@@ -24,7 +24,7 @@
     },
     {
       "name": "time_in_force",
-      "type": "roq/kraken/json/TimeInForce"
+      "type": "roq/kraken/json/TimeInForce2"
     },
     {
       "name": "exec_type",
@@ -81,6 +81,10 @@
     {
       "name": "reason",
       "type": "std/string_view"
+    },
+    {
+      "name": "amended",
+      "type": "std/bool"
     }
   ]
 }

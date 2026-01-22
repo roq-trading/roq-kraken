@@ -2,12 +2,15 @@
 
 #pragma once
 
+#include "roq/kraken/json/order_status.hpp"
 #include "roq/kraken/json/order_type.hpp"
 #include "roq/kraken/json/pairs_status.hpp"
 #include "roq/kraken/json/side.hpp"
 #include "roq/kraken/json/time_in_force.hpp"
+#include "roq/kraken/json/time_in_force2.hpp"
 #include "roq/kraken/json/type.hpp"
 
+#include "roq/order_status.hpp"
 #include "roq/order_type.hpp"
 #include "roq/side.hpp"
 #include "roq/time_in_force.hpp"
@@ -22,6 +25,10 @@ namespace roq {
 
 template <>
 template <>
+std::optional<roq::OrderStatus> Map<kraken::json::OrderStatus>::helper() const;
+
+template <>
+template <>
 std::optional<roq::OrderType> Map<kraken::json::OrderType>::helper() const;
 
 template <>
@@ -31,6 +38,10 @@ std::optional<roq::Side> Map<kraken::json::Side>::helper() const;
 template <>
 template <>
 std::optional<roq::TimeInForce> Map<kraken::json::TimeInForce>::helper() const;
+
+template <>
+template <>
+std::optional<roq::TimeInForce> Map<kraken::json::TimeInForce2>::helper() const;
 
 template <>
 template <>

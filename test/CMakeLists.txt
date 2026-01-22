@@ -5,6 +5,8 @@ set(TARGET_NAME ${PROJECT_NAME}-test)
 set(SOURCES
     # json_balance_ack.cpp  XXX FIXME need key-double
     json_add_order.cpp
+    json_amend_order.cpp
+    json_amend_order.cpp
     json_balances.cpp
     json_book.cpp
     json_cancel_order.cpp
@@ -12,6 +14,7 @@ set(SOURCES
     json_executions.cpp
     json_heartbeat.cpp
     json_instrument.cpp
+    json_open_orders_ack.cpp
     json_open_positions_ack.cpp
     json_pong.cpp
     json_status.cpp

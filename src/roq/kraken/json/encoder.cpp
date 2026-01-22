@@ -224,40 +224,26 @@ std::string_view Encoder::amend_order_json(
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id,
     std::string_view const &token) {
-  /*
-  auto side = map(order.side).template get<Side>();
-  auto quantity = std::isnan(modify_order.quantity) ? order.quantity : modify_order.quantity;
-  auto price = std::isnan(modify_order.price) ? order.price : modify_order.price;
   buffer.clear();
   fmt::format_to(
       std::back_inserter(buffer),
       R"({{)"
-      R"("id":"{}",)"
-      R"("method":"order.modify",)"
+      R"("method":"amend_order",)"
       R"("params":{{)"
-      R"("symbol":"{}")"
-      R"(,"side":"{}")"sv,
-      id,
-      order.symbol,
-      side.as_raw_text());
-  if (std::empty(order.external_order_id)) {
-    fmt::format_to(std::back_inserter(buffer), R"(,"origClientOrderId":"{}")"sv, order.client_order_id);
-  } else {
-    fmt::format_to(std::back_inserter(buffer), R"(,"orderId":{})"sv, order.external_order_id);  // note! integer
+      R"("token":"{}",)"
+      R"("cl_ord_id":"{}")"sv,
+      token,
+      order.client_order_id);
+  if (!std::isnan(modify_order.quantity)) {
+    fmt::format_to(std::back_inserter(buffer), R"(,"order_qty":{})"sv, Decimal{modify_order.quantity, order.quantity_precision.precision});
+  }
+  if (!std::isnan(modify_order.price)) {
+    fmt::format_to(std::back_inserter(buffer), R"(,"limit_price":{})"sv, Decimal{modify_order.price, order.price_precision.precision});
   }
   fmt::format_to(
       std::back_inserter(buffer),
-      R"(,"quantity":"{}")"
-      R"(,"price":"{}")"
-      R"(,"recvWindow":{})"
-      R"(,"timestamp":{})"
       R"(}})"
-      R"(}})"sv,
-      Decimal{quantity, order.quantity_precision.precision},
-      Decimal{price, order.price_precision.precision},
-      recv_window.count(),
-      now_utc.count());
-  */
+      R"(}})"sv);
   std::string_view result{std::data(buffer), std::size(buffer)};
   return result;
 }

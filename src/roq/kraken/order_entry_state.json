@@ -12,6 +12,9 @@
       "name": "open_positions"
     },
     {
+      "name": "open_orders"
+    },
+    {
       "name": "done"
     }
   ]

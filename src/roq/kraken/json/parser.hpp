@@ -9,6 +9,7 @@
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/kraken/json/add_order.hpp"
+#include "roq/kraken/json/amend_order.hpp"
 #include "roq/kraken/json/balances.hpp"
 #include "roq/kraken/json/book.hpp"
 #include "roq/kraken/json/cancel_all.hpp"
@@ -46,6 +47,7 @@ struct Parser final {
     virtual void operator()(Trace<Executions> const &) = 0;
 
     virtual void operator()(Trace<AddOrder> const &) = 0;
+    virtual void operator()(Trace<AmendOrder> const &) = 0;
     virtual void operator()(Trace<CancelOrder> const &) = 0;
     virtual void operator()(Trace<CancelAll> const &) = 0;
   };

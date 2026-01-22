@@ -1,0 +1,12 @@
+{
+  "name": "roq/kraken/json/OpenOrdersAckResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "open",
+      "type": "roq/kraken/json/OpenOrdersAckResultOpenItem",
+      "array": "std/span",
+      "map": true
+    }
+  ]
+}

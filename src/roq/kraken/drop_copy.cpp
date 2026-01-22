@@ -17,6 +17,8 @@
 #include "roq/server/oms/exceptions.hpp"
 
 #include "roq/kraken/json/encoder.hpp"
+#include "roq/kraken/json/map.hpp"
+#include "roq/kraken/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -28,7 +30,13 @@ namespace kraken {
 namespace {
 auto const NAME = "ex"sv;
 
-auto const SUPPORTS = Mask<SupportType>{};
+auto const SUPPORTS = Mask{
+    SupportType::CREATE_ORDER,
+    SupportType::MODIFY_ORDER,
+    SupportType::CANCEL_ORDER,
+    SupportType::ORDER_ACK,
+    SupportType::ORDER,
+};
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 2;
 }  // namespace
@@ -120,11 +128,11 @@ uint16_t DropCopy::operator()(Event<CreateOrder> const &event, server::oms::Orde
 }
 
 uint16_t DropCopy::operator()(
-    Event<ModifyOrder> const &,
-    server::oms::Order const &,
-    [[maybe_unused]] std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previous_request_id) {
-  throw NotImplemented{"not implemented"sv};
+    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
+  auto message = json::Encoder::amend_order_json(encode_buffer_, event, order, request_id, previous_request_id, token_);
+  log::warn("DEBUG {}"sv, message);
+  (*connection_).send_text(message);
+  return stream_id_;
 }
 
 uint16_t DropCopy::operator()(
@@ -252,73 +260,14 @@ void DropCopy::parse(std::string_view const &message) {
     }
   });
 }
-/*
-// json::ParserPrivate::Handler
 
-void DropCopy::operator()(Trace<json::Status> const &event) {
-  auto &[trace_info, status] = event;
-  log::info("status={}"sv, status);
-  (*this)(ConnectionStatus::READY);
-  subscribe();
-}
-
-void DropCopy::operator()(Trace<json::Error> const &event) {
-  auto &[trace_info, error] = event;
-  log::fatal("error={}"sv, error);
-}
-
-void DropCopy::operator()(Trace<json::SystemStatus> const &event) {
-  auto &[trace_info, system_status] = event;
-  log::info("system_status={}"sv, system_status);
-}
-
-void DropCopy::operator()(Trace<json::Pong> const &event) {
-  auto &[trace_info, pong] = event;
-  log::info<1>("pong={}"sv, pong);
-}
-
-void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
-  auto &[trace_info, heartbeat] = event;
-  log::info<1>("heartbeat={}"sv, heartbeat);
-}
-
-void DropCopy::operator()(Trace<json::SubscriptionStatus> const &event) {
-  auto &[trace_info, subscription_status] = event;
-  log::info("subscription_status={}"sv, subscription_status);
-}
-
-void DropCopy::operator()(Trace<json::AddOrderStatus> const &event) {
-  auto &[trace_info, add_order_status] = event;
-  log::info("add_order_status={}"sv, add_order_status);
-  throw NotImplemented{"not implemented"sv};
-}
-
-void DropCopy::operator()(Trace<json::CancelOrderStatus> const &event) {
-  auto &[trace_info, cancel_order_status] = event;
-  log::info("cancel_order_status={}"sv, cancel_order_status);
-  throw NotImplemented{"not implemented"sv};
-}
-
-void DropCopy::operator()(Trace<json::OpenOrders> const &event) {
-  auto &[trace_info, open_orders] = event;
-  log::info("open_orders={}"sv, open_orders);
-  throw NotImplemented{"not implemented"sv};
-}
-
-void DropCopy::operator()(Trace<json::OwnTrades> const &event) {
-  auto &[trace_info, own_trades] = event;
-  log::info("own_trades={}"sv, own_trades);
-  throw NotImplemented{"not implemented"sv};
-}
-*/
 // json::Parser::Handler
 
 void DropCopy::operator()(Trace<json::Status> const &event) {
   auto &[trace_info, status] = event;
   log::info("status={}"sv, status);
   (*this)(ConnectionStatus::READY);
-  // download_.begin();
-  subscribe();
+  subscribe();  // note!
 }
 
 void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
@@ -336,7 +285,7 @@ void DropCopy::operator()(Trace<json::Pong> const &event) {
   auto &[trace_info, pong] = event;
   log::info<5>("pong={}"sv, pong);
   auto external_latency = trace_info.origin_create_time - std::chrono::nanoseconds{pong.req_id};
-  log::warn("DEBUG external_latency={}"sv, external_latency);
+  log::info<5>("external_latency={}"sv, external_latency);
   (*connection_).touch(trace_info.source_receive_time);
 }
 
@@ -373,16 +322,157 @@ void DropCopy::operator()(Trace<json::Balances> const &event) {
 void DropCopy::operator()(Trace<json::Executions> const &event) {
   auto &[trace_info, executions] = event;
   log::warn("DEBUG executions={}"sv, executions);
+  for (auto &item : executions.data) {
+    auto order_update = server::oms::OrderUpdate{
+        .account = account_.name,
+        .exchange = shared_.settings.exchange,
+        .symbol = item.symbol,
+        .side = map(item.side),
+        .position_effect = {},
+        .margin_mode = {},
+        .max_show_quantity = NaN,
+        .order_type = map(item.order_type),
+        .time_in_force = map(item.time_in_force),
+        .execution_instructions = {},
+        .create_time_utc = item.timestamp,
+        .update_time_utc = item.timestamp,
+        .external_account = {},
+        .external_order_id = item.order_id,
+        .client_order_id = item.cl_ord_id,
+        .order_status = map(item.order_status),
+        .quantity = item.order_qty,
+        .price = item.limit_price,
+        .stop_price = NaN,
+        .leverage = NaN,
+        .remaining_quantity = NaN,
+        .traded_quantity = NaN,
+        .average_traded_price = {},
+        .last_traded_quantity = {},
+        .last_traded_price = {},
+        .last_liquidity = {},
+        .routing_id = {},
+        .max_request_version = {},
+        .max_response_version = {},
+        .max_accepted_version = {},
+        .update_type = UpdateType::INCREMENTAL,
+        .sending_time_utc = {},
+    };
+    shared_.update_order(item.cl_ord_id, stream_id_, trace_info, order_update, []([[maybe_unused]] auto &order) {});
+    /*
+    switch (item.exec_type) {
+      using json::ExecType::type_t;
+      case UNDEFINED_INTERNAL:
+        break;
+      case UNKNOWN_INTERNAL:
+        break;
+      case PENDING_NEW:
+      case NEW:
+      case TRADE:
+      case FILLED:
+      case CANCELED:
+      case ICEBERG_REFILL:
+        break;
+      case EXPIRED:
+        break;
+      case AMENDED:
+      case RESTATED:
+        break;
+      case STATUS:  // ???
+        break;
+    }
+    */
+  }
 }
 
 void DropCopy::operator()(Trace<json::AddOrder> const &event) {
   auto &[trace_info, add_order] = event;
   log::warn("DEBUG add_order={}"sv, add_order);
+  auto request_or_exchange_id = [&]() {
+    if (std::empty(add_order.result.cl_ord_id)) {
+      return add_order.result.order_id;
+    }
+    return add_order.result.cl_ord_id;
+  }();
+  auto helper = [&](auto request_status, Error error, std::string_view const &text) {
+    auto response = server::oms::Response{
+        .request_type = RequestType::CREATE_ORDER,
+        .origin = Origin::EXCHANGE,
+        .request_status = request_status,
+        .error = error,
+        .text = text,
+        .version = 1,  // note!
+        .request_id = {},
+        .external_order_id = add_order.result.order_id,
+        .quantity = NaN,
+        .price = NaN,
+    };
+    shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
+  };
+  if (std::empty(add_order.error)) {
+    helper(RequestStatus::ACCEPTED, {}, {});
+  } else {
+    auto error = json::guess_error(add_order.error);
+    helper(RequestStatus::ACCEPTED, error, add_order.error);
+  }
+}
+
+void DropCopy::operator()(Trace<json::AmendOrder> const &event) {
+  auto &[trace_info, amend_order] = event;
+  log::warn("DEBUG amend_order={}"sv, amend_order);
+  auto request_or_exchange_id = [&]() { return amend_order.result.cl_ord_id; }();  // XXX no order_id ?
+  auto helper = [&](auto request_status, Error error, std::string_view const &text) {
+    auto response = server::oms::Response{
+        .request_type = RequestType::MODIFY_ORDER,
+        .origin = Origin::EXCHANGE,
+        .request_status = request_status,
+        .error = error,
+        .text = text,
+        .version = {},
+        .request_id = {},
+        .external_order_id = {},
+        .quantity = NaN,
+        .price = NaN,
+    };
+    shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
+  };
+  if (std::empty(amend_order.error)) {
+    helper(RequestStatus::ACCEPTED, {}, {});
+  } else {
+    auto error = json::guess_error(amend_order.error);
+    helper(RequestStatus::ACCEPTED, error, amend_order.error);
+  }
 }
 
 void DropCopy::operator()(Trace<json::CancelOrder> const &event) {
   auto &[trace_info, cancel_order] = event;
   log::warn("DEBUG cancel_order={}"sv, cancel_order);
+  auto request_or_exchange_id = [&]() {
+    if (std::empty(cancel_order.result.cl_ord_id)) {
+      return cancel_order.result.order_id;
+    }
+    return cancel_order.result.cl_ord_id;
+  }();
+  auto helper = [&](auto request_status, Error error, std::string_view const &text) {
+    auto response = server::oms::Response{
+        .request_type = RequestType::CANCEL_ORDER,
+        .origin = Origin::EXCHANGE,
+        .request_status = request_status,
+        .error = error,
+        .text = text,
+        .version = {},
+        .request_id = {},
+        .external_order_id = {},
+        .quantity = NaN,
+        .price = NaN,
+    };
+    shared_.update_order(request_or_exchange_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
+  };
+  if (std::empty(cancel_order.error)) {
+    helper(RequestStatus::ACCEPTED, {}, {});
+  } else {
+    auto error = json::guess_error(cancel_order.error);
+    helper(RequestStatus::ACCEPTED, error, cancel_order.error);
+  }
 }
 
 void DropCopy::operator()(Trace<json::CancelAll> const &event) {

@@ -25,6 +25,7 @@
 #include "roq/kraken/shared.hpp"
 
 #include "roq/kraken/json/balance_ack.hpp"
+#include "roq/kraken/json/open_orders_ack.hpp"
 #include "roq/kraken/json/open_positions_ack.hpp"
 #include "roq/kraken/json/token_ack.hpp"
 
@@ -85,6 +86,12 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void get_open_positions_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::OpenPositionsAck> const &);
 
+  void get_open_orders();
+  void get_open_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::OpenOrdersAck> const &);
+
+  // helpers
+
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
 
@@ -107,7 +114,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, balance, balance_ack, open_positions, open_positions_ack;
+    utils::metrics::Profile get_web_sockets_token, get_web_sockets_token_ack, balance, balance_ack, open_positions, open_positions_ack, open_orders,
+        open_orders_ack;
   } profile_;
   struct {
     utils::metrics::Latency ping;

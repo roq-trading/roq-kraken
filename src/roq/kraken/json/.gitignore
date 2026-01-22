@@ -2,6 +2,8 @@
 roq-kraken-json
 add_order.hpp
 add_order_result.hpp
+amend_order.hpp
+amend_order_result.hpp
 balance_ack.hpp
 balance_ack_result_item.hpp
 balances_data_item.hpp
@@ -26,6 +28,10 @@ instrument_data.hpp
 instrument_data_pairs_item.hpp
 instrument.hpp
 limit_price_type.hpp
+open_orders_ack.hpp
+open_orders_ack_result.hpp
+open_orders_ack_result_open_item.hpp
+open_orders_ack_result_open_item_descr.hpp
 open_positions_ack.hpp
 open_positions_ack_result_item.hpp
 order.hpp
@@ -42,6 +48,7 @@ subscribe_result.hpp
 ticker_data_item.hpp
 ticker.hpp
 time_in_force.hpp
+time_in_force2.hpp
 time_.hpp
 token_ack.hpp
 token_ack_result.hpp
@@ -53,6 +60,8 @@ type.hpp
 update_type.hpp
 add_order.cpp
 add_order_result.cpp
+amend_order.cpp
+amend_order_result.cpp
 balance_ack.cpp
 balance_ack_result_item.cpp
 balances_data_item.cpp
@@ -77,6 +86,10 @@ instrument_data.cpp
 instrument_data_pairs_item.cpp
 instrument.cpp
 limit_price_type.cpp
+open_orders_ack.cpp
+open_orders_ack_result.cpp
+open_orders_ack_result_open_item.cpp
+open_orders_ack_result_open_item_descr.cpp
 open_positions_ack.cpp
 open_positions_ack_result_item.cpp
 order.cpp
@@ -93,6 +106,7 @@ subscribe_result.cpp
 ticker_data_item.cpp
 ticker.cpp
 time_in_force.cpp
+time_in_force2.cpp
 time_.cpp
 token_ack.cpp
 token_ack_result.cpp

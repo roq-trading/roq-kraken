@@ -543,6 +543,10 @@ void MarketData::operator()(Trace<json::AddOrder> const &) {
   log::fatal("Unexpected"sv);
 }
 
+void MarketData::operator()(Trace<json::AmendOrder> const &) {
+  log::fatal("Unexpected"sv);
+}
+
 void MarketData::operator()(Trace<json::CancelOrder> const &) {
   log::fatal("Unexpected"sv);
 }

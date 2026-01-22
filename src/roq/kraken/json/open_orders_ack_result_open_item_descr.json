@@ -1,0 +1,42 @@
+{
+  "name": "roq/kraken/json/OpenOrdersAckResultOpenItemDescr",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "pair",
+      "type": "std/string_view"
+    },
+    {
+      "name": "aclass",
+      "type": "std/string_view"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken/json/Side"
+    },
+    {
+      "name": "ordertype",
+      "type": "roq/kraken/json/OrderType"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "price2",
+      "type": "std/double"
+    },
+    {
+      "name": "leverage",
+      "type": "std/string_view"
+    },
+    {
+      "name": "order",
+      "type": "std/string_view"
+    },
+    {
+      "name": "close",
+      "type": "std/string_view"
+    }
+  ]
+}

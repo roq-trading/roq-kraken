@@ -51,6 +51,9 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
       value);
 }
 
+extern roq::Error guess_error(int32_t code);
+extern roq::Error guess_error(std::string_view const &error);
+
 }  // namespace json
 }  // namespace kraken
 }  // namespace roq
