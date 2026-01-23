@@ -250,7 +250,7 @@ void DropCopy::operator()(ConnectionStatus status) {
 
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
-    log::warn("DEBUG message={}"sv, message);
+    // log::warn("DEBUG message={}"sv, message);
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     TraceInfo trace_info;
     try {

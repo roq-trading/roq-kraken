@@ -6,7 +6,7 @@ set(SOURCES
     json_add_order.cpp
     json_amend_order.cpp
     json_amend_order.cpp
-    # json_balance_ack.cpp  XXX FIXME need key-double
+    json_balance_ack.cpp
     json_balances.cpp
     json_book.cpp
     json_cancel_order.cpp

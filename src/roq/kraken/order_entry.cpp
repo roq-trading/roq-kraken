@@ -10,6 +10,8 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
+#include "roq/utils/charconv/from_chars.hpp"
+
 #include "roq/web/rest/client.hpp"
 
 #include "roq/core/json/parser.hpp"
@@ -30,6 +32,7 @@ auto const NAME = "om"sv;
 
 auto const SUPPORTS = Mask{
     SupportType::ORDER,
+    SupportType::FUNDS,
 };
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 1;
@@ -340,10 +343,9 @@ void OrderEntry::get_balance_ack(Trace<web::rest::Response> const &event, uint32
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        // XXX FIXME TODO need key-double autogen
-        // json::BalanceAck balance_ack{body, decode_buffer_};
-        // Trace event_2{event, balance_ack};
-        // (*this)(event_2);
+        json::BalanceAck balance_ack{body, decode_buffer_};
+        Trace event_2{event, balance_ack};
+        (*this)(event_2);
         download_.check(STATE);
       }
     };
@@ -355,6 +357,26 @@ void OrderEntry::operator()(Trace<json::BalanceAck> const &event) {
   auto &[trace_info, balance_ack] = event;
   log::info<4>("balance_ack={}"sv, balance_ack);
   assert(std::empty(balance_ack.error));
+  for (auto &item : balance_ack.result) {
+    log::warn("DEBUG {}={}"sv, item.KEY, item.VALUE);
+    auto balance = utils::charconv::from_string_relaxed<double>(item.VALUE);
+    auto funds_update = FundsUpdate{
+        .stream_id = stream_id_,
+        .account = account_.name,
+        .currency = item.KEY,
+        .margin_mode = {},
+        .balance = balance,
+        .hold = NaN,
+        .borrowed = NaN,
+        .external_account = {},
+        .update_type = UpdateType::SNAPSHOT,
+        .exchange_time_utc = {},
+        .exchange_sequence = {},
+        .sending_time_utc = {},
+    };
+    log::warn("DEBUG funds_update={}"sv, funds_update);
+    create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+  }
 }
 
 // trade-balance
