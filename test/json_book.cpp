@@ -76,3 +76,64 @@ TEST_CASE("update", "[json_book]") {
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 2);
 }
+
+// note! repeated price range
+TEST_CASE("strange", "[json_book]") {
+  auto message = R"({)"
+                 R"("channel":"book",)"
+                 R"("type":"update",)"
+                 R"("data":[{)"
+                 R"("symbol":"BTC/USDT",)"
+                 R"("bids":[)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171536},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000},)"
+                 R"({"price":89773.7,"qty":0.00171534},)"
+                 R"({"price":89773.7,"qty":0.00000000},)"
+                 R"({"price":89723.4,"qty":0.01320000})"
+                 R"(],)"
+                 R"("asks":[],)"
+                 R"("checksum":1773535742,)"
+                 R"("timestamp":"2026-01-23T15:49:41.026930Z")"
+                 R"(})"
+                 R"(])"
+                 R"(})"sv;
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.channel == "book"sv);
+    CHECK(obj.type == json::Type::UPDATE);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 2);
+}
+

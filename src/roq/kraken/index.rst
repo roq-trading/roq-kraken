@@ -233,6 +233,7 @@ Outbound
 Comments
 --------
 
+* Choice prices appear to be allowed from book updates
 * Limited length of ClOrdId => we use HEX encoding and limit the fields we can download
 * Unsure how expensive it is to get snapshot of orders from WS
 * Issue with downloading open orders from REST (using :code:`pair` which has different encoding than :code:`symbol`)

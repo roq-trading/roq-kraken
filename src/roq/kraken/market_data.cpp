@@ -238,6 +238,9 @@ void MarketData::subscribe(std::string_view const &channel, std::span<Symbol con
       R"("symbol":["{}"])"sv,
       channel,
       fmt::join(symbols, R"(",")"sv));
+  if (channel == "ticker"sv) {
+    fmt::format_to(std::back_inserter(message), R"(,"event_trigger":"bbo")"sv);
+  }
   if (channel == "book"sv) {
     if (shared_.settings.ws.public_subscribe_book_depth) {
       fmt::format_to(std::back_inserter(message), R"(,"depth":{})"sv, shared_.settings.ws.public_subscribe_book_depth);
@@ -491,14 +494,15 @@ void MarketData::operator()(Trace<json::Book> const &event) {
   (*connection_).touch(trace_info.source_receive_time);
   shared_.bids.clear();
   shared_.asks.clear();
-  auto emplace_back = [](auto &result, auto &value) {
+  uint32_t price_level = 0;
+  auto emplace_back = [&](auto &result, auto &value) {
     auto mbp_update = MBPUpdate{
         .price = value.price,
         .quantity = value.qty,
         .implied_quantity = NaN,
         .number_of_orders = {},
         .update_action = {},
-        .price_level = {},
+        .price_level = ++price_level,  // note! duplicates allowed, last wins
     };
     result.emplace_back(std::move(mbp_update));
   };
