@@ -29,7 +29,7 @@ namespace kraken {
 
 struct MarketData final : public web::socket::Client::Handler, public json::Parser::Handler {
   struct SymbolsUpdate final {
-    std::span<Symbol> symbols;
+    std::span<Symbol const> symbols;
   };
 
   struct Handler {
@@ -129,8 +129,6 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   // state
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus status_ = {};
-  // experimental
-  utils::unordered_set<std::string> all_symbols_;
 };
 
 }  // namespace kraken

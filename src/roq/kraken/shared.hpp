@@ -52,6 +52,7 @@ struct Shared final {
 
  public:
   core::Symbols symbols;
+  utils::unordered_set<std::string> all_symbols;
 };
 
 }  // namespace kraken

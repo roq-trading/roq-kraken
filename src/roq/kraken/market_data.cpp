@@ -362,7 +362,7 @@ void MarketData::operator()(Trace<json::Instrument> const &event) {
     if (discard) {
       continue;
     }
-    if (all_symbols_.emplace(item.symbol).second) {  // only include new
+    if (shared_.all_symbols.emplace(item.symbol).second) {  // only include new
       symbols.emplace_back(item.symbol);
     }
     ++counter;
