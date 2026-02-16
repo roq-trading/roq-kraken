@@ -137,13 +137,15 @@ void OrderEntry::operator()(metrics::Writer &writer) const {
       .write(latency_.ping, metrics::Type::LATENCY);
 }
 
-uint16_t OrderEntry::operator()(Event<CreateOrder> const &, server::oms::Order const &, [[maybe_unused]] std::string_view const &request_id) {
+uint16_t OrderEntry::operator()(
+    Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, [[maybe_unused]] std::string_view const &request_id) {
   throw NotImplemented{"not implemented"sv};
 }
 
 uint16_t OrderEntry::operator()(
     Event<ModifyOrder> const &,
     server::oms::Order const &,
+    server::oms::RefData const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   throw NotImplemented{"not implemented"sv};
@@ -152,6 +154,7 @@ uint16_t OrderEntry::operator()(
 uint16_t OrderEntry::operator()(
     Event<CancelOrder> const &,
     server::oms::Order const &,
+    server::oms::RefData const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
   throw NotImplemented{"not implemented"sv};
