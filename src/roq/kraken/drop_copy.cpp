@@ -124,8 +124,8 @@ void DropCopy::operator()(metrics::Writer &writer) const {
 }
 
 uint16_t DropCopy::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &, std::string_view const &request_id) {
-  auto message = json::Encoder::add_order_json(encode_buffer_, event, order, request_id, token_);
+    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
+  auto message = json::Encoder::add_order_json(encode_buffer_, event, order, ref_data, request_id, token_);
   log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
   return stream_id_;
@@ -134,10 +134,10 @@ uint16_t DropCopy::operator()(
 uint16_t DropCopy::operator()(
     Event<ModifyOrder> const &event,
     server::oms::Order const &order,
-    server::oms::RefData const &,
+    server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  auto message = json::Encoder::amend_order_json(encode_buffer_, event, order, request_id, previous_request_id, token_);
+  auto message = json::Encoder::amend_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
   log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
   return stream_id_;
@@ -146,10 +146,10 @@ uint16_t DropCopy::operator()(
 uint16_t DropCopy::operator()(
     Event<CancelOrder> const &event,
     server::oms::Order const &order,
-    server::oms::RefData const &,
+    server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  auto message = json::Encoder::cancel_order_json(encode_buffer_, event, order, request_id, previous_request_id, token_);
+  auto message = json::Encoder::cancel_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
   log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
   return stream_id_;

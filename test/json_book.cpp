@@ -136,4 +136,3 @@ TEST_CASE("strange", "[json_book]") {
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 2);
 }
-

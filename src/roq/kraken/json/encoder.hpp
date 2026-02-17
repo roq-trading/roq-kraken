@@ -13,6 +13,7 @@
 #include "roq/modify_order.hpp"
 
 #include "roq/server/oms/order.hpp"
+#include "roq/server/oms/ref_data.hpp"
 
 namespace roq {
 namespace kraken {
@@ -23,7 +24,8 @@ struct Encoder final {
 
   // order-place
 
-  static std::string_view add_order_url(std::string &buffer, CreateOrder const &, server::oms::Order const &, std::string_view const &request_id);
+  static std::string_view add_order_url(
+      std::string &buffer, CreateOrder const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id);
 
   // amend-order
 
@@ -31,6 +33,7 @@ struct Encoder final {
       std::string &buffer,
       roq::ModifyOrder const &,
       server::oms::Order const &,
+      server::oms::RefData const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
 
@@ -40,6 +43,7 @@ struct Encoder final {
       std::string &buffer,
       roq::CancelOrder const &,
       server::oms::Order const &,
+      server::oms::RefData const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
 
@@ -48,7 +52,12 @@ struct Encoder final {
   // add-order
 
   static std::string_view add_order_json(
-      std::string &buffer, CreateOrder const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &token);
+      std::string &buffer,
+      CreateOrder const &,
+      server::oms::Order const &,
+      server::oms::RefData const &,
+      std::string_view const &request_id,
+      std::string_view const &token);
 
   // amend-order
 
@@ -56,6 +65,7 @@ struct Encoder final {
       std::string &buffer,
       roq::ModifyOrder const &,
       server::oms::Order const &,
+      server::oms::RefData const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id,
       std::string_view const &token);
@@ -66,6 +76,7 @@ struct Encoder final {
       std::string &buffer,
       roq::CancelOrder const &,
       server::oms::Order const &,
+      server::oms::RefData const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id,
       std::string_view const &token);
