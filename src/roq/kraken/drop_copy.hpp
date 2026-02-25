@@ -73,7 +73,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
 
-  void operator()(ConnectionStatus);
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void subscribe();
   void subscribe(std::string_view const &channel);
@@ -131,7 +131,7 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
   // state
   bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
-  ConnectionStatus status_ = {};
+  ConnectionStatus connection_status_ = {};
 };
 
 }  // namespace kraken

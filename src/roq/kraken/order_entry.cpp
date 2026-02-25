@@ -165,33 +165,32 @@ uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &, [[maybe_unused]]
   return stream_id_;
 }
 
-void OrderEntry::operator()(ConnectionStatus status) {
-  if (utils::update(status_, status)) {
-    TraceInfo trace_info;
-    auto stream_status = StreamStatus{
-        .stream_id = stream_id_,
-        .account = account_.name,
-        .supports = SUPPORTS,
-        .transport = Transport::TCP,
-        .protocol = Protocol::HTTP,
-        .encoding = {Encoding::JSON},
-        .priority = Priority::PRIMARY,
-        .connection_status = status_,
-        .interface = (*connection_).get_interface(),
-        .authority = (*connection_).get_current_authority(),
-        .path = (*connection_).get_current_path(),
-        .proxy = (*connection_).get_proxy(),
-    };
-    log::info("stream_status={}"sv, stream_status);
-    create_trace_and_dispatch(handler_, trace_info, stream_status);
-  }
+void OrderEntry::operator()(ConnectionStatus connection_status, std::string_view const &reason) {
+  connection_status_ = connection_status;
+  TraceInfo trace_info;
+  auto stream_status = StreamStatus{
+      .stream_id = stream_id_,
+      .account = account_.name,
+      .supports = SUPPORTS,
+      .transport = Transport::TCP,
+      .protocol = Protocol::HTTP,
+      .encoding = {Encoding::JSON},
+      .priority = Priority::PRIMARY,
+      .connection_status = connection_status_,
+      .reason = reason,
+      .interface = (*connection_).get_interface(),
+      .authority = (*connection_).get_current_authority(),
+      .path = (*connection_).get_current_path(),
+      .proxy = (*connection_).get_proxy(),
+  };
+  log::info("stream_status={}"sv, stream_status);
+  create_trace_and_dispatch(handler_, trace_info, stream_status);
 }
 
 void OrderEntry::operator()(Trace<web::rest::Client::Connected> const &) {
   if (download_.downloading()) {
     download_.bump();
   } else {
-    (*this)(ConnectionStatus::DOWNLOADING);
     download_.begin();
   }
 }
@@ -225,15 +224,19 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       get_token();
       return 1;
     case BALANCE:
+      (*this)(ConnectionStatus::DOWNLOADING, "balance"sv);
       get_balance();
       return 1;
     case TRADE_BALANCE:
+      (*this)(ConnectionStatus::DOWNLOADING, "trade-balance"sv);
       get_trade_balance();
       return 1;
     case OPEN_POSITIONS:
+      (*this)(ConnectionStatus::DOWNLOADING, "open-positions"sv);
       get_open_positions();
       return 1;
     case OPEN_ORDERS:
+      (*this)(ConnectionStatus::DOWNLOADING, "open-orders"sv);
       get_open_orders();
       return 1;
     case DONE:
