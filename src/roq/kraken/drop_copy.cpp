@@ -190,7 +190,6 @@ void DropCopy::subscribe(std::string_view const &channel) {
       R"(}})"
       R"(}})"sv);
   log::info<3>(R"(request="{}")"sv, message);
-  log::warn(R"(DEBUG request="{}")"sv, message);
   (*connection_).send_text(message);
 }
 
@@ -327,7 +326,6 @@ void DropCopy::operator()(Trace<json::Book> const &) {
 
 void DropCopy::operator()(Trace<json::Balances> const &event) {
   auto &[trace_info, balances] = event;
-  log::warn("DEBUG balances={}"sv, balances);
   for (auto &item : balances.data) {
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
@@ -350,7 +348,6 @@ void DropCopy::operator()(Trace<json::Balances> const &event) {
 
 void DropCopy::operator()(Trace<json::Executions> const &event) {
   auto &[trace_info, executions] = event;
-  log::warn("DEBUG executions={}"sv, executions);
   auto update_type = map(executions.type).get<UpdateType>();
   for (auto &item : executions.data) {
     auto discard = [&]() {

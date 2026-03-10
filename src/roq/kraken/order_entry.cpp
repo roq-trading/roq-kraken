@@ -282,7 +282,6 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
       download_.retry(STATE);
     };
     auto handle_success = [&](auto &body) {
-      log::warn("DEBUG body={}"sv, body);
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
@@ -345,7 +344,6 @@ void OrderEntry::get_balance_ack(Trace<web::rest::Response> const &event, uint32
       download_.retry(STATE);
     };
     auto handle_success = [&](auto &body) {
-      log::warn("DEBUG body={}"sv, body);
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
@@ -421,7 +419,6 @@ void OrderEntry::get_trade_balance_ack(Trace<web::rest::Response> const &event, 
       download_.retry(STATE);
     };
     auto handle_success = [&](auto &body) {
-      log::warn("DEBUG body={}"sv, body);
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
@@ -477,7 +474,6 @@ void OrderEntry::get_open_positions_ack(Trace<web::rest::Response> const &event,
       download_.retry(STATE);
     };
     auto handle_success = [&](auto &body) {
-      log::warn("DEBUG body={}"sv, body);
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
@@ -532,7 +528,6 @@ void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, ui
       download_.retry(STATE);
     };
     auto handle_success = [&](auto &body) {
-      log::warn("DEBUG body={}"sv, body);
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
