@@ -362,7 +362,6 @@ void OrderEntry::operator()(Trace<json::BalanceAck> const &event) {
   log::info<4>("balance_ack={}"sv, balance_ack);
   assert(std::empty(balance_ack.error));
   for (auto &item : balance_ack.result) {
-    log::warn("DEBUG {}={}"sv, item.KEY, item.VALUE);
     auto balance = utils::charconv::from_string_relaxed<double>(item.VALUE);
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
@@ -379,7 +378,6 @@ void OrderEntry::operator()(Trace<json::BalanceAck> const &event) {
         .exchange_sequence = {},
         .sending_time_utc = {},
     };
-    log::warn("DEBUG funds_update={}"sv, funds_update);
     create_trace_and_dispatch(handler_, trace_info, funds_update, true);
   }
 }

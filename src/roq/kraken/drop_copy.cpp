@@ -125,7 +125,6 @@ void DropCopy::operator()(metrics::Writer &writer) const {
 uint16_t DropCopy::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   auto message = json::Encoder::add_order_json(encode_buffer_, event, order, ref_data, request_id, token_);
-  log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
   return stream_id_;
 }
@@ -137,7 +136,6 @@ uint16_t DropCopy::operator()(
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   auto message = json::Encoder::amend_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
-  log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
   return stream_id_;
 }
@@ -149,14 +147,12 @@ uint16_t DropCopy::operator()(
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   auto message = json::Encoder::cancel_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
-  log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
   return stream_id_;
 }
 
 uint16_t DropCopy::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   auto message = json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
-  log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
   return stream_id_;
 }
@@ -257,7 +253,6 @@ void DropCopy::operator()(ConnectionStatus connection_status, std::string_view c
 
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
-    // log::warn("DEBUG message={}"sv, message);
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     TraceInfo trace_info;
     try {
@@ -419,7 +414,6 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
         .update_type = update_type,
         .sending_time_utc = {},
     };
-    log::warn("DEBUG order_update={}"sv, order_update);
     auto user_id = SOURCE_NONE;
     auto order_id = ORDER_ID_NONE;
     auto strategy_id = STRATEGY_ID_NONE;
@@ -496,7 +490,7 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
 
 void DropCopy::operator()(Trace<json::AddOrder> const &event) {
   auto &[trace_info, add_order] = event;
-  log::warn("DEBUG add_order={}"sv, add_order);
+  log::debug("add_order={}"sv, add_order);
   if (std::empty(add_order.error)) {
     // note! using executions
   } else {
@@ -520,7 +514,7 @@ void DropCopy::operator()(Trace<json::AddOrder> const &event) {
 
 void DropCopy::operator()(Trace<json::AmendOrder> const &event) {
   auto &[trace_info, amend_order] = event;
-  log::warn("DEBUG amend_order={}"sv, amend_order);
+  log::debug("amend_order={}"sv, amend_order);
   if (std::empty(amend_order.error)) {
     // note! using executions
   } else {
@@ -544,7 +538,7 @@ void DropCopy::operator()(Trace<json::AmendOrder> const &event) {
 
 void DropCopy::operator()(Trace<json::CancelOrder> const &event) {
   auto &[trace_info, cancel_order] = event;
-  log::warn("DEBUG cancel_order={}"sv, cancel_order);
+  log::debug("cancel_order={}"sv, cancel_order);
   if (std::empty(cancel_order.error)) {
     // note! using executions
   } else {
@@ -568,7 +562,7 @@ void DropCopy::operator()(Trace<json::CancelOrder> const &event) {
 
 void DropCopy::operator()(Trace<json::CancelAll> const &event) {
   auto &[trace_info, cancel_all] = event;
-  log::warn("DEBUG cancel_all={}"sv, cancel_all);
+  log::debug("cancel_all={}"sv, cancel_all);
   // XXX FIXME TODO ack
 }
 
