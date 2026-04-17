@@ -32,12 +32,12 @@ uint64_t pack_req_id(uint8_t user_id, uint64_t order_id) {
 // add-order
 
 std::string_view Encoder::add_order_url(
-    std::string &buffer, CreateOrder const &create_order, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id) {
+    std::string &buffer, CreateOrder const &, server::oms::Order const &, server::oms::RefData const &, [[maybe_unused]] std::string_view const &request_id) {
+  buffer.clear();
+  /*
   auto side = map(create_order.side).template get<Side>();
   auto type = map(create_order.order_type).template get<OrderType>();
   auto reduce_only = false;
-  buffer.clear();
-  /*
   fmt::format_to(
       std::back_inserter(buffer),
       {

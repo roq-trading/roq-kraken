@@ -416,7 +416,7 @@ void OrderEntry::get_trade_balance_ack(Trace<web::rest::Response> const &event, 
       log::warn(R"(account="{}", origin={}, error={}, status={}, text="{}")"sv, account_.name, origin, error, status, text);
       download_.retry(STATE);
     };
-    auto handle_success = [&](auto &body) {
+    auto handle_success = [&]([[maybe_unused]] auto &body) {
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
