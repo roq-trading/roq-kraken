@@ -214,9 +214,9 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   latency_.ping.update(latency.sample);
 }
 
-uint32_t OrderEntry::download(OrderEntryState state) {
+uint32_t OrderEntry::download(State state) {
   switch (state) {
-    using enum OrderEntryState;
+    using enum State;
     case UNDEFINED:
       assert(false);
       break;
@@ -275,7 +275,7 @@ void OrderEntry::get_token() {
 }
 
 void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  auto const STATE = OrderEntryState::TOKEN;
+  auto const STATE = State::TOKEN;
   profile_.get_web_sockets_token([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(account="{}", origin={}, error={}, status={}, text="{}")"sv, account_.name, origin, error, status, text);
@@ -337,7 +337,7 @@ void OrderEntry::get_balance() {
 }
 
 void OrderEntry::get_balance_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  auto const STATE = OrderEntryState::BALANCE;
+  auto const STATE = State::BALANCE;
   profile_.balance_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       log::warn(R"(account="{}", origin={}, error={}, status={}, text="{}")"sv, account_.name, origin, error, status, text);
@@ -410,7 +410,7 @@ void OrderEntry::get_trade_balance() {
 }
 
 void OrderEntry::get_trade_balance_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  auto const STATE = OrderEntryState::TRADE_BALANCE;
+  auto const STATE = State::TRADE_BALANCE;
   profile_.trade_balance_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       log::warn(R"(account="{}", origin={}, error={}, status={}, text="{}")"sv, account_.name, origin, error, status, text);
@@ -465,7 +465,7 @@ void OrderEntry::get_open_positions() {
 }
 
 void OrderEntry::get_open_positions_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  auto const STATE = OrderEntryState::OPEN_POSITIONS;
+  auto const STATE = State::OPEN_POSITIONS;
   profile_.open_positions_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       log::warn(R"(account="{}", origin={}, error={}, status={}, text="{}")"sv, account_.name, origin, error, status, text);
@@ -519,7 +519,7 @@ void OrderEntry::get_open_orders() {
 }
 
 void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  auto const STATE = OrderEntryState::OPEN_ORDERS;
+  auto const STATE = State::OPEN_ORDERS;
   profile_.open_orders_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       log::warn(R"(account="{}", origin={}, error={}, status={}, text="{}")"sv, account_.name, origin, error, status, text);

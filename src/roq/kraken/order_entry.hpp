@@ -21,7 +21,6 @@
 #include "roq/server.hpp"
 
 #include "roq/kraken/account.hpp"
-#include "roq/kraken/order_entry_state.hpp"
 #include "roq/kraken/shared.hpp"
 
 #include "roq/kraken/json/balance_ack.hpp"
@@ -84,7 +83,17 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
-  uint32_t download(OrderEntryState);
+  enum class State {
+    UNDEFINED = 0,
+    TOKEN,
+    BALANCE,
+    TRADE_BALANCE,
+    OPEN_POSITIONS,
+    OPEN_ORDERS,
+    DONE,
+  };
+
+  uint32_t download(State);
 
   void get_token();
   void get_token_ack(Trace<web::rest::Response> const &, uint32_t sequence);
@@ -142,7 +151,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   Shared &shared_;
   // state
   ConnectionStatus connection_status_ = {};
-  core::Download<OrderEntryState> download_;
+  core::Download<State> download_;
 };
 
 }  // namespace kraken
