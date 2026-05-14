@@ -4,6 +4,4 @@ set(SOURCES crypto.cpp)
 
 add_library(${TARGET_NAME} OBJECT ${SOURCES})
 
-add_dependencies(${TARGET_NAME} autogen-headers)
-
 target_link_libraries(${TARGET_NAME} PRIVATE ${PROJECT_NAME}-flags roq-utils::roq-utils fmt::fmt)
