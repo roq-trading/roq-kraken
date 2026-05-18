@@ -12,11 +12,12 @@
 
 #include "roq/kraken/account.hpp"
 #include "roq/kraken/config.hpp"
+#include "roq/kraken/settings.hpp"
+#include "roq/kraken/shared.hpp"
+
 #include "roq/kraken/drop_copy.hpp"
 #include "roq/kraken/market_data.hpp"
 #include "roq/kraken/order_entry.hpp"
-#include "roq/kraken/settings.hpp"
-#include "roq/kraken/shared.hpp"
 
 namespace roq {
 namespace kraken {
@@ -60,6 +61,8 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
 
   void operator()(metrics::Writer &) const override;
 
+  // streams
+
   void operator()(Trace<StreamStatus> const &) override;
   void operator()(Trace<ExternalLatency> const &) override;
   void operator()(Trace<ReferenceData> const &, bool is_last) override;
@@ -75,9 +78,9 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
 
   void operator()(OrderEntry::TokenUpdate &) override;
 
-  void ensure_symbol_slices(size_t size);
-
   // utilities
+
+  void ensure_symbol_slices(size_t size);
 
   template <typename... Args>
   void dispatch(Args &&...);

@@ -63,6 +63,8 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Confi
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(accounts_)} {
 }
 
+// server::Handler
+
 void Gateway::operator()(Event<Start> const &event) {
   log::info("Starting..."sv);
   dispatch(event);
@@ -176,6 +178,8 @@ void Gateway::operator()(metrics::Writer &writer) const {
   dispatch_helper(*this, writer);
 }
 
+// streams
+
 void Gateway::operator()(Trace<StreamStatus> const &event) {
   dispatcher_(event);
 }
@@ -242,7 +246,7 @@ void Gateway::operator()(OrderEntry::TokenUpdate &token_update) {
   }
 }
 
-// helpers
+// utilities
 
 void Gateway::ensure_symbol_slices(size_t size) {
   while (std::size(market_data_) < size) {
