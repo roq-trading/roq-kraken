@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken/settings.hpp"
+#include "roq/kraken/flags/settings.hpp"
 
 #include "roq/logging.hpp"
 
@@ -8,6 +8,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace kraken {
+namespace flags {
 
 Settings::Settings(args::Parser const &args)
     : server::flags::Settings{args, ROQ_PACKAGE_NAME, ROQ_BUILD_NUMBER}, flags::Flags{flags::Flags::create()}, misc{flags::Misc::create()},
@@ -15,5 +16,6 @@ Settings::Settings(args::Parser const &args)
   log::info("settings={}"sv, *this);
 }
 
+}  // namespace flags
 }  // namespace kraken
 }  // namespace roq
