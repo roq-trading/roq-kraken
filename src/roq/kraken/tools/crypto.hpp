@@ -13,8 +13,6 @@
 
 #include "roq/web/http/method.hpp"
 
-#include "roq/kraken/config.hpp"
-
 namespace roq {
 namespace kraken {
 namespace tools {

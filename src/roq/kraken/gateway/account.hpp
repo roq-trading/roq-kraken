@@ -7,12 +7,13 @@
 
 #include "roq/web/http/method.hpp"
 
-#include "roq/kraken/config.hpp"
+#include "roq/kraken/gateway/config.hpp"
 
 #include "roq/kraken/tools/crypto.hpp"
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 struct Account final {
   Account(Config const &, std::string_view const &name);
@@ -29,5 +30,6 @@ struct Account final {
   tools::Crypto crypto_;
 };
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

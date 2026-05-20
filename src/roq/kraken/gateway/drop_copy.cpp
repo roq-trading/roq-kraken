@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken/drop_copy.hpp"
+#include "roq/kraken/gateway/drop_copy.hpp"
 
 #include "roq/mask.hpp"
 
@@ -26,6 +26,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -566,5 +567,6 @@ void DropCopy::operator()(Trace<json::CancelAll> const &event) {
   // XXX FIXME TODO ack
 }
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

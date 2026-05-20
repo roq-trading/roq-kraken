@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "roq/compat.hpp"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,22 +12,27 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/kraken/account.hpp"
-#include "roq/kraken/config.hpp"
-#include "roq/kraken/settings.hpp"
-#include "roq/kraken/shared.hpp"
+#include "roq/kraken/gateway/account.hpp"
+#include "roq/kraken/gateway/config.hpp"
+#include "roq/kraken/gateway/settings.hpp"
+#include "roq/kraken/gateway/shared.hpp"
 
-#include "roq/kraken/drop_copy.hpp"
-#include "roq/kraken/market_data.hpp"
-#include "roq/kraken/order_entry.hpp"
+#include "roq/kraken/gateway/drop_copy.hpp"
+#include "roq/kraken/gateway/market_data.hpp"
+#include "roq/kraken/gateway/order_entry.hpp"
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
-struct Gateway final : public server::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
-  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+struct Controller final : public server::Handler, public OrderEntry::Handler, public MarketData::Handler, public DropCopy::Handler {
+  ROQ_PUBLIC static std::unique_ptr<server::Handler> create(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
-  Gateway(Gateway const &) = delete;
+  Controller(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+
+  Controller(Controller const &) = delete;
+
+  virtual ~Controller() = default;
 
  protected:
   // server::Handler
@@ -109,5 +116,6 @@ struct Gateway final : public server::Handler, public OrderEntry::Handler, publi
   std::vector<MBPUpdate> bids_, asks_;
 };
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

@@ -5,6 +5,8 @@
 #include <random>
 #include <vector>
 
+#include <fmt/chrono.h>
+
 #include "roq/logging.hpp"
 
 #include "roq/clock.hpp"

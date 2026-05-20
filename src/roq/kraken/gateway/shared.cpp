@@ -1,11 +1,12 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken/shared.hpp"
+#include "roq/kraken/gateway/shared.hpp"
 
 using namespace std::literals;
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -20,5 +21,6 @@ std::string_view Shared::next_request_id() {
   return request_id_encode_buffer_;
 }
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

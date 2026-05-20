@@ -1,9 +1,10 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken/account.hpp"
+#include "roq/kraken/gateway/account.hpp"
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -19,5 +20,6 @@ std::string Account::create_headers(web::http::Method method, std::string_view c
   return crypto_.create_headers(method, path, body);
 }
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

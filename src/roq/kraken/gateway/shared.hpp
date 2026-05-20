@@ -10,11 +10,12 @@
 
 #include "roq/core/symbols.hpp"
 
-#include "roq/kraken/api.hpp"
-#include "roq/kraken/settings.hpp"
+#include "roq/kraken/gateway/api.hpp"
+#include "roq/kraken/gateway/settings.hpp"
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 struct Shared final {
   Shared(server::Dispatcher &, Settings const &);
@@ -55,5 +56,6 @@ struct Shared final {
   utils::unordered_set<std::string> all_symbols;
 };
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

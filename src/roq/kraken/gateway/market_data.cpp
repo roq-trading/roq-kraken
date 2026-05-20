@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/kraken/market_data.hpp"
+#include "roq/kraken/gateway/market_data.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -24,6 +24,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -559,5 +560,6 @@ void MarketData::operator()(Trace<json::CancelAll> const &) {
   log::fatal("Unexpected"sv);
 }
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

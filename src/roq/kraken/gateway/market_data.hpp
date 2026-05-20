@@ -20,12 +20,13 @@
 
 #include "roq/server.hpp"
 
-#include "roq/kraken/shared.hpp"
+#include "roq/kraken/gateway/shared.hpp"
 
 #include "roq/kraken/json/parser.hpp"
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 struct MarketData final : public web::socket::Client::Handler, public json::Parser::Handler {
   struct SymbolsUpdate final {
@@ -131,5 +132,6 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   ConnectionStatus connection_status_ = {};
 };
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq

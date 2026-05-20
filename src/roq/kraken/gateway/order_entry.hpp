@@ -20,8 +20,8 @@
 
 #include "roq/server.hpp"
 
-#include "roq/kraken/account.hpp"
-#include "roq/kraken/shared.hpp"
+#include "roq/kraken/gateway/account.hpp"
+#include "roq/kraken/gateway/shared.hpp"
 
 #include "roq/kraken/json/balance_ack.hpp"
 #include "roq/kraken/json/open_orders_ack.hpp"
@@ -31,6 +31,7 @@
 
 namespace roq {
 namespace kraken {
+namespace gateway {
 
 struct OrderEntry final : public web::rest::Client::Handler {
   struct TokenUpdate final {
@@ -154,5 +155,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
   core::Download<State> download_;
 };
 
+}  // namespace gateway
 }  // namespace kraken
 }  // namespace roq
