@@ -1,0 +1,10 @@
+{
+  "name": "roq/kraken/protocol/json/CancelAllResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "count",
+      "type": "std/int32"
+    }
+  ]
+}

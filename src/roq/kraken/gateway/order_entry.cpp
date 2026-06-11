@@ -18,7 +18,7 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
-#include "roq/kraken/json/map.hpp"
+#include "roq/kraken/protocol/json/map.hpp"
 
 using namespace std::literals;
 
@@ -286,7 +286,7 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::TokenAck token_ack{body, decode_buffer_};
+        protocol::json::TokenAck token_ack{body, decode_buffer_};
         if (std::empty(token_ack.error)) {
           Trace event_2{event, token_ack};
           (*this)(event_2);
@@ -300,7 +300,7 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
   });
 }
 
-void OrderEntry::operator()(Trace<json::TokenAck> const &event) {
+void OrderEntry::operator()(Trace<protocol::json::TokenAck> const &event) {
   auto &[trace_info, token_ack] = event;
   log::info<2>(R"(token_ack={})"sv, token_ack);
   auto token_update = TokenUpdate{
@@ -348,7 +348,7 @@ void OrderEntry::get_balance_ack(Trace<web::rest::Response> const &event, uint32
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::BalanceAck balance_ack{body, decode_buffer_};
+        protocol::json::BalanceAck balance_ack{body, decode_buffer_};
         Trace event_2{event, balance_ack};
         (*this)(event_2);
         download_.check(STATE);
@@ -358,7 +358,7 @@ void OrderEntry::get_balance_ack(Trace<web::rest::Response> const &event, uint32
   });
 }
 
-void OrderEntry::operator()(Trace<json::BalanceAck> const &event) {
+void OrderEntry::operator()(Trace<protocol::json::BalanceAck> const &event) {
   auto &[trace_info, balance_ack] = event;
   log::info<4>("balance_ack={}"sv, balance_ack);
   assert(std::empty(balance_ack.error));
@@ -422,7 +422,7 @@ void OrderEntry::get_trade_balance_ack(Trace<web::rest::Response> const &event, 
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
         // XXX FIXME TODO need key-double autogen
-        // json::TradeBalanceAck trade_balance_ack{body, decode_buffer_};
+        // protocol::json::TradeBalanceAck trade_balance_ack{body, decode_buffer_};
         // Trace event_2{event, trade_balance_ack};
         // (*this)(event_2);
         download_.check(STATE);
@@ -432,7 +432,7 @@ void OrderEntry::get_trade_balance_ack(Trace<web::rest::Response> const &event, 
   });
 }
 
-void OrderEntry::operator()(Trace<json::TradeBalanceAck> const &event) {
+void OrderEntry::operator()(Trace<protocol::json::TradeBalanceAck> const &event) {
   auto &[trace_info, trade_balance_ack] = event;
   log::info<4>("trade_balance_ack={}"sv, trade_balance_ack);
   assert(std::empty(trade_balance_ack.error));
@@ -476,7 +476,7 @@ void OrderEntry::get_open_positions_ack(Trace<web::rest::Response> const &event,
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::OpenPositionsAck open_positions_ack{body, decode_buffer_};
+        protocol::json::OpenPositionsAck open_positions_ack{body, decode_buffer_};
         Trace event_2{event, open_positions_ack};
         (*this)(event_2);
         download_.check(STATE);
@@ -486,7 +486,7 @@ void OrderEntry::get_open_positions_ack(Trace<web::rest::Response> const &event,
   });
 }
 
-void OrderEntry::operator()(Trace<json::OpenPositionsAck> const &event) {
+void OrderEntry::operator()(Trace<protocol::json::OpenPositionsAck> const &event) {
   auto &[trace_info, open_positions_ack] = event;
   log::info<4>("open_positions_ack={}"sv, open_positions_ack);
   assert(std::empty(open_positions_ack.error));
@@ -530,7 +530,7 @@ void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, ui
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::OpenOrdersAck open_orders_ack{body, decode_buffer_};
+        protocol::json::OpenOrdersAck open_orders_ack{body, decode_buffer_};
         Trace event_2{event, open_orders_ack};
         (*this)(event_2);
         download_.check(STATE);
@@ -540,7 +540,7 @@ void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, ui
   });
 }
 
-void OrderEntry::operator()(Trace<json::OpenOrdersAck> const &event) {
+void OrderEntry::operator()(Trace<protocol::json::OpenOrdersAck> const &event) {
   auto &[trace_info, open_orders_ack] = event;
   log::info<4>("open_orders_ack={}"sv, open_orders_ack);
   assert(std::empty(open_orders_ack.error));

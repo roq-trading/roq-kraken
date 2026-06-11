@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::CancelOrder;
+using value_type = protocol::json::CancelOrder;
 
 TEST_CASE("failure", "[json_cancel_order]") {
   auto message = R"({)"

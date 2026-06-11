@@ -1,0 +1,12 @@
+{
+  "name": "roq/kraken/protocol/json/Side",
+  "type": "enum",
+  "values": [
+    {
+      "name": "buy"
+    },
+    {
+      "name": "sell"
+    }
+  ]
+}

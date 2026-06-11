@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Heartbeat;
+using value_type = protocol::json::Heartbeat;
 
 TEST_CASE("snapshot", "[json_heartbeat]") {
   auto message = R"({)"

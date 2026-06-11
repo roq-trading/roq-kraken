@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken/protocol/json/BookDataBidsAsksItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "qty",
+      "type": "std/double"
+    }
+  ]
+}

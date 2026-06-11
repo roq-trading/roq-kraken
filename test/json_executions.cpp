@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Executions;
+using value_type = protocol::json::Executions;
 
 TEST_CASE("snapshot_empty", "[json_executions]") {
   auto message = R"({)"
@@ -22,7 +22,7 @@ TEST_CASE("snapshot_empty", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::SNAPSHOT);
+    CHECK(obj.type == protocol::json::Type::SNAPSHOT);
     REQUIRE(std::empty(obj.data));
     CHECK(obj.sequence == 1);
   };
@@ -60,7 +60,7 @@ TEST_CASE("snapshot_trade", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::SNAPSHOT);
+    CHECK(obj.type == protocol::json::Type::SNAPSHOT);
     REQUIRE(std::size(obj.data) == 1);
     CHECK(obj.sequence == 1);
   };
@@ -94,7 +94,7 @@ TEST_CASE("pending_new", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 2);
@@ -118,7 +118,7 @@ TEST_CASE("new", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 3);
@@ -148,7 +148,7 @@ TEST_CASE("amended_price", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 4);
@@ -178,7 +178,7 @@ TEST_CASE("amended_quantity", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 5);
@@ -208,7 +208,7 @@ TEST_CASE("canceled", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 6);
@@ -250,7 +250,7 @@ TEST_CASE("trade_and_partially_filled", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 4);
@@ -278,7 +278,7 @@ TEST_CASE("filled", "[json_executions]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "executions"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     //
     CHECK(obj.sequence == 5);

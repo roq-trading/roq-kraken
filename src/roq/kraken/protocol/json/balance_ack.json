@@ -1,0 +1,19 @@
+{
+  "name": "roq/kraken/protocol/json/BalanceAck",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "error",
+      "type": "std/string_view",
+      "array": "std/span",
+      "required": false
+    },
+    {
+      "name": "result",
+      "type": "roq/kraken/protocol/json/BalanceAckResultItem",
+      "array": "std/span",
+      "map": true,
+      "required": false
+    }
+  ]
+}

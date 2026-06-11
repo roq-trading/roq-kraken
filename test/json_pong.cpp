@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Pong;
+using value_type = protocol::json::Pong;
 
 TEST_CASE("snapshot", "[json_pong]") {
   auto message = R"({)"

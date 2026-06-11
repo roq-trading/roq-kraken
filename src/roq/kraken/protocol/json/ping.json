@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken/protocol/json/Ping",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "event",
+      "type": "std/string_view"
+    },
+    {
+      "name": "reqid",
+      "type": "std/int64"
+    }
+  ]
+}

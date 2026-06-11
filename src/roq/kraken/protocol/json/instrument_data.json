@@ -1,0 +1,16 @@
+{
+  "name": "roq/kraken/protocol/json/InstrumentData",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "assets",
+      "type": "roq/kraken/protocol/json/InstrumentDataAssetsItem",
+      "array": "std/span"
+    },
+    {
+      "name": "pairs",
+      "type": "roq/kraken/protocol/json/InstrumentDataPairsItem",
+      "array": "std/span"
+    }
+  ]
+}

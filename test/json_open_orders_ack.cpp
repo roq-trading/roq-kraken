@@ -4,14 +4,14 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken/json/open_orders_ack.hpp"
+#include "roq/kraken/protocol/json/open_orders_ack.hpp"
 
 using namespace roq;
 using namespace roq::kraken;
 
 using namespace std::literals;
 
-using value_type = json::OpenOrdersAck;
+using value_type = protocol::json::OpenOrdersAck;
 
 TEST_CASE("simple", "[json_open_orders_ack]") {
   auto message = R"({)"

@@ -9,7 +9,7 @@ using namespace roq::kraken;
 
 using namespace std::literals;
 
-using value_type = json::Subscribe;
+using value_type = protocol::json::Subscribe;
 
 TEST_CASE("error", "[json_subscribe]") {
   auto message = R"({)"

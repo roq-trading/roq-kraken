@@ -1,0 +1,19 @@
+{
+  "name": "roq/kraken/protocol/json/Trade",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "channel",
+      "type": "std/string_view"
+    },
+    {
+      "name": "type",
+      "type": "roq/kraken/protocol/json/Type"
+    },
+    {
+      "name": "data",
+      "type": "roq/kraken/protocol/json/TradeDataItem",
+      "array": "std/span"
+    }
+  ]
+}

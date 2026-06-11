@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Balances;
+using value_type = protocol::json::Balances;
 
 TEST_CASE("empty", "[json_balances]") {
   auto message = R"({)"
@@ -33,7 +33,7 @@ TEST_CASE("empty", "[json_balances]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "balances"sv);
-    CHECK(obj.type == json::Type::SNAPSHOT);
+    CHECK(obj.type == protocol::json::Type::SNAPSHOT);
     REQUIRE(std::size(obj.data) == 1);
     auto &d0 = obj.data[0];
     CHECK(d0.asset == "USDT"sv);
@@ -71,7 +71,7 @@ TEST_CASE("leg_1", "[json_balances]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "balances"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     auto &d0 = obj.data[0];
     CHECK(d0.ledger_id == "LMP34Z-UOZMC-XNSVXD"sv);
@@ -113,7 +113,7 @@ TEST_CASE("leg_2", "[json_balances]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "balances"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
     REQUIRE(std::size(obj.data) == 1);
     auto &d0 = obj.data[0];
     CHECK(d0.ledger_id == "LKZ5PE-XN427-KNE4XP"sv);

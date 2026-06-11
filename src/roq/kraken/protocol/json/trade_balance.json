@@ -1,0 +1,18 @@
+{
+  "name": "roq/kraken/protocol/json/TradeBalance",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "error",
+      "type": "std/string_view",
+      "array": "std/span",
+      "required": false
+    },
+    {
+      "name": "result",
+      "type": "roq/kraken/protocol/json/TradeBalanceItem",
+      "array": "std/span",
+      "required": false
+    }
+  ]
+}

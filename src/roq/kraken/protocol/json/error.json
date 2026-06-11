@@ -1,0 +1,30 @@
+{
+  "name": "roq/kraken/protocol/json/Error",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "method",
+      "type": "std/string_view"
+    },
+    {
+      "name": "success",
+      "type": "std/bool"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "time_in",
+      "type": "std/microseconds"
+    },
+    {
+      "name": "time_out",
+      "type": "std/microseconds"
+    }
+  ]
+}

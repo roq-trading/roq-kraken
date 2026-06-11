@@ -1,0 +1,10 @@
+{
+  "name": "roq/kraken/protocol/json/Heartbeat",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "channel",
+      "type": "std/string_view"
+    }
+  ]
+}

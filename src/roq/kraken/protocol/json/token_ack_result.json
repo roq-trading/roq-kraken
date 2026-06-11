@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken/protocol/json/TokenAckResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "token",
+      "type": "std/string_view"
+    },
+    {
+      "name": "expires",
+      "type": "std/int64"
+    }
+  ]
+}

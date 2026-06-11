@@ -21,13 +21,13 @@
 #include "roq/kraken/gateway/account.hpp"
 #include "roq/kraken/gateway/shared.hpp"
 
-#include "roq/kraken/json/parser.hpp"
+#include "roq/kraken/protocol/json/parser.hpp"
 
 namespace roq {
 namespace kraken {
 namespace gateway {
 
-struct DropCopy final : public web::socket::Client::Handler, public json::Parser::Handler {
+struct DropCopy final : public web::socket::Client::Handler, public protocol::json::Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
@@ -81,28 +81,28 @@ struct DropCopy final : public web::socket::Client::Handler, public json::Parser
 
   void parse(std::string_view const &message);
 
-  // json::Parser::Handler
+  // protocol::json::Parser::Handler
 
-  void operator()(Trace<json::Status> const &) override;
-  void operator()(Trace<json::Heartbeat> const &) override;
+  void operator()(Trace<protocol::json::Status> const &) override;
+  void operator()(Trace<protocol::json::Heartbeat> const &) override;
 
-  void operator()(Trace<json::Error> const &) override;
-  void operator()(Trace<json::Pong> const &) override;
-  void operator()(Trace<json::Subscribe> const &) override;
+  void operator()(Trace<protocol::json::Error> const &) override;
+  void operator()(Trace<protocol::json::Pong> const &) override;
+  void operator()(Trace<protocol::json::Subscribe> const &) override;
 
-  void operator()(Trace<json::Instrument> const &) override;
+  void operator()(Trace<protocol::json::Instrument> const &) override;
 
-  void operator()(Trace<json::Ticker> const &) override;
-  void operator()(Trace<json::Trade> const &) override;
-  void operator()(Trace<json::Book> const &) override;
+  void operator()(Trace<protocol::json::Ticker> const &) override;
+  void operator()(Trace<protocol::json::Trade> const &) override;
+  void operator()(Trace<protocol::json::Book> const &) override;
 
-  void operator()(Trace<json::Balances> const &) override;
-  void operator()(Trace<json::Executions> const &) override;
+  void operator()(Trace<protocol::json::Balances> const &) override;
+  void operator()(Trace<protocol::json::Executions> const &) override;
 
-  void operator()(Trace<json::AddOrder> const &) override;
-  void operator()(Trace<json::AmendOrder> const &) override;
-  void operator()(Trace<json::CancelOrder> const &) override;
-  void operator()(Trace<json::CancelAll> const &) override;
+  void operator()(Trace<protocol::json::AddOrder> const &) override;
+  void operator()(Trace<protocol::json::AmendOrder> const &) override;
+  void operator()(Trace<protocol::json::CancelOrder> const &) override;
+  void operator()(Trace<protocol::json::CancelAll> const &) override;
 
  private:
   Handler &handler_;

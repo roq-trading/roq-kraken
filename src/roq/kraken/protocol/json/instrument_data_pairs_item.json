@@ -1,0 +1,78 @@
+{
+  "name": "roq/kraken/protocol/json/InstrumentDataPairsItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "base",
+      "type": "std/string_view"
+    },
+    {
+      "name": "quote",
+      "type": "std/string_view"
+    },
+    {
+      "name": "status",
+      "type": "roq/kraken/protocol/json/PairsStatus"
+    },
+    {
+      "name": "qty_precision",
+      "type": "std/int32"
+    },
+    {
+      "name": "qty_increment",
+      "type": "std/double"
+    },
+    {
+      "name": "price_precision",
+      "type": "std/int32"
+    },
+    {
+      "name": "cost_precision",
+      "type": "std/int32"
+    },
+    {
+      "name": "marginable",
+      "type": "std/bool"
+    },
+    {
+      "name": "has_index",
+      "type": "std/bool"
+    },
+    {
+      "name": "ws_display_price_precision",
+      "type": "std/int32"
+    },
+    {
+      "name": "cost_min",
+      "type": "std/double"
+    },
+    {
+      "name": "tick_size",
+      "type": "std/double"
+    },
+    {
+      "name": "price_increment",
+      "type": "std/double"
+    },
+    {
+      "name": "qty_min",
+      "type": "std/double"
+    },
+    {
+      "name": "margin_initial",
+      "type": "std/double"
+    },
+    {
+      "name": "position_limit_long",
+      "type": "std/double"
+    },
+    {
+      "name": "position_limit_short",
+      "type": "std/double"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "roq/kraken/protocol/json/TimeInForce",
+  "type": "enum",
+  "values": [
+    {
+      "name": "gtc"
+    },
+    {
+      "name": "gtd"
+    },
+    {
+      "name": "ioc"
+    }
+  ]
+}

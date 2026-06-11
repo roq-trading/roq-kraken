@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::AddOrder;
+using value_type = protocol::json::AddOrder;
 
 TEST_CASE("failure", "[json_add_order]") {
   auto message = R"({)"

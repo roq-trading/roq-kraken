@@ -18,9 +18,9 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
-#include "roq/kraken/json/encoder.hpp"
-#include "roq/kraken/json/map.hpp"
-#include "roq/kraken/json/utils.hpp"
+#include "roq/kraken/protocol/json/encoder.hpp"
+#include "roq/kraken/protocol/json/map.hpp"
+#include "roq/kraken/protocol/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -125,7 +125,7 @@ void DropCopy::operator()(metrics::Writer &writer) const {
 
 uint16_t DropCopy::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
-  auto message = json::Encoder::add_order_json(encode_buffer_, event, order, ref_data, request_id, token_);
+  auto message = protocol::json::Encoder::add_order_json(encode_buffer_, event, order, ref_data, request_id, token_);
   (*connection_).send_text(message);
   return stream_id_;
 }
@@ -136,7 +136,7 @@ uint16_t DropCopy::operator()(
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  auto message = json::Encoder::amend_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
+  auto message = protocol::json::Encoder::amend_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
   (*connection_).send_text(message);
   return stream_id_;
 }
@@ -147,13 +147,13 @@ uint16_t DropCopy::operator()(
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  auto message = json::Encoder::cancel_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
+  auto message = protocol::json::Encoder::cancel_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
   (*connection_).send_text(message);
   return stream_id_;
 }
 
 uint16_t DropCopy::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
-  auto message = json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
+  auto message = protocol::json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
   (*connection_).send_text(message);
   return stream_id_;
 }
@@ -257,7 +257,7 @@ void DropCopy::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     TraceInfo trace_info;
     try {
-      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!protocol::json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -267,27 +267,27 @@ void DropCopy::parse(std::string_view const &message) {
   });
 }
 
-// json::Parser::Handler
+// protocol::json::Parser::Handler
 
-void DropCopy::operator()(Trace<json::Status> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Status> const &event) {
   auto &[trace_info, status] = event;
   log::info("status={}"sv, status);
   (*this)(ConnectionStatus::READY);
   subscribe();  // note!
 }
 
-void DropCopy::operator()(Trace<json::Heartbeat> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Heartbeat> const &event) {
   auto &[trace_info, heartbeat] = event;
   log::info<5>("heartbeat={}"sv, heartbeat);
   (*connection_).touch(trace_info.source_receive_time);
 }
 
-void DropCopy::operator()(Trace<json::Error> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::error("error={}"sv, error);
 }
 
-void DropCopy::operator()(Trace<json::Pong> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Pong> const &event) {
   auto &[trace_info, pong] = event;
   log::info<5>("pong={}"sv, pong);
   auto external_latency = trace_info.origin_create_time - std::chrono::nanoseconds{pong.req_id};
@@ -295,7 +295,7 @@ void DropCopy::operator()(Trace<json::Pong> const &event) {
   (*connection_).touch(trace_info.source_receive_time);
 }
 
-void DropCopy::operator()(Trace<json::Subscribe> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   if (subscribe.success) {
     log::info<5>("subscribe={}"sv, subscribe);
@@ -304,23 +304,23 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   }
 }
 
-void DropCopy::operator()(Trace<json::Instrument> const &) {
+void DropCopy::operator()(Trace<protocol::json::Instrument> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Ticker> const &) {
+void DropCopy::operator()(Trace<protocol::json::Ticker> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Trade> const &) {
+void DropCopy::operator()(Trace<protocol::json::Trade> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Book> const &) {
+void DropCopy::operator()(Trace<protocol::json::Book> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Balances> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Balances> const &event) {
   auto &[trace_info, balances] = event;
   for (auto &item : balances.data) {
     auto funds_update = FundsUpdate{
@@ -342,13 +342,13 @@ void DropCopy::operator()(Trace<json::Balances> const &event) {
   }
 }
 
-void DropCopy::operator()(Trace<json::Executions> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Executions> const &event) {
   auto &[trace_info, executions] = event;
   auto update_type = map(executions.type).get<UpdateType>();
   for (auto &item : executions.data) {
     auto discard = [&]() {
       switch (item.exec_type) {
-        using enum json::ExecType::type_t;
+        using enum protocol::json::ExecType::type_t;
         case UNDEFINED_INTERNAL:
         case UNKNOWN_INTERNAL:
           break;
@@ -365,7 +365,7 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
         case STATUS:  // ???
           break;
       }
-      return executions.type == json::Type::SNAPSHOT;
+      return executions.type == protocol::json::Type::SNAPSHOT;
     }();
     if (discard) {
       continue;  // note!
@@ -426,7 +426,7 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
     } else {
       log::warn("*** EXTERNAL ORDER ***"sv);
     }
-    if (item.exec_type == json::ExecType::TRADE && user_id != SOURCE_NONE) {
+    if (item.exec_type == protocol::json::ExecType::TRADE && user_id != SOURCE_NONE) {
       auto fill = Fill{
           .exchange_time_utc = item.timestamp,
           .external_trade_id = {},
@@ -465,7 +465,7 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
     }
     /*
     switch (item.exec_type) {
-      using json::ExecType::type_t;
+      using protocol::json::ExecType::type_t;
       case UNDEFINED_INTERNAL:
         break;
       case UNKNOWN_INTERNAL:
@@ -489,13 +489,13 @@ void DropCopy::operator()(Trace<json::Executions> const &event) {
   }
 }
 
-void DropCopy::operator()(Trace<json::AddOrder> const &event) {
+void DropCopy::operator()(Trace<protocol::json::AddOrder> const &event) {
   auto &[trace_info, add_order] = event;
   log::debug("add_order={}"sv, add_order);
   if (std::empty(add_order.error)) {
     // note! using executions
   } else {
-    auto error = json::guess_error(add_order.error);
+    auto error = protocol::json::guess_error(add_order.error);
     auto response = server::oms::Response{
         .request_type = RequestType::CREATE_ORDER,
         .origin = Origin::EXCHANGE,
@@ -508,18 +508,18 @@ void DropCopy::operator()(Trace<json::AddOrder> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    auto [user_id, order_id] = json::Encoder::unpack_req_id(add_order.req_id);
+    auto [user_id, order_id] = protocol::json::Encoder::unpack_req_id(add_order.req_id);
     shared_.update_order(user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
   }
 }
 
-void DropCopy::operator()(Trace<json::AmendOrder> const &event) {
+void DropCopy::operator()(Trace<protocol::json::AmendOrder> const &event) {
   auto &[trace_info, amend_order] = event;
   log::debug("amend_order={}"sv, amend_order);
   if (std::empty(amend_order.error)) {
     // note! using executions
   } else {
-    auto error = json::guess_error(amend_order.error);
+    auto error = protocol::json::guess_error(amend_order.error);
     auto response = server::oms::Response{
         .request_type = RequestType::MODIFY_ORDER,
         .origin = Origin::EXCHANGE,
@@ -532,18 +532,18 @@ void DropCopy::operator()(Trace<json::AmendOrder> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    auto [user_id, order_id] = json::Encoder::unpack_req_id(amend_order.req_id);
+    auto [user_id, order_id] = protocol::json::Encoder::unpack_req_id(amend_order.req_id);
     shared_.update_order(user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
   }
 }
 
-void DropCopy::operator()(Trace<json::CancelOrder> const &event) {
+void DropCopy::operator()(Trace<protocol::json::CancelOrder> const &event) {
   auto &[trace_info, cancel_order] = event;
   log::debug("cancel_order={}"sv, cancel_order);
   if (std::empty(cancel_order.error)) {
     // note! using executions
   } else {
-    auto error = json::guess_error(cancel_order.error);
+    auto error = protocol::json::guess_error(cancel_order.error);
     auto response = server::oms::Response{
         .request_type = RequestType::CANCEL_ORDER,
         .origin = Origin::EXCHANGE,
@@ -556,12 +556,12 @@ void DropCopy::operator()(Trace<json::CancelOrder> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    auto [user_id, order_id] = json::Encoder::unpack_req_id(cancel_order.req_id);
+    auto [user_id, order_id] = protocol::json::Encoder::unpack_req_id(cancel_order.req_id);
     shared_.update_order(user_id, order_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {});
   }
 }
 
-void DropCopy::operator()(Trace<json::CancelAll> const &event) {
+void DropCopy::operator()(Trace<protocol::json::CancelAll> const &event) {
   auto &[trace_info, cancel_all] = event;
   log::debug("cancel_all={}"sv, cancel_all);
   // XXX FIXME TODO ack

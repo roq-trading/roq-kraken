@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Error;
+using value_type = protocol::json::Error;
 
 TEST_CASE("malformed_request", "[json_error]") {
   auto message = R"({)"

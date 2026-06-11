@@ -4,14 +4,14 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken/json/balance_ack.hpp"
+#include "roq/kraken/protocol/json/balance_ack.hpp"
 
 using namespace roq;
 using namespace roq::kraken;
 
 using namespace std::literals;
 
-using value_type = json::BalanceAck;
+using value_type = protocol::json::BalanceAck;
 
 TEST_CASE("simple", "[json_balance_ack]") {
   auto const message = R"({)"

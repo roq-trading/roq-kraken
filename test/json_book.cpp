@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Book;
+using value_type = protocol::json::Book;
 
 TEST_CASE("snapshot", "[json_book]") {
   auto message = R"({)"
@@ -50,7 +50,7 @@ TEST_CASE("snapshot", "[json_book]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "book"sv);
-    CHECK(obj.type == json::Type::SNAPSHOT);
+    CHECK(obj.type == protocol::json::Type::SNAPSHOT);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 2);
 }
@@ -72,7 +72,7 @@ TEST_CASE("update", "[json_book]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "book"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 2);
 }
@@ -132,7 +132,7 @@ TEST_CASE("strange", "[json_book]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "book"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 2);
 }

@@ -1,0 +1,62 @@
+{
+  "name": "roq/kraken/protocol/json/TickerDataItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "bid",
+      "type": "std/double"
+    },
+    {
+      "name": "bid_qty",
+      "type": "std/double"
+    },
+    {
+      "name": "ask",
+      "type": "std/double"
+    },
+    {
+      "name": "ask_qty",
+      "type": "std/double"
+    },
+    {
+      "name": "last",
+      "type": "std/double"
+    },
+    {
+      "name": "volume",
+      "type": "std/double"
+    },
+    {
+      "name": "vwap",
+      "type": "std/double"
+    },
+    {
+      "name": "low",
+      "type": "std/double"
+    },
+    {
+      "name": "high",
+      "type": "std/double"
+    },
+    {
+      "name": "change",
+      "type": "std/double"
+    },
+    {
+      "name": "change_pct",
+      "type": "std/double"
+    },
+    {
+      "name": "volume_usd",
+      "type": "std/double"
+    },
+    {
+      "name": "timestamp",
+      "type": "std/microseconds"
+    }
+  ]
+}

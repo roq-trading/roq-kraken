@@ -9,7 +9,7 @@ using namespace roq::kraken;
 
 using namespace std::literals;
 
-using value_type = json::Status;
+using value_type = protocol::json::Status;
 
 TEST_CASE("simple", "[json_status]") {
   auto message = R"({)"

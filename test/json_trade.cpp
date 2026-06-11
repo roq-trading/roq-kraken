@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Trade;
+using value_type = protocol::json::Trade;
 
 TEST_CASE("update", "[json_trade]") {
   auto message = R"({)"
@@ -30,7 +30,7 @@ TEST_CASE("update", "[json_trade]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "trade"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

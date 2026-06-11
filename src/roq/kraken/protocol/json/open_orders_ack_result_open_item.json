@@ -1,0 +1,78 @@
+{
+  "name": "roq/kraken/protocol/json/OpenOrdersAckResultOpenItem",
+  "type": "key_value",
+  "values": [
+    {
+      "name": "refid",
+      "type": "std/string_view"
+    },
+    {
+      "name": "userref",
+      "type": "std/string_view"
+    },
+    {
+      "name": "cl_ord_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "status",
+      "type": "std/string_view"
+    },
+    {
+      "name": "opentm",
+      "type": "std/microseconds"
+    },
+    {
+      "name": "starttm",
+      "type": "std/microseconds"
+    },
+    {
+      "name": "expiretm",
+      "type": "std/microseconds"
+    },
+    {
+      "name": "descr",
+      "type": "roq/kraken/protocol/json/OpenOrdersAckResultOpenItemDescr"
+    },
+    {
+      "name": "vol",
+      "type": "std/double"
+    },
+    {
+      "name": "vol_exec",
+      "type": "std/double"
+    },
+    {
+      "name": "cost",
+      "type": "std/double"
+    },
+    {
+      "name": "fee",
+      "type": "std/double"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "stopprice",
+      "type": "std/double"
+    },
+    {
+      "name": "limitprice",
+      "type": "std/double"
+    },
+    {
+      "name": "misc",
+      "type": "std/string_view"
+    },
+    {
+      "name": "oflags",
+      "type": "std/string_view"
+    },
+    {
+      "name": "time_in_force",
+      "type": "roq/kraken/protocol/json/TimeInForce"
+    }
+  ]
+}

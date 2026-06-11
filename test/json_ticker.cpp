@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Ticker;
+using value_type = protocol::json::Ticker;
 
 TEST_CASE("snapshot", "[json_ticker]") {
   auto message = R"({)"
@@ -37,7 +37,7 @@ TEST_CASE("snapshot", "[json_ticker]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "ticker"sv);
-    CHECK(obj.type == json::Type::SNAPSHOT);
+    CHECK(obj.type == protocol::json::Type::SNAPSHOT);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
@@ -66,7 +66,7 @@ TEST_CASE("update", "[json_ticker]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "ticker"sv);
-    CHECK(obj.type == json::Type::UPDATE);
+    CHECK(obj.type == protocol::json::Type::UPDATE);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

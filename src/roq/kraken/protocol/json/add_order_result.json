@@ -1,0 +1,14 @@
+{
+  "name": "roq/kraken/protocol/json/AddOrderResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "cl_ord_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "order_id",
+      "type": "std/string_view"
+    }
+  ]
+}

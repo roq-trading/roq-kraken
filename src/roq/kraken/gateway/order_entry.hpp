@@ -23,11 +23,11 @@
 #include "roq/kraken/gateway/account.hpp"
 #include "roq/kraken/gateway/shared.hpp"
 
-#include "roq/kraken/json/balance_ack.hpp"
-#include "roq/kraken/json/open_orders_ack.hpp"
-#include "roq/kraken/json/open_positions_ack.hpp"
-#include "roq/kraken/json/token_ack.hpp"
-#include "roq/kraken/json/trade_balance_ack.hpp"
+#include "roq/kraken/protocol/json/balance_ack.hpp"
+#include "roq/kraken/protocol/json/open_orders_ack.hpp"
+#include "roq/kraken/protocol/json/open_positions_ack.hpp"
+#include "roq/kraken/protocol/json/token_ack.hpp"
+#include "roq/kraken/protocol/json/trade_balance_ack.hpp"
 
 namespace roq {
 namespace kraken {
@@ -98,23 +98,23 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   void get_token();
   void get_token_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::TokenAck> const &);
+  void operator()(Trace<protocol::json::TokenAck> const &);
 
   void get_balance();
   void get_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::BalanceAck> const &);
+  void operator()(Trace<protocol::json::BalanceAck> const &);
 
   void get_trade_balance();
   void get_trade_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::TradeBalanceAck> const &);
+  void operator()(Trace<protocol::json::TradeBalanceAck> const &);
 
   void get_open_positions();
   void get_open_positions_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::OpenPositionsAck> const &);
+  void operator()(Trace<protocol::json::OpenPositionsAck> const &);
 
   void get_open_orders();
   void get_open_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::OpenOrdersAck> const &);
+  void operator()(Trace<protocol::json::OpenOrdersAck> const &);
 
   // helpers
 

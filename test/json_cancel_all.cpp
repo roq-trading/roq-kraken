@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::CancelAll;
+using value_type = protocol::json::CancelAll;
 
 TEST_CASE("success", "[json_cancel_all]") {
   auto message = R"({)"

@@ -4,14 +4,14 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/kraken/json/token_ack.hpp"
+#include "roq/kraken/protocol/json/token_ack.hpp"
 
 using namespace roq;
 using namespace roq::kraken;
 
 using namespace std::literals;
 
-using value_type = json::TokenAck;
+using value_type = protocol::json::TokenAck;
 
 TEST_CASE("simple", "[json_token_ack]") {
   auto const message = R"({)"

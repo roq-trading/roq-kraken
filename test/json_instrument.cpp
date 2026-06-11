@@ -11,7 +11,7 @@ using namespace std::literals;
 
 using namespace Catch::literals;
 
-using value_type = json::Instrument;
+using value_type = protocol::json::Instrument;
 
 // note! truncated
 TEST_CASE("snapshot", "[json_instrument]") {
@@ -125,7 +125,7 @@ TEST_CASE("snapshot", "[json_instrument]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.channel == "instrument"sv);
-    CHECK(obj.type == json::Type::SNAPSHOT);
+    CHECK(obj.type == protocol::json::Type::SNAPSHOT);
     REQUIRE(std::size(obj.data.assets) == 4);
     auto &a0 = obj.data.assets[0];
     CHECK(a0.id == "USD"sv);
@@ -141,7 +141,7 @@ TEST_CASE("snapshot", "[json_instrument]") {
     CHECK(p0.symbol == "VET/USDC"sv);
     CHECK(p0.base == "VET"sv);
     CHECK(p0.quote == "USDC"sv);
-    CHECK(p0.status == json::PairsStatus::POST_ONLY);
+    CHECK(p0.status == protocol::json::PairsStatus::POST_ONLY);
     CHECK(p0.qty_precision == 5);
     CHECK(p0.qty_increment == 0.00001_a);
     CHECK(p0.price_precision == 6);

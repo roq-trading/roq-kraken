@@ -1,0 +1,34 @@
+{
+  "name": "roq/kraken/protocol/json/AddOrder",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "method",
+      "type": "std/string_view"
+    },
+    {
+      "name": "result",
+      "type": "roq/kraken/protocol/json/AddOrderResult"
+    },
+    {
+      "name": "success",
+      "type": "std/bool"
+    },
+    {
+      "name": "error",
+      "type": "std/string_view"
+    },
+    {
+      "name": "req_id",
+      "type": "std/uint64"
+    },
+    {
+      "name": "time_in",
+      "type": "std/microseconds"
+    },
+    {
+      "name": "time_out",
+      "type": "std/microseconds"
+    }
+  ]
+}
