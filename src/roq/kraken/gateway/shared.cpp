@@ -11,7 +11,7 @@ namespace gateway {
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
-    : dispatcher_{dispatcher}, settings{settings}, api{API::create(settings)}, symbols{settings.ws.public_max_subscriptions_per_stream} {
+    : dispatcher{dispatcher}, settings{settings}, api{API::create(settings)}, symbols{settings.ws.public_max_subscriptions_per_stream} {
 }
 
 std::string_view Shared::next_request_id() {
