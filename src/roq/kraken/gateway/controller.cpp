@@ -187,48 +187,7 @@ void Controller::operator()(metrics::Writer &writer) const {
   dispatch_helper(*this, writer);
 }
 
-// streams
-
-void Controller::operator()(Trace<StreamStatus> const &event) {
-  dispatcher_(event);
-}
-
-void Controller::operator()(Trace<ExternalLatency> const &event) {
-  dispatcher_(event);
-}
-
-void Controller::operator()(Trace<ReferenceData> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<MarketStatus> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<TopOfBook> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<MarketByPriceUpdate> const &event, bool is_last) {
-  auto callback = []([[maybe_unused]] auto &market_by_price) {};
-  dispatcher_(event, is_last, bids_, asks_, callback);
-}
-
-void Controller::operator()(Trace<TradeSummary> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id) {
-  dispatcher_(event, is_last, user_id);
-}
-
-void Controller::operator()(Trace<FundsUpdate> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
+// MarketData::Handler
 
 void Controller::operator()(MarketData::SymbolsUpdate &symbols_update) {
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);
@@ -237,6 +196,8 @@ void Controller::operator()(MarketData::SymbolsUpdate &symbols_update) {
     (*iter).subscribe(start_from);
   }
 }
+
+// OrderEntry::Handler
 
 void Controller::operator()(OrderEntry::TokenUpdate &token_update) {
   auto &account = token_update.account;

@@ -167,7 +167,7 @@ void MarketData::operator()(web::socket::Client::Latency const &latency) {
       .account = {},
       .latency = latency.sample,
   };
-  create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -198,7 +198,7 @@ void MarketData::operator()(ConnectionStatus connection_status, std::string_view
       .proxy = (*connection_).get_proxy(),
   };
   log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(handler_, trace_info, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
 void MarketData::subscribe_static() {
@@ -323,7 +323,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
       if (item.status == protocol::json::PairsStatus::DELISTED) {
         return true;
       }
-      return shared_.discard_symbol(item.symbol);
+      return shared_.dispatcher.discard_symbol(item.symbol);
     }();
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
@@ -359,7 +359,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
         .sending_time_utc = {},
         .discard = discard,
     };
-    create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, reference_data, true);
     if (discard) {
       continue;
     }
@@ -376,7 +376,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
         .exchange_sequence = {},
         .sending_time_utc = {},
     };
-    create_trace_and_dispatch(handler_, trace_info, market_status, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, market_status, true);
   }
   log::info("pairs {} / {}"sv, counter, std::size(instrument.data.pairs));
   if (!std::empty(symbols)) {
@@ -407,7 +407,7 @@ void MarketData::operator()(Trace<protocol::json::Ticker> const &event) {
         .exchange_sequence = {},
         .sending_time_utc = {},
     };
-    create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, top_of_book, true);
     std::array<Statistics, 3> statistics{{
         {
             .type = StatisticsType::TRADE_VOLUME,
@@ -438,7 +438,7 @@ void MarketData::operator()(Trace<protocol::json::Ticker> const &event) {
         .exchange_sequence = {},
         .sending_time_utc = {},
     };
-    create_trace_and_dispatch(handler_, event.trace_info, statistics_update, true);
+    create_trace_and_dispatch(shared_.dispatcher, event.trace_info, statistics_update, true);
   }
 }
 
@@ -475,7 +475,7 @@ void MarketData::operator()(Trace<protocol::json::Trade> const &event) {
         .exchange_sequence = {},
         .sending_time_utc = {},
     };
-    create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, trade_summary, true);
     shared_.trades.clear();
   };
   for (auto &item : trade.data) {
@@ -529,7 +529,7 @@ void MarketData::operator()(Trace<protocol::json::Book> const &event) {
           .quantity_precision = {},
           .checksum = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, market_by_price_update, true);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, market_by_price_update, true, shared_.final_bids, shared_.final_asks);
       shared_.bids.clear();
       shared_.asks.clear();
     }

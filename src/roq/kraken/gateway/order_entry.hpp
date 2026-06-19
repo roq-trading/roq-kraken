@@ -40,11 +40,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   };
 
   struct Handler {
-    virtual void operator()(Trace<StreamStatus> const &) = 0;
-    virtual void operator()(Trace<ExternalLatency> const &) = 0;
-    // cross-communication
     virtual void operator()(TokenUpdate &) = 0;
-    virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
   };
 
   OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Account &, Shared &);

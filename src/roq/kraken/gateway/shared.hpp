@@ -24,30 +24,20 @@ struct Shared final {
 
   std::string_view next_request_id();
 
-  auto discard_symbol(std::string_view const &name) const { return dispatcher.discard_symbol(name); }
-
-  template <typename... Args>
-  auto operator()(Args &&...args) {
-    return dispatcher(std::forward<Args>(args)...);
-  }
-
- public:
-  std::vector<MBPUpdate> bids, asks;
-  std::vector<Trade> trades;
-
   server::Dispatcher &dispatcher;
 
- public:
   Settings const &settings;
   API const api;
+
+  std::vector<MBPUpdate> bids, asks, final_bids, final_asks;
+  std::vector<Trade> trades;
+
+  core::Symbols symbols;
+  utils::unordered_set<std::string> all_symbols;
 
  private:
   uint32_t request_id_ = {};
   std::string request_id_encode_buffer_;
-
- public:
-  core::Symbols symbols;
-  utils::unordered_set<std::string> all_symbols;
 };
 
 }  // namespace gateway
