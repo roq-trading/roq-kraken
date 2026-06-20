@@ -2,8 +2,7 @@
 
 #include "roq/kraken/gateway/market_data.hpp"
 
-#include <algorithm>
-#include <utility>
+#include "roq/logging.hpp"
 
 #include "roq/mask.hpp"
 
@@ -14,8 +13,6 @@
 #include "roq/utils/metrics/factory.hpp"
 
 #include "roq/utils/charconv/to_string.hpp"
-
-#include "roq/web/socket/client.hpp"
 
 #include "roq/kraken/protocol/json/map.hpp"
 #include "roq/kraken/protocol/json/utils.hpp"

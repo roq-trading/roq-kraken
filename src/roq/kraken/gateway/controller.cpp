@@ -2,8 +2,6 @@
 
 #include "roq/kraken/gateway/controller.hpp"
 
-#include <utility>
-
 #include "roq/server/oms/exceptions.hpp"
 
 using namespace std::literals;

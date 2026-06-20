@@ -2,19 +2,15 @@
 
 #include "roq/kraken/gateway/drop_copy.hpp"
 
-#include "roq/mask.hpp"
-
 #include "roq/logging.hpp"
 
-#include "roq/utils/update.hpp"
+#include "roq/mask.hpp"
 
 #include "roq/utils/exceptions/unhandled.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
 
 #include "roq/utils/charconv/to_string.hpp"
-
-#include "roq/web/socket/client.hpp"
 
 #include "roq/server/oms/exceptions.hpp"
 

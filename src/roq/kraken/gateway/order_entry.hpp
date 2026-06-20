@@ -3,8 +3,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
-#include <vector>
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -47,8 +45,6 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   OrderEntry(OrderEntry const &) = delete;
 
-  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
-
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
   void operator()(Event<Timer> const &);
@@ -78,6 +74,10 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
 
+  // helpers
+
+  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
+
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   enum class State {
@@ -92,21 +92,31 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   uint32_t download(State);
 
+  // token
+
   void get_token();
   void get_token_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<protocol::json::TokenAck> const &);
+
+  // balance
 
   void get_balance();
   void get_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<protocol::json::BalanceAck> const &);
 
+  // trade-balance
+
   void get_trade_balance();
   void get_trade_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<protocol::json::TradeBalanceAck> const &);
 
+  // open-positions
+
   void get_open_positions();
   void get_open_positions_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<protocol::json::OpenPositionsAck> const &);
+
+  // open-orders
 
   void get_open_orders();
   void get_open_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
