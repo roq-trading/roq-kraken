@@ -329,6 +329,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
         .description = {},
         .security_type = SecurityType::SPOT,
         .external_security_id = {},
+        .market_segment = {},
         .cfi_code = {},
         .base_currency = item.base,
         .quote_currency = item.quote,
