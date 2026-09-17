@@ -386,6 +386,7 @@ void DropCopy::operator()(Trace<protocol::json::Executions> const &event) {
         .order_type = map(item.order_type),
         .time_in_force = map(item.time_in_force),
         .execution_instructions = {},
+        .execution_destination = {},
         .create_time_utc = item.timestamp,
         .update_time_utc = item.timestamp,
         .external_account = {},
