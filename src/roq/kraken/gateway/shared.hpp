@@ -13,6 +13,8 @@
 #include "roq/kraken/gateway/api.hpp"
 #include "roq/kraken/gateway/settings.hpp"
 
+#include "roq/kraken/tools/rate_limit.hpp"
+
 namespace roq {
 namespace kraken {
 namespace gateway {
@@ -28,6 +30,8 @@ struct Shared final {
 
   Settings const &settings;
   API const api;
+
+  tools::RateLimit rate_limit;
 
   std::vector<MBPUpdate> bids, asks, final_bids, final_asks;
   std::vector<Trade> trades;
