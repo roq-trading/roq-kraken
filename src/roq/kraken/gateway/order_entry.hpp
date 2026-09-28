@@ -124,8 +124,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   // helpers
 
-  template <typename SuccessHandler, typename ErrorHandler>
-  void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
+  void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
 
  private:
   Handler &handler_;

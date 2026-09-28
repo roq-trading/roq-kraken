@@ -67,7 +67,7 @@ auto create_connection(auto &handler, auto &settings, auto &context, auto &share
       .decode_buffer_size = settings.misc.decode_buffer_size,
       .encode_buffer_size = settings.misc.encode_buffer_size,
   };
-  return web::rest::Client::create(handler, context, config, shared.rate_limit);
+  return web::rest::Client::create(handler, context, config, shared.throttle);
 }
 
 struct create_metrics final : public utils::metrics::Factory {
@@ -290,7 +290,7 @@ void OrderEntry::get_token_ack(Trace<web::rest::Response> const &event, uint32_t
         }
       }
     };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -348,7 +348,7 @@ void OrderEntry::get_balance_ack(Trace<web::rest::Response> const &event, uint32
         download_.check(STATE);
       }
     };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -422,7 +422,7 @@ void OrderEntry::get_trade_balance_ack(Trace<web::rest::Response> const &event, 
         download_.check(STATE);
       }
     };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -476,7 +476,7 @@ void OrderEntry::get_open_positions_ack(Trace<web::rest::Response> const &event,
         download_.check(STATE);
       }
     };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -530,7 +530,7 @@ void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, ui
         download_.check(STATE);
       }
     };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -582,8 +582,8 @@ void OrderEntry::operator()(Trace<protocol::json::OpenOrdersAck> const &event) {
 
 // helpers
 
-template <typename SuccessHandler, typename ErrorHandler>
-void OrderEntry::process_response(web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
+void OrderEntry::process_response(Trace<web::rest::Response> const &event, auto error_handler, auto success_handler) {
+  auto &[trace_info, response] = event;
   try {
     auto [status, category, body] = response.result();
     switch (category) {
