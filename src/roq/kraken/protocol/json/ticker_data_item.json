@@ -57,6 +57,10 @@
     {
       "name": "timestamp",
       "type": "std/microseconds"
+    },
+    {
+      "name": "trades",
+      "type": "std/int64"
     }
   ]
 }

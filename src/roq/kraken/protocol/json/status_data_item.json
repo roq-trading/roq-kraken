@@ -17,6 +17,12 @@
     {
       "name": "connection_id",
       "type": "std/int64"
+    },
+    {
+      "name": "upcoming_maintenance"
+    },
+    {
+      "name": "emergency"
     }
   ]
 }

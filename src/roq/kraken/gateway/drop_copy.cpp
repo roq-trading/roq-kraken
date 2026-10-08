@@ -96,6 +96,8 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
       account_{account}, shared_{shared} {
 }
 
+// server::Stream
+
 void DropCopy::operator()(Event<Start> const &) {
   (*connection_).start();
 }
@@ -105,7 +107,8 @@ void DropCopy::operator()(Event<Stop> const &) {
 }
 
 void DropCopy::operator()(Event<Timer> const &event) {
-  (*connection_).refresh(event.value.now);
+  auto &[trace_info, timer] = event;
+  (*connection_).refresh(timer.now);
 }
 
 void DropCopy::operator()(metrics::Writer &writer) const {
@@ -118,6 +121,30 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       .write(latency_.ping, metrics::Type::LATENCY)
       .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
+
+void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
+  auto &[trace_info, connection_status] = event;
+  connection_status_ = connection_status;
+  auto stream_status = StreamStatus{
+      .stream_id = stream_id_,
+      .account = account_.name,
+      .supports = SUPPORTS,
+      .transport = Transport::TCP,
+      .protocol = Protocol::WS,
+      .encoding = {Encoding::JSON},
+      .priority = Priority::PRIMARY,
+      .connection_status = connection_status_,
+      .reason = reason,
+      .interface = (*connection_).get_interface(),
+      .authority = (*connection_).get_current_authority(),
+      .path = (*connection_).get_current_path(),
+      .proxy = (*connection_).get_proxy(),
+  };
+  log::info("stream_status={}"sv, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+}
+
+// server::OrderActionStream
 
 uint16_t DropCopy::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
@@ -148,63 +175,29 @@ uint16_t DropCopy::operator()(
   return stream_id_;
 }
 
-uint16_t DropCopy::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
-  auto message = protocol::json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
-  (*connection_).send_text(message);
-  return stream_id_;
-}
-
-void DropCopy::subscribe() {
-  subscribe("executions"sv);
-  subscribe("balances"sv);
-}
-
-void DropCopy::subscribe(std::string_view const &channel) {
-  log::info(R"(subscribe channel="{}", token="{}")"sv, channel, token_);
-  assert(!std::empty(token_));
-  std::string message;
-  fmt::format_to(
-      std::back_inserter(message),
-      R"({{)"
-      R"("method":"subscribe",)"
-      R"("params":{{)"
-      R"("channel":"{}",)"
-      R"("token":"{}")"sv,
-      channel,
-      token_);
-  if (channel == "executions"sv) {
-    fmt::format_to(
-        std::back_inserter(message),
-        R"(,"snap_orders":true)"
-        R"(,"snap_trades":true)"sv);
-  }
-  fmt::format_to(
-      std::back_inserter(message),
-      R"(}})"
-      R"(}})"sv);
-  log::info<3>(R"(request="{}")"sv, message);
-  (*connection_).send_text(message);
-}
-
 // web::socket::Client::Handler
 
 void DropCopy::operator()(Trace<web::socket::Connected> const &) {
   // note! wait for upgrade
 }
 
-void DropCopy::operator()(Trace<web::socket::Disconnected> const &) {
+void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
+  auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
   ready_ = false;
   next_heartbeat_ = {};
-  (*this)(ConnectionStatus::DISCONNECTED);
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
 }
 
-void DropCopy::operator()(Trace<web::socket::Ready> const &) {
-  (*this)(ConnectionStatus::DOWNLOADING);
+void DropCopy::operator()(Trace<web::socket::Ready> const &event) {
+  auto &[trace_info, ready] = event;
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING);
   // wait for status
 }
 
-void DropCopy::operator()(Trace<web::socket::Close> const &) {
+void DropCopy::operator()(Trace<web::socket::Close> const &event) {
+  auto &[trace_info, close] = event;
+  log::warn("close={}"sv, close);
 }
 
 void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
@@ -227,28 +220,6 @@ void DropCopy::operator()(Trace<web::socket::Binary> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(ConnectionStatus connection_status, std::string_view const &reason) {
-  connection_status_ = connection_status;
-  TraceInfo trace_info;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = account_.name,
-      .supports = SUPPORTS,
-      .transport = Transport::TCP,
-      .protocol = Protocol::WS,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-      .proxy = (*connection_).get_proxy(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
-}
-
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
@@ -269,7 +240,7 @@ void DropCopy::parse(std::string_view const &message) {
 void DropCopy::operator()(Trace<protocol::json::Status> const &event) {
   auto &[trace_info, status] = event;
   log::info("status={}"sv, status);
-  (*this)(ConnectionStatus::READY);
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
   subscribe();  // note!
 }
 
@@ -564,6 +535,46 @@ void DropCopy::operator()(Trace<protocol::json::CancelAll> const &event) {
   auto &[trace_info, cancel_all] = event;
   log::debug("cancel_all={}"sv, cancel_all);
   // XXX FIXME TODO ack
+}
+
+// helpers
+
+uint16_t DropCopy::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
+  auto message = protocol::json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
+  (*connection_).send_text(message);
+  return stream_id_;
+}
+
+void DropCopy::subscribe() {
+  subscribe("executions"sv);
+  subscribe("balances"sv);
+}
+
+void DropCopy::subscribe(std::string_view const &channel) {
+  log::info(R"(subscribe channel="{}", token="{}")"sv, channel, token_);
+  assert(!std::empty(token_));
+  std::string message;
+  fmt::format_to(
+      std::back_inserter(message),
+      R"({{)"
+      R"("method":"subscribe",)"
+      R"("params":{{)"
+      R"("channel":"{}",)"
+      R"("token":"{}")"sv,
+      channel,
+      token_);
+  if (channel == "executions"sv) {
+    fmt::format_to(
+        std::back_inserter(message),
+        R"(,"snap_orders":true)"
+        R"(,"snap_trades":true)"sv);
+  }
+  fmt::format_to(
+      std::back_inserter(message),
+      R"(}})"
+      R"(}})"sv);
+  log::info<3>(R"(request="{}")"sv, message);
+  (*connection_).send_text(message);
 }
 
 }  // namespace gateway

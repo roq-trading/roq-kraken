@@ -16,6 +16,8 @@
 
 #include "roq/server.hpp"
 
+#include "roq/server/stream.hpp"
+
 #include "roq/kraken/gateway/account.hpp"
 #include "roq/kraken/gateway/shared.hpp"
 
@@ -25,36 +27,45 @@ namespace roq {
 namespace kraken {
 namespace gateway {
 
-struct DropCopy final : public web::socket::Client::Handler, public protocol::json::Parser::Handler {
+struct DropCopy final : public Base<DropCopy>, public server::OrderActionStream, public web::socket::Client::Handler, public protocol::json::Parser::Handler {
   struct Handler {};
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &, std::string_view const &token);
 
-  DropCopy(DropCopy const &) = delete;
+  // protected:
+  friend base_type;
 
-  void operator()(Event<Start> const &);
-  void operator()(Event<Stop> const &);
-  void operator()(Event<Timer> const &);
+  // server::Stream
 
-  void operator()(metrics::Writer &) const;
+  uint16_t stream_id() const override { return stream_id_; }
 
-  uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id);
+  bool ready() const override { return connection_status_ == ConnectionStatus::READY; }
+
+  void operator()(Event<Start> const &) override;
+  void operator()(Event<Stop> const &) override;
+  void operator()(Event<Timer> const &) override;
+
+  void operator()(metrics::Writer &) const override;
+
+  void operator()(Trace<ConnectionStatus> const &, std::string_view const &reason = {}) override;
+
+  // server::OrderActionStream
+
+  uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id) override;
   uint16_t operator()(
       Event<ModifyOrder> const &,
       server::oms::Order const &,
       server::oms::RefData const &,
       std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+      std::string_view const &previous_request_id) override;
   uint16_t operator()(
       Event<CancelOrder> const &,
       server::oms::Order const &,
       server::oms::RefData const &,
       std::string_view const &request_id,
-      std::string_view const &previous_request_id);
+      std::string_view const &previous_request_id) override;
 
-  uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
-
-  void subscribe(std::string_view const &name, std::string_view const &token);
+  uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id) override;
 
  protected:
   // web::socket::Client::Handler
@@ -66,15 +77,6 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(Trace<web::socket::Latency> const &) override;
   void operator()(Trace<web::socket::Text> const &) override;
   void operator()(Trace<web::socket::Binary> const &) override;
-
-  // helpers
-
-  void operator()(ConnectionStatus, std::string_view const &reason = {});
-
-  void subscribe();
-  void subscribe(std::string_view const &channel);
-
-  void parse(std::string_view const &message);
 
   // protocol::json::Parser::Handler
 
@@ -98,6 +100,15 @@ struct DropCopy final : public web::socket::Client::Handler, public protocol::js
   void operator()(Trace<protocol::json::AmendOrder> const &) override;
   void operator()(Trace<protocol::json::CancelOrder> const &) override;
   void operator()(Trace<protocol::json::CancelAll> const &) override;
+
+  // helpers
+
+  void subscribe(std::string_view const &name, std::string_view const &token);
+
+  void subscribe();
+  void subscribe(std::string_view const &channel);
+
+  void parse(std::string_view const &message);
 
  private:
   Handler &handler_;
