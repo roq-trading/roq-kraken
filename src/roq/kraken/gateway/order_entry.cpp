@@ -273,11 +273,8 @@ void OrderEntry::get_token() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    (*connection_)("token"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_token_ack(event, sequence);
-    });
+    auto callback = [this, sequence](auto &event, [[maybe_unused]] auto &request_id) { get_token_ack(event, sequence); };
+    (*connection_)(request, callback, "token"sv);
   });
 }
 
@@ -335,11 +332,8 @@ void OrderEntry::get_balance() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    (*connection_)("balance"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_balance_ack(event, sequence);
-    });
+    auto callback = [this, sequence](auto &event, [[maybe_unused]] auto &request_id) { get_balance_ack(event, sequence); };
+    (*connection_)(request, callback, "balance"sv);
   });
 }
 
@@ -408,11 +402,8 @@ void OrderEntry::get_trade_balance() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    (*connection_)("trade_balance"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_trade_balance_ack(event, sequence);
-    });
+    auto callback = [this, sequence](auto &event, [[maybe_unused]] auto &request_id) { get_trade_balance_ack(event, sequence); };
+    (*connection_)(request, callback, "trade_balance"sv);
   });
 }
 
@@ -463,11 +454,8 @@ void OrderEntry::get_open_positions() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    (*connection_)("open-positions"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_open_positions_ack(event, sequence);
-    });
+    auto callback = [this, sequence](auto &event, [[maybe_unused]] auto &request_id) { get_open_positions_ack(event, sequence); };
+    (*connection_)(request, callback, "open-positions"sv);
   });
 }
 
@@ -517,11 +505,8 @@ void OrderEntry::get_open_orders() {
         .quality_of_service = {},
     };
     auto sequence = download_.sequence();
-    (*connection_)("open-orders"sv, request, [this, sequence]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_open_orders_ack(event, sequence);
-    });
+    auto callback = [this, sequence](auto &event, [[maybe_unused]] auto &request_id) { get_open_orders_ack(event, sequence); };
+    (*connection_)(request, callback, "open-orders"sv);
   });
 }
 
