@@ -72,34 +72,18 @@ Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings,
 
 // server::Handler
 
-void Controller::operator()(Event<Start> const &event) {
+void Controller::operator()(Trace<Start> const &event) {
   log::info("Starting..."sv);
   dispatch(event);
 }
 
-void Controller::operator()(Event<Stop> const &event) {
+void Controller::operator()(Trace<Stop> const &event) {
   log::info("Stopping..."sv);
   dispatch(event);
 }
 
-void Controller::operator()(Event<Timer> const &event) {
+void Controller::operator()(Trace<Timer> const &event) {
   dispatch(event);
-}
-
-void Controller::operator()(Event<Control> const &event) {
-  auto &[message_info, control] = event;
-  switch (control.action) {
-    using enum Action;
-    case UNDEFINED:
-      assert(false);
-      break;
-    case ENABLE:
-      dispatcher_(State::ENABLED);
-      break;
-    case DISABLE:
-      dispatcher_(State::DISABLED);
-      break;
-  }
 }
 
 void Controller::operator()(Event<Connected> const &) {
@@ -122,6 +106,22 @@ void Controller::operator()(Event<Subscribe> const &event) {
       .symbols = symbols,
   };
   (*this)(symbols_update);
+}
+
+void Controller::operator()(Event<Control> const &event) {
+  auto &[message_info, control] = event;
+  switch (control.action) {
+    using enum Action;
+    case UNDEFINED:
+      assert(false);
+      break;
+    case ENABLE:
+      dispatcher_(State::ENABLED);
+      break;
+    case DISABLE:
+      dispatcher_(State::DISABLED);
+      break;
+  }
 }
 
 uint16_t Controller::operator()(
@@ -207,9 +207,9 @@ void Controller::operator()(OrderEntry::TokenUpdate &token_update) {
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"sv);
     auto drop_copy = std::make_unique<DropCopy>(*this, context_, ++stream_id_, *accounts_.at(account), shared_, token_update.token);
-    MessageInfo message_info;
+    TraceInfo trace_info;  // XXX FIXME TODO
     Start start;
-    create_event_and_dispatch(*drop_copy, message_info, start);
+    create_trace_and_dispatch(*drop_copy, trace_info, start);
     (*iter).second = std::move(drop_copy);
   }
 }
@@ -222,9 +222,9 @@ void Controller::ensure_symbol_slices(size_t size) {
     auto index = std::size(market_data_);
     log::debug("Create MarketData (stream_id={}, index={})"sv, stream_id, index);
     auto market_data = std::make_unique<MarketData>(*this, context_, stream_id, shared_, index);
-    MessageInfo message_info;
+    TraceInfo trace_info;  // XXX FIXME TODO
     Start start;
-    create_event_and_dispatch(*market_data, message_info, start);
+    create_trace_and_dispatch(*market_data, trace_info, start);
     market_data_.emplace_back(std::move(market_data));
   }
 }
