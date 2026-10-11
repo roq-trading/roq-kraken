@@ -202,7 +202,7 @@ void MarketData::operator()(Trace<web::socket::Latency> const &event) {
 
 void MarketData::operator()(Trace<web::socket::Text> const &event) {
   auto &[trace_info, text] = event;
-  parse(text.payload);
+  parse(trace_info, text.payload);
 }
 
 void MarketData::operator()(Trace<web::socket::Binary> const &) {
@@ -322,7 +322,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
     auto symbols_update = SymbolsUpdate{
         .symbols = symbols,
     };
-    handler_(symbols_update);
+    create_trace_and_dispatch(handler_, trace_info, symbols_update);
   }
 }
 
@@ -377,7 +377,7 @@ void MarketData::operator()(Trace<protocol::json::Ticker> const &event) {
         .exchange_sequence = {},
         .sending_time_utc = {},
     };
-    create_trace_and_dispatch(shared_.dispatcher, event.trace_info, statistics_update, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, statistics_update, true);
   }
 }
 
@@ -557,11 +557,10 @@ void MarketData::subscribe(std::string_view const &channel, std::span<Symbol con
   (*connection_).send_text(message);
 }
 
-void MarketData::parse(std::string_view const &message) {
+void MarketData::parse(TraceInfo const &trace_info, std::string_view const &message) {
   profile_.parse([&]() {
     // log::warn("DEBUG message={}"sv, message);
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
-    TraceInfo trace_info;
     try {
       if (!protocol::json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();

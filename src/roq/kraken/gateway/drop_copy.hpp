@@ -108,7 +108,7 @@ struct DropCopy final : public Base<DropCopy>, public server::OrderActionStream,
   void subscribe();
   void subscribe(std::string_view const &channel);
 
-  void parse(std::string_view const &message);
+  void parse(TraceInfo const &, std::string_view const &message);
 
  private:
   Handler &handler_;

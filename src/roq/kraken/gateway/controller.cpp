@@ -102,10 +102,10 @@ void Controller::operator()(Event<Subscribe> const &event) {
       log::warn(R"(*** DUPLICATE SUBSCRIPTION *** (symbol="{}")"sv, item);
     }
   }
-  auto symbols_update = MarketData::SymbolsUpdate{
+  auto symbols_update = SymbolsUpdate{
       .symbols = symbols,
   };
-  (*this)(symbols_update);
+  create_trace_and_dispatch_2(message_info, symbols_update);
 }
 
 void Controller::operator()(Event<Control> const &event) {
@@ -126,11 +126,12 @@ void Controller::operator()(Event<Control> const &event) {
 
 uint16_t Controller::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
-  assert(!std::empty(event.value.account));
+  auto &[message_info, create_order] = event;
+  assert(!std::empty(create_order.account));
   if (shared_.settings.ws_api) {
-    return get_drop_copy(event.value.account)(event, order, ref_data, request_id);
+    return get_drop_copy(create_order.account)(event, order, ref_data, request_id);
   } else {
-    return get_order_entry(event.value.account)(event, order, ref_data, request_id);
+    return get_order_entry(create_order.account)(event, order, ref_data, request_id);
   }
 }
 
@@ -140,12 +141,13 @@ uint16_t Controller::operator()(
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  assert(!std::empty(event.value.account));
-  assert(event.value.account == order.account);
+  auto &[message_info, modify_order] = event;
+  assert(!std::empty(modify_order.account));
+  assert(modify_order.account == order.account);
   if (shared_.settings.ws_api) {
-    return get_drop_copy(event.value.account)(event, order, ref_data, request_id, previous_request_id);
+    return get_drop_copy(modify_order.account)(event, order, ref_data, request_id, previous_request_id);
   } else {
-    return get_order_entry(event.value.account)(event, order, ref_data, request_id, previous_request_id);
+    return get_order_entry(modify_order.account)(event, order, ref_data, request_id, previous_request_id);
   }
 }
 
@@ -155,21 +157,23 @@ uint16_t Controller::operator()(
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  assert(!std::empty(event.value.account));
-  assert(event.value.account == order.account);
+  auto &[message_info, cancel_order] = event;
+  assert(!std::empty(cancel_order.account));
+  assert(cancel_order.account == order.account);
   if (shared_.settings.ws_api) {
-    return get_drop_copy(event.value.account)(event, order, ref_data, request_id, previous_request_id);
+    return get_drop_copy(cancel_order.account)(event, order, ref_data, request_id, previous_request_id);
   } else {
-    return get_order_entry(event.value.account)(event, order, ref_data, request_id, previous_request_id);
+    return get_order_entry(cancel_order.account)(event, order, ref_data, request_id, previous_request_id);
   }
 }
 
 uint16_t Controller::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
-  assert(!std::empty(event.value.account));
+  auto &[message_info, cancel_all_orders] = event;
+  assert(!std::empty(cancel_all_orders.account));
   if (shared_.settings.ws_api) {
-    return get_drop_copy(event.value.account)(event, request_id);
+    return get_drop_copy(cancel_all_orders.account)(event, request_id);
   } else {
-    return get_order_entry(event.value.account)(event, request_id);
+    return get_order_entry(cancel_all_orders.account)(event, request_id);
   }
 }
 
@@ -187,9 +191,10 @@ void Controller::operator()(metrics::Writer &writer) const {
 
 // MarketData::Handler
 
-void Controller::operator()(MarketData::SymbolsUpdate &symbols_update) {
+void Controller::operator()(Trace<SymbolsUpdate> const &event) {
+  auto &[trace_info, symbols_update] = event;
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);
-  ensure_symbol_slices(size);
+  ensure_symbol_slices(trace_info, size);
   for (auto &iter : market_data_) {
     (*iter).subscribe(start_from);
   }
@@ -197,7 +202,8 @@ void Controller::operator()(MarketData::SymbolsUpdate &symbols_update) {
 
 // OrderEntry::Handler
 
-void Controller::operator()(OrderEntry::TokenUpdate &token_update) {
+void Controller::operator()(Trace<TokenUpdate> const &event) {
+  auto &[trace_info, token_update] = event;
   auto &account = token_update.account;
   assert(!std::empty(account));
   auto iter = drop_copy_.find(account);
@@ -207,7 +213,6 @@ void Controller::operator()(OrderEntry::TokenUpdate &token_update) {
   if (!static_cast<bool>((*iter).second)) {
     log::info("Create drop-copy (ws-private)"sv);
     auto drop_copy = std::make_unique<DropCopy>(*this, context_, ++stream_id_, *accounts_.at(account), shared_, token_update.token);
-    TraceInfo trace_info;  // XXX FIXME TODO
     Start start;
     create_trace_and_dispatch(*drop_copy, trace_info, start);
     (*iter).second = std::move(drop_copy);
@@ -216,13 +221,12 @@ void Controller::operator()(OrderEntry::TokenUpdate &token_update) {
 
 // utilities
 
-void Controller::ensure_symbol_slices(size_t size) {
+void Controller::ensure_symbol_slices(TraceInfo const &trace_info, size_t size) {
   while (std::size(market_data_) < size) {
     auto stream_id = ++stream_id_;
     auto index = std::size(market_data_);
     log::debug("Create MarketData (stream_id={}, index={})"sv, stream_id, index);
     auto market_data = std::make_unique<MarketData>(*this, context_, stream_id, shared_, index);
-    TraceInfo trace_info;  // XXX FIXME TODO
     Start start;
     create_trace_and_dispatch(*market_data, trace_info, start);
     market_data_.emplace_back(std::move(market_data));

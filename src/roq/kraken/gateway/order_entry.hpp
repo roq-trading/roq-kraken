@@ -22,6 +22,7 @@
 
 #include "roq/kraken/gateway/account.hpp"
 #include "roq/kraken/gateway/shared.hpp"
+#include "roq/kraken/gateway/token_update.hpp"
 
 #include "roq/kraken/protocol/json/balance_ack.hpp"
 #include "roq/kraken/protocol/json/open_orders_ack.hpp"
@@ -34,13 +35,8 @@ namespace kraken {
 namespace gateway {
 
 struct OrderEntry final : public Base<OrderEntry>, public server::OrderActionStream, public web::rest::Client::Handler {
-  struct TokenUpdate final {
-    std::string_view account;
-    std::string_view token;
-  };
-
   struct Handler {
-    virtual void operator()(TokenUpdate &) = 0;
+    virtual void operator()(Trace<TokenUpdate> const &) = 0;
   };
 
   OrderEntry(Handler &, io::Context &context, uint16_t stream_id, Account &, Shared &);

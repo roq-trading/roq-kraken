@@ -19,6 +19,7 @@
 #include "roq/server/stream.hpp"
 
 #include "roq/kraken/gateway/shared.hpp"
+#include "roq/kraken/gateway/symbols_update.hpp"
 
 #include "roq/kraken/protocol/json/parser.hpp"
 
@@ -30,12 +31,8 @@ struct MarketData final : public Base<MarketData>,
                           public server::MarketDataStream,
                           public web::socket::Client::Handler,
                           public protocol::json::Parser::Handler {
-  struct SymbolsUpdate final {
-    std::span<Symbol const> symbols;
-  };
-
   struct Handler {
-    virtual void operator()(SymbolsUpdate &) = 0;
+    virtual void operator()(Trace<SymbolsUpdate> const &) = 0;
   };
 
   MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &, size_t index);
@@ -104,7 +101,7 @@ struct MarketData final : public Base<MarketData>,
   void subscribe(std::string_view const &channel);
   void subscribe(std::string_view const &channel, std::span<Symbol const> const &symbols);
 
-  void parse(std::string_view const &message);
+  void parse(TraceInfo const &, std::string_view const &message);
 
  private:
   Handler &handler_;

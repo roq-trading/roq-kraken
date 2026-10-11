@@ -310,7 +310,7 @@ void OrderEntry::operator()(Trace<protocol::json::TokenAck> const &event) {
       .account = account_.name,
       .token = token_ack.result.token,
   };
-  handler_(token_update);
+  create_trace_and_dispatch(handler_, trace_info, token_update);
 }
 
 // balance
