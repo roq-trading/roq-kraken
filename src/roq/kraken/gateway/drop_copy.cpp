@@ -30,12 +30,12 @@ namespace {
 auto const NAME = "ex"sv;
 
 auto const SUPPORTS = Mask{
+    SupportType::FUNDS,
     SupportType::CREATE_ORDER,
     SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
     SupportType::ORDER,
-    SupportType::FUNDS,
 };
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 2;
@@ -108,7 +108,10 @@ void DropCopy::operator()(Trace<Stop> const &) {
 
 void DropCopy::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  (*connection_).refresh(timer.now);
+  if ((*connection_).refresh(timer.now)) {
+    if (ready()) {
+    }
+  }
 }
 
 void DropCopy::operator()(metrics::Writer &writer) const {

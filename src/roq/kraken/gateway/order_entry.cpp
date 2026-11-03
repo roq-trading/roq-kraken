@@ -26,7 +26,6 @@ namespace {
 auto const NAME = "om"sv;
 
 auto const SUPPORTS = Mask{
-    SupportType::ORDER,
     SupportType::FUNDS,
 };
 
@@ -113,7 +112,10 @@ void OrderEntry::operator()(Trace<Stop> const &) {
 
 void OrderEntry::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  (*connection_).refresh(timer.now);
+  if ((*connection_).refresh(timer.now)) {
+    if (ready()) {
+    }
+  }
 }
 
 void OrderEntry::operator()(metrics::Writer &writer) const {
@@ -222,6 +224,7 @@ void OrderEntry::operator()(Trace<web::rest::Latency> const &event) {
 
 int32_t OrderEntry::download(Trace<State> const &event) {
   auto &[trace_info, state] = event;
+  auto publish_downloading = [&]() { create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, magic_enum::enum_name(state)); };
   switch (state) {
     using enum State;
     case UNDEFINED:
@@ -231,19 +234,19 @@ int32_t OrderEntry::download(Trace<State> const &event) {
       get_token();
       return 1;
     case BALANCE:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "balance"sv);
+      publish_downloading();
       get_balance();
       return 1;
     case TRADE_BALANCE:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "trade-balance"sv);
+      publish_downloading();
       get_trade_balance();
       return 1;
     case OPEN_POSITIONS:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "open-positions"sv);
+      publish_downloading();
       get_open_positions();
       return 1;
     case OPEN_ORDERS:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "open-orders"sv);
+      publish_downloading();
       get_open_orders();
       return 1;
     case DONE:
