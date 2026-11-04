@@ -107,16 +107,16 @@ void MarketData::operator()(Trace<Stop> const &) {
 
 void MarketData::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  if ((*connection_).refresh(timer.now)) {
+  if ((*connection_).refresh(trace_info)) {
     if (ready()) {
-      if (next_heartbeat_ < timer.now) {
-        next_heartbeat_ = timer.now + shared_.settings.ws.public_ping_freq;
+      if (next_heartbeat_ < trace_info.origin_create_time) {
+        next_heartbeat_ = trace_info.origin_create_time + shared_.settings.ws.public_ping_freq;
         auto message = fmt::format(
             R"({{)"
             R"("method":"ping",)"
             R"("req_id":{})"
             R"(}})"sv,
-            timer.now.count());
+            trace_info.origin_create_time.count());
         log::info<3>(R"(request="{}")"sv, message);
         (*connection_).send_text(message);
       }
