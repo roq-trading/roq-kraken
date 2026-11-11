@@ -27,6 +27,10 @@ namespace roq {
 
 template <>
 template <>
+std::optional<roq::Error> Map<int32_t>::helper() const;
+
+template <>
+template <>
 std::optional<roq::Liquidity> Map<kraken::protocol::json::LiquidityInd>::helper() const;
 
 template <>

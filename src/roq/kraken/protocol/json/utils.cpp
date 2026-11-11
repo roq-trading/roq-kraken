@@ -13,10 +13,6 @@ namespace json {
 
 // === IMPLEMENTATION ===
 
-roq::Error guess_error([[maybe_unused]] int32_t code) {
-  return {};
-}
-
 roq::Error guess_error(std::string_view const &error) {
   auto key = utils::hash::FNV::compute(error);
   switch (key) {
