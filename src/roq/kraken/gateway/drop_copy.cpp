@@ -474,6 +474,7 @@ void DropCopy::operator()(Trace<protocol::json::AddOrder> const &event) {
         .text = add_order.error,
         .version = 1,  // note!
         .request_id = {},
+        .external_trace_id = {},
         .external_order_id = {},
         .client_order_id = {},
         .quantity = NaN,
@@ -499,6 +500,7 @@ void DropCopy::operator()(Trace<protocol::json::AmendOrder> const &event) {
         .text = amend_order.error,
         .version = {},  // note! we don't have space in req_id => use heuristics
         .request_id = {},
+        .external_trace_id = {},
         .external_order_id = {},
         .client_order_id = {},
         .quantity = NaN,
@@ -524,6 +526,7 @@ void DropCopy::operator()(Trace<protocol::json::CancelOrder> const &event) {
         .text = cancel_order.error,
         .version = {},  // note! we don't have space in req_id => use heuristics
         .request_id = {},
+        .external_trace_id = {},
         .external_order_id = {},
         .client_order_id = {},
         .quantity = NaN,
