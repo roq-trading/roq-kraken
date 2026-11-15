@@ -555,6 +555,7 @@ void OrderEntry::operator()(Trace<protocol::json::OpenOrdersAck> const &event) {
         .execution_instructions = {},
         .create_time_utc = item.opentm,
         .update_time_utc = {},
+        .external_trace_id = {},
         .external_account = {},
         .external_order_id = item.KEY,
         .client_order_id = item.cl_ord_id,
