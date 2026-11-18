@@ -150,15 +150,27 @@ void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view
 
 // server::OrderActionStream
 
+void DropCopy::operator()(Trace<server::oms::OrderActionBatchBegin> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void DropCopy::operator()(Trace<server::oms::OrderActionBatchCommit> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void DropCopy::operator()(Trace<server::oms::OrderActionBatchRollback> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
 uint16_t DropCopy::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
+    Trace<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   auto message = protocol::json::Encoder::add_order_json(encode_buffer_, event, order, ref_data, request_id, token_);
   (*connection_).send_text(message);
   return stream_id_;
 }
 
 uint16_t DropCopy::operator()(
-    Event<ModifyOrder> const &event,
+    Trace<ModifyOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
@@ -169,7 +181,7 @@ uint16_t DropCopy::operator()(
 }
 
 uint16_t DropCopy::operator()(
-    Event<CancelOrder> const &event,
+    Trace<CancelOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
@@ -546,7 +558,7 @@ void DropCopy::operator()(Trace<protocol::json::CancelAll> const &event) {
 
 // helpers
 
-uint16_t DropCopy::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
+uint16_t DropCopy::operator()(Trace<CancelAllOrders> const &event, std::string_view const &request_id) {
   auto message = protocol::json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
   (*connection_).send_text(message);
   return stream_id_;

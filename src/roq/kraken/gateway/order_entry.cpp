@@ -162,13 +162,25 @@ void OrderEntry::operator()(Trace<ConnectionStatus> const &event, std::string_vi
 
 // server::OrderActionStream
 
+void OrderEntry::operator()(Trace<server::oms::OrderActionBatchBegin> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void OrderEntry::operator()(Trace<server::oms::OrderActionBatchCommit> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void OrderEntry::operator()(Trace<server::oms::OrderActionBatchRollback> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
 uint16_t OrderEntry::operator()(
-    Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, [[maybe_unused]] std::string_view const &request_id) {
+    Trace<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, [[maybe_unused]] std::string_view const &request_id) {
   throw NotImplemented{"not implemented"sv};
 }
 
 uint16_t OrderEntry::operator()(
-    Event<ModifyOrder> const &,
+    Trace<ModifyOrder> const &,
     server::oms::Order const &,
     server::oms::RefData const &,
     [[maybe_unused]] std::string_view const &request_id,
@@ -177,7 +189,7 @@ uint16_t OrderEntry::operator()(
 }
 
 uint16_t OrderEntry::operator()(
-    Event<CancelOrder> const &,
+    Trace<CancelOrder> const &,
     server::oms::Order const &,
     server::oms::RefData const &,
     [[maybe_unused]] std::string_view const &request_id,
@@ -185,7 +197,7 @@ uint16_t OrderEntry::operator()(
   throw NotImplemented{"not implemented"sv};
 }
 
-uint16_t OrderEntry::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
+uint16_t OrderEntry::operator()(Trace<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
   throw server::oms::NotSupported{"CancelAllOrders"sv};
   return stream_id_;
 }
