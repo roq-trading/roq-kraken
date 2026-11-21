@@ -200,7 +200,6 @@ void DropCopy::operator()(Trace<web::socket::Connected> const &) {
 void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
   auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
-  ready_ = false;
   next_heartbeat_ = {};
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
 }

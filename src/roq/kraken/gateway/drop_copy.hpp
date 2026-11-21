@@ -115,17 +115,15 @@ struct DropCopy final : public Base<DropCopy>, public server::OrderActionStream,
   void parse(TraceInfo const &, std::string_view const &message);
 
  private:
-  Handler &handler_;
-  // config
+  [[maybe_unused]] Handler &handler_;
+  //
   uint16_t const stream_id_;
   std::string const name_;
   std::string const token_;
-  // web socket
   std::unique_ptr<web::socket::Client> const connection_;
-  // buffers
+  //
   core::json::BufferStack decode_buffer_;
   std::string encode_buffer_;
-  // metrics
   struct {
     utils::metrics::Counter disconnect;
   } counter_;
@@ -135,12 +133,8 @@ struct DropCopy final : public Base<DropCopy>, public server::OrderActionStream,
   struct {
     utils::metrics::Latency ping, heartbeat;
   } latency_;
-  // account
   Account &account_;
-  // cache
   Shared &shared_;
-  // state
-  bool ready_ = false;
   std::chrono::nanoseconds next_heartbeat_ = {};
   ConnectionStatus connection_status_ = {};
 };
