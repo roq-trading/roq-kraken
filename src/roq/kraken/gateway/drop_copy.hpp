@@ -32,7 +32,7 @@ struct DropCopy final : public Base<DropCopy>, public server::OrderActionStream,
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &, std::string_view const &token);
 
-  // protected:
+ protected:
   friend base_type;
 
   // server::Stream
@@ -71,7 +71,6 @@ struct DropCopy final : public Base<DropCopy>, public server::OrderActionStream,
 
   uint16_t operator()(Trace<CancelAllOrders> const &, std::string_view const &request_id) override;
 
- protected:
   // web::socket::Client::Handler
 
   void operator()(Trace<web::socket::Connected> const &) override;

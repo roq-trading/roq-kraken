@@ -101,15 +101,13 @@ struct Controller final : public Base<Controller>, public server::Handler, publi
 
  private:
   server::Dispatcher &dispatcher_;
-  // accounts
-  utils::unordered_map<std::string, std::unique_ptr<Account>> const accounts_;
-  // io
+  //
   io::Context &context_;
-  // shared
   Shared shared_;
-  // seed
   uint16_t stream_id_ = {};
-  // streams
+  //
+  utils::unordered_map<std::string, std::unique_ptr<Account>> const accounts_;
+  //
   std::vector<std::unique_ptr<MarketData>> market_data_;
   utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
