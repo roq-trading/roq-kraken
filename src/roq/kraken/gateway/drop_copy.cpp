@@ -81,7 +81,7 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared, std::string_view const &token)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)}, token_{token},
+    : server::OrderActionStream{stream_id}, handler_{handler}, name_{create_name(stream_id, account.name)}, token_{token},
       connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -127,25 +127,26 @@ void DropCopy::operator()(metrics::Writer &writer) const {
 
 void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
   auto &[trace_info, connection_status] = event;
-  connection_status_ = connection_status;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = account_.name,
-      .supports = SUPPORTS,
-      .transport = Transport::TCP,
-      .protocol = Protocol::WS,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .proxy = (*connection_).get_proxy(),
-      .peer = (*connection_).get_current_peer(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  if (update(connection_status, reason)) {
+    auto stream_status = StreamStatus{
+        .stream_id = stream_id(),
+        .account = account_.name,
+        .supports = SUPPORTS,
+        .transport = Transport::TCP,
+        .protocol = Protocol::WS,
+        .encoding = {Encoding::JSON},
+        .priority = Priority::PRIMARY,
+        .connection_status = connection_status,
+        .reason = reason,
+        .interface = (*connection_).get_interface(),
+        .proxy = (*connection_).get_proxy(),
+        .peer = (*connection_).get_current_peer(),
+        .authority = (*connection_).get_current_authority(),
+        .path = (*connection_).get_current_path(),
+    };
+    log::info("stream_status={}"sv, stream_status);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  }
 }
 
 // server::OrderActionStream
@@ -166,7 +167,7 @@ uint16_t DropCopy::operator()(
     Trace<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   auto message = protocol::json::Encoder::add_order_json(encode_buffer_, event, order, ref_data, request_id, token_);
   (*connection_).send_text(message);
-  return stream_id_;
+  return stream_id();
 }
 
 uint16_t DropCopy::operator()(
@@ -177,7 +178,7 @@ uint16_t DropCopy::operator()(
     std::string_view const &previous_request_id) {
   auto message = protocol::json::Encoder::amend_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
   (*connection_).send_text(message);
-  return stream_id_;
+  return stream_id();
 }
 
 uint16_t DropCopy::operator()(
@@ -188,7 +189,7 @@ uint16_t DropCopy::operator()(
     std::string_view const &previous_request_id) {
   auto message = protocol::json::Encoder::cancel_order_json(encode_buffer_, event, order, ref_data, request_id, previous_request_id, token_);
   (*connection_).send_text(message);
-  return stream_id_;
+  return stream_id();
 }
 
 // web::socket::Client::Handler
@@ -201,12 +202,12 @@ void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
   auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
   next_heartbeat_ = {};
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
+  publish(trace_info, ConnectionStatus::DISCONNECTED);
 }
 
 void DropCopy::operator()(Trace<web::socket::Ready> const &event) {
   auto &[trace_info, ready] = event;
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING);
+  publish(trace_info, ConnectionStatus::DOWNLOADING);
   // wait for status
 }
 
@@ -218,7 +219,7 @@ void DropCopy::operator()(Trace<web::socket::Close> const &event) {
 void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id_,
+      .stream_id = stream_id(),
       .account = account_.name,
       .latency = latency.sample,
   };
@@ -254,7 +255,7 @@ void DropCopy::parse(TraceInfo const &trace_info, std::string_view const &messag
 void DropCopy::operator()(Trace<protocol::json::Status> const &event) {
   auto &[trace_info, status] = event;
   log::info("status={}"sv, status);
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+  publish(trace_info, ConnectionStatus::READY);
   subscribe();  // note!
 }
 
@@ -306,7 +307,7 @@ void DropCopy::operator()(Trace<protocol::json::Balances> const &event) {
   auto &[trace_info, balances] = event;
   for (auto &item : balances.data) {
     auto funds_update = FundsUpdate{
-        .stream_id = stream_id_,
+        .stream_id = stream_id(),
         .account = account_.name,
         .currency = item.asset,
         .margin_mode = {},
@@ -407,7 +408,7 @@ void DropCopy::operator()(Trace<protocol::json::Executions> const &event) {
       order_id = order.order_id;
       strategy_id = order.strategy_id;
     };
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id_, callback);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id(), callback);
     if (item.exec_type == protocol::json::ExecType::TRADE && user_id != SOURCE_NONE) {
       auto fill = Fill{
           .exchange_time_utc = item.timestamp,
@@ -423,7 +424,7 @@ void DropCopy::operator()(Trace<protocol::json::Executions> const &event) {
       };
       utils::charconv::to_string(std::back_inserter(fill.external_trade_id), item.trade_id);
       auto trade_update = TradeUpdate{
-          .stream_id = stream_id_,
+          .stream_id = stream_id(),
           .account = account_.name,
           .order_id = order_id,
           .exchange = shared_.settings.exchange,
@@ -493,7 +494,7 @@ void DropCopy::operator()(Trace<protocol::json::AddOrder> const &event) {
         .price = NaN,
     };
     auto [user_id, order_id] = protocol::json::Encoder::unpack_req_id(add_order.req_id);
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_, user_id, order_id);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id(), user_id, order_id);
   }
 }
 
@@ -519,7 +520,7 @@ void DropCopy::operator()(Trace<protocol::json::AmendOrder> const &event) {
         .price = NaN,
     };
     auto [user_id, order_id] = protocol::json::Encoder::unpack_req_id(amend_order.req_id);
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_, user_id, order_id);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id(), user_id, order_id);
   }
 }
 
@@ -545,7 +546,7 @@ void DropCopy::operator()(Trace<protocol::json::CancelOrder> const &event) {
         .price = NaN,
     };
     auto [user_id, order_id] = protocol::json::Encoder::unpack_req_id(cancel_order.req_id);
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_, user_id, order_id);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id(), user_id, order_id);
   }
 }
 
@@ -560,7 +561,7 @@ void DropCopy::operator()(Trace<protocol::json::CancelAll> const &event) {
 uint16_t DropCopy::operator()(Trace<CancelAllOrders> const &event, std::string_view const &request_id) {
   auto message = protocol::json::Encoder::cancel_all_json(encode_buffer_, event, request_id, token_);
   (*connection_).send_text(message);
-  return stream_id_;
+  return stream_id();
 }
 
 void DropCopy::subscribe() {

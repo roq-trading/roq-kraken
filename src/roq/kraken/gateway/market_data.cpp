@@ -80,7 +80,7 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
+    : server::MarketDataStream{stream_id}, handler_{handler}, name_{create_name(stream_id)}, index_{index},
       connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -137,25 +137,26 @@ void MarketData::operator()(metrics::Writer &writer) const {
 
 void MarketData::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
   auto &[trace_info, connection_status] = event;
-  connection_status_ = connection_status;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = {},
-      .supports = SUPPORTS,
-      .transport = Transport::TCP,
-      .protocol = Protocol::WS,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .proxy = (*connection_).get_proxy(),
-      .peer = (*connection_).get_current_peer(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  if (update(connection_status, reason)) {
+    auto stream_status = StreamStatus{
+        .stream_id = stream_id(),
+        .account = {},
+        .supports = SUPPORTS,
+        .transport = Transport::TCP,
+        .protocol = Protocol::WS,
+        .encoding = {Encoding::JSON},
+        .priority = Priority::PRIMARY,
+        .connection_status = connection_status,
+        .reason = reason,
+        .interface = (*connection_).get_interface(),
+        .proxy = (*connection_).get_proxy(),
+        .peer = (*connection_).get_current_peer(),
+        .authority = (*connection_).get_current_authority(),
+        .path = (*connection_).get_current_path(),
+    };
+    log::info("stream_status={}"sv, stream_status);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  }
 }
 
 // server::MarketDataStream
@@ -176,12 +177,12 @@ void MarketData::operator()(Trace<web::socket::Disconnected> const &event) {
   auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
   next_heartbeat_ = {};
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
+  publish(trace_info, ConnectionStatus::DISCONNECTED);
 }
 
 void MarketData::operator()(Trace<web::socket::Ready> const &event) {
   auto &[trace_info, ready] = event;
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING);
+  publish(trace_info, ConnectionStatus::DOWNLOADING);
   // wait for status
 }
 
@@ -193,7 +194,7 @@ void MarketData::operator()(Trace<web::socket::Close> const &event) {
 void MarketData::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id_,
+      .stream_id = stream_id(),
       .account = {},
       .latency = latency.sample,
   };
@@ -215,7 +216,7 @@ void MarketData::operator()(Trace<web::socket::Binary> const &) {
 void MarketData::operator()(Trace<protocol::json::Status> const &event) {
   auto &[trace_info, status] = event;
   log::info("status={}"sv, status);
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+  publish(trace_info, ConnectionStatus::READY);
   if (index_ == 0) {
     subscribe_static();
   }
@@ -265,7 +266,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
       return shared_.dispatcher.discard_symbol(item.symbol);
     }();
     auto reference_data = ReferenceData{
-        .stream_id = stream_id_,
+        .stream_id = stream_id(),
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .description = {},
@@ -308,7 +309,7 @@ void MarketData::operator()(Trace<protocol::json::Instrument> const &event) {
     }
     ++counter;
     auto market_status = MarketStatus{
-        .stream_id = stream_id_,
+        .stream_id = stream_id(),
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .trading_status = map(item.status),
@@ -333,7 +334,7 @@ void MarketData::operator()(Trace<protocol::json::Ticker> const &event) {
   (*connection_).touch(trace_info.source_receive_time);
   for (auto &item : ticker.data) {
     auto top_of_book = TopOfBook{
-        .stream_id = stream_id_,
+        .stream_id = stream_id(),
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .layer{
@@ -369,7 +370,7 @@ void MarketData::operator()(Trace<protocol::json::Ticker> const &event) {
         },
     }};
     auto statistics_update = StatisticsUpdate{
-        .stream_id = stream_id_,
+        .stream_id = stream_id(),
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .statistics = statistics,
@@ -409,7 +410,7 @@ void MarketData::operator()(Trace<protocol::json::Trade> const &event) {
     }
     assert(!std::empty(previous));
     auto trade_summary = TradeSummary{
-        .stream_id = stream_id_,
+        .stream_id = stream_id(),
         .exchange = shared_.settings.exchange,
         .symbol = previous,
         .trades = shared_.trades,
@@ -458,7 +459,7 @@ void MarketData::operator()(Trace<protocol::json::Book> const &event) {
     }
     if (!(std::empty(shared_.bids) && std::empty(shared_.asks))) {
       auto market_by_price_update = MarketByPriceUpdate{
-          .stream_id = stream_id_,
+          .stream_id = stream_id(),
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .bids = shared_.bids,

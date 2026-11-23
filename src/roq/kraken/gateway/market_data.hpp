@@ -42,10 +42,6 @@ struct MarketData final : public Base<MarketData>,
 
   // server::Stream
 
-  uint16_t stream_id() const override { return stream_id_; }
-
-  bool ready() const override { return connection_status_ == ConnectionStatus::READY; }
-
   void operator()(Trace<Start> const &) override;
   void operator()(Trace<Stop> const &) override;
   void operator()(Trace<Timer> const &) override;
@@ -105,7 +101,6 @@ struct MarketData final : public Base<MarketData>,
  private:
   Handler &handler_;
   //
-  uint16_t const stream_id_;
   std::string const name_;
   size_t const index_;
   std::unique_ptr<web::socket::Client> const connection_;
@@ -122,7 +117,6 @@ struct MarketData final : public Base<MarketData>,
   } latency_;
   Shared &shared_;
   std::chrono::nanoseconds next_heartbeat_ = {};
-  ConnectionStatus connection_status_ = {};
 };
 
 }  // namespace gateway
