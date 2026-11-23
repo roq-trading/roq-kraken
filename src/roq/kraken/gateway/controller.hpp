@@ -96,8 +96,8 @@ struct Controller final : public Base<Controller>, public server::Handler, publi
   OrderEntry &get_order_entry(std::string_view const &account);
   DropCopy &get_drop_copy(std::string_view const &account);
 
-  template <typename Res, typename T, typename... Args>
-  Res dispatch_order_action(Trace<T> const &, Args &&...);
+  template <typename T, typename... Args>
+  uint16_t dispatch_order_action(Trace<T> const &, Args &&...);
 
  private:
   server::Dispatcher &dispatcher_;
